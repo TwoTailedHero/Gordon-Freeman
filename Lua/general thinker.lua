@@ -467,6 +467,7 @@ rawset(_G, "HL1_DMGStats", {
 local function HL_InitBullet(mobj) -- Does the setting up for our HL1 Projctiles.
 	if kombilocalplayer
 		mobj.target = kombilocalplayer.mo
+		mobj.stats = HL_WpnStats[kombilocalplayer.hl1weapon]
 		mobj.hl1damage = HL_WpnStats[kombilocalplayer.hl1weapon].damage or 0
 		if HL_WpnStats[kombilocalplayer.hl1weapon].ismelee and kombilocalplayer.doom and kombilocalplayer.doom.powers[POWERS_BERSERK]
 			mobj.hl1damage = $*10
@@ -477,14 +478,14 @@ end
 addHook("MobjSpawn", HL_InitBullet, MT_HL1_BULLET)
 addHook("MobjSpawn", HL_InitBullet, MT_HL1_HANDGRENADE)
 
-addHook("MobjSpawn", function(mobj)
+local function HL_InitHealth(mobj) -- Sets up mobjs.
 	HL.valuemodes["HLGetObjectHealth"] = HL_LASTFUNC
 	local health = HL.RunHook("HLGetObjectHealth", mobj)
 	if health == nil
 	if (mobj.skin == "scieinstein" or mobj.skin == "scinerd" or mobj.skin == "sciluther" or mobj.skin == "scislick")
 		mobj.hl1health = 20 -- 20 HP for scientist users.
 	else
-		mobj.hl1health = $ or (kombihl1stats[mobj.type] and kombihl1stats[mobj.type].health) or max(1, FixedInt(FixedSqrt(FixedDiv(FixedMul(mobj.radius * 2, mobj.height),4*FRACUNIT/3))))
+		mobj.hl1health = $ or (HL1_DMGStats[mobj.type] and HL1_DMGStats[mobj.type].health) or max(1, FixedInt(FixedSqrt(FixedDiv(FixedMul(mobj.radius * 2, mobj.height),4*FRACUNIT/3))))
 		if mobj.type == MT_PLAYER
 			mobj.hl1armor = 100*FRACUNIT
 		end
@@ -494,6 +495,10 @@ addHook("MobjSpawn", function(mobj)
 	local maxhealth, maxarmor = HL.RunHook("HLGetObjectMaxStats", mobj)
 	mobj.hl1maxhealth = maxhealth or 100
 	mobj.hl1maxarmor = (maxarmor or 100)*FRACUNIT
+end
+
+addHook("MobjSpawn", function(mobj)
+	HL_InitHealth(mobj)
 end)
 
 if not duke_roboinfo
@@ -504,6 +509,9 @@ duke_roboinfo[MT_HL1_BULLET] = {unshrinkable = true, damage = 1, ringslingerdama
 
 rawset(_G, "HL_DamageGordon", function(thing, tmthing, dmg) -- expose our damage logic to outside sources
 	local hldamage = tmthing and tmthing.hl1damage or dmg
+	if not thing.hl1health
+		HL_InitHealth(thing)
+	end
 	if hldamage
 		if thing.hl1armor
 			thing.hl1armor = $-(2*(hldamage*FRACUNIT)/5)
@@ -601,8 +609,8 @@ addHook("MobjDamage", function(target, inf, src, dmg, dmgType)
 			end
 		end
 		if not inf return end
-		local damage = hookeddamage or (kombihl1stats[inf.type] and kombihl1stats[inf.type].damage) or dmg or 0
-		local damagetype = hookeddamagetype or kombihl1stats[inf.type] and kombihl1stats[inf.type].damagetype
+		local damage = hookeddamage or (HL1_DMGStats[inf.type] and HL1_DMGStats[inf.type].damage) or dmg or 0
+		local damagetype = hookeddamagetype or HL1_DMGStats[inf.type] and HL1_DMGStats[inf.type].damagetype
 		target.player.powers[pw_flashing] = 18
 		target.player.timeshit = $+1
 		P_PlayerEmeraldBurst(target.player,false)
@@ -637,10 +645,14 @@ end)
 
 addHook("MobjThinker", function(mobj)
 	local shooter = mobj.target
+	local didathing = false
 	shooter.flags = $|MF_NOCLIP -- No touchie.
 	for i = 1, mobj.fuse do
 		if not mobj and not mobj.valid break end
-		if P_RailThinker(mobj) break end
+		if P_RailThinker(mobj) didathing = true break end
+	end
+	if not didathing and mobj.stats.israycaster
+		P_KillMobj(mobj, nil, nil, DMG_INSTAKILL)
 	end
 	shooter.flags = $&~MF_NOCLIP
 end, MT_HL1_BULLET)
