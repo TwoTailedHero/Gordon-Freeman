@@ -1,0 +1,953 @@
+/*
+	Shotty
+	FrameIndex SHT0 A 0 0 // select
+	FrameIndex SHT0 B 0 1
+	FrameIndex SHT0 C 0 2
+	FrameIndex SHT0 D 0 3
+	FrameIndex SHT0 E 0 4
+
+	FrameIndex SHT0 F 0 5 // idle
+	FrameIndex SHT0 G 0 6
+	FrameIndex SHT0 H 0 7
+	FrameIndex SHT0 I 0 8
+	FrameIndex SHT0 J 0 9
+	FrameIndex SHT0 K 0 10
+	FrameIndex SHT0 L 0 11
+	FrameIndex SHT0 M 0 12
+	FrameIndex SHT0 N 0 13
+	FrameIndex SHT0 O 0 14
+
+	FrameIndex SHT0 P 0 32 // idle2
+	FrameIndex SHT0 Q 0 33
+	FrameIndex SHT0 R 0 34
+	FrameIndex SHT0 S 0 35
+	FrameIndex SHT0 T 0 36
+	FrameIndex SHT0 U 0 37
+	FrameIndex SHT0 V 0 38
+	FrameIndex SHT0 W 0 39
+	FrameIndex SHT0 X 0 40
+	FrameIndex SHT0 Y 0 41
+	FrameIndex SHT0 Z 0 42
+
+	FrameIndex SHT1 A 0 15 // idle3
+	FrameIndex SHT1 B 0 16
+	FrameIndex SHT1 C 0 17
+	FrameIndex SHT1 D 0 18
+	FrameIndex SHT1 E 0 19
+	FrameIndex SHT1 F 0 20
+	FrameIndex SHT1 G 0 21
+	FrameIndex SHT1 H 0 22
+	FrameIndex SHT1 I 0 23
+	FrameIndex SHT1 J 0 24
+	FrameIndex SHT1 K 0 25
+	FrameIndex SHT1 L 0 26
+	FrameIndex SHT1 M 0 27
+	FrameIndex SHT1 N 0 28
+	FrameIndex SHT1 O 0 29
+	FrameIndex SHT1 P 0 30
+	FrameIndex SHT1 Q 0 31
+
+	FrameIndex SHT2 A 0 43 // fire
+	FrameIndex SHT2 B 0 44
+	FrameIndex SHT2 C 0 45
+	FrameIndex SHT2 D 0 46
+	FrameIndex SHT2 E 0 47
+	FrameIndex SHT2 F 0 48
+	FrameIndex SHT2 G 0 49
+	FrameIndex SHT2 H 0 50
+	FrameIndex SHT2 I 0 51
+	FrameIndex SHT2 J 0 52
+	FrameIndex SHT2 K 0 53
+	FrameIndex SHT2 L 0 54
+
+	FrameIndex SHT4 A 0 55 // altfire
+	FrameIndex SHT4 B 0 56
+	FrameIndex SHT4 C 0 57
+	FrameIndex SHT4 D 0 58
+	FrameIndex SHT4 E 0 59
+	FrameIndex SHT4 F 0 60
+	FrameIndex SHT4 G 0 61
+	FrameIndex SHT4 H 0 62
+	FrameIndex SHT4 I 0 63
+	FrameIndex SHT4 J 0 64
+	FrameIndex SHT4 K 0 65
+	FrameIndex SHT4 L 0 66
+	FrameIndex SHT4 M 0 67
+	FrameIndex SHT4 N 0 68
+	FrameIndex SHT4 O 0 69
+	FrameIndex SHT4 P 0 70
+	FrameIndex SHT4 Q 0 71
+	FrameIndex SHT4 R 0 72
+	FrameIndex SHT4 S 0 73
+	FrameIndex SHT4 T 0 74
+	FrameIndex SHT4 U 0 75
+
+	FrameIndex SHT3 A 0 76 // rel start
+	FrameIndex SHT3 B 0 77
+	FrameIndex SHT3 C 0 78
+	FrameIndex SHT3 D 0 79
+	FrameIndex SHT3 E 0 80
+
+	FrameIndex SHT3 F 0 81 // rel loop
+	FrameIndex SHT3 G 0 82
+	FrameIndex SHT3 H 0 83
+	FrameIndex SHT3 I 0 84
+
+	FrameIndex SHT3 J 0 85 // rel end
+	FrameIndex SHT3 K 0 86
+	FrameIndex SHT3 L 0 87
+	FrameIndex SHT3 M 0 88
+	FrameIndex SHT3 N 0 89
+	FrameIndex SHT3 O 0 90
+	FrameIndex SHT3 P 0 91
+	FrameIndex SHT3 Q 0 92
+*/
+
+local function SafeFreeSlot(...)
+	for _,slot in ipairs({...})
+		if not rawget(_G, slot) freeslot(slot) end -- overlapping = wasting, how do we not waste (as many of) them? don't do it in the first place!
+	end
+end
+
+SafeFreeSlot("SPR_LEGOBATTLESPROJ","S_KOMBI_SHURIKEN",
+"S_KOMBI_BULLETHOLE",
+"S_KOMBI_SNARKDIE",
+"MT_HL1_BULLET",
+"MT_HL1_BOLT",
+"MT_HL1_ARGRENADE",
+"MT_HL1_ROCKET",
+"MT_HL1_HANDGRENADE",
+"MT_HL1_SATCHEL",
+"MT_HL1_TRIPMINE",
+"MT_HL1_SNARK",
+"MT_HL1_HORNET")
+
+states[S_KOMBI_SHURIKEN] = {
+	sprite = SPR_LEGOBATTLESPROJ,
+	frame = A,
+	tics = 18,
+	var1 = 0,
+	var2 = 0,
+	nextstate = S_KOMBI_SHURIKEN
+}
+
+states[S_KOMBI_BULLETHOLE] = {
+	sprite = SPR_LEGOBATTLESPROJ,
+	frame = A|FF_PAPERSPRITE,
+	tics = 18,
+	var1 = 0,
+	var2 = 0,
+	nextstate = S_KOMBI_BULLETHOLE
+}
+
+states[S_KOMBI_SNARKDIE] = {
+	sprite = SPR_LEGOBATTLESPROJ,
+	frame = A,
+	tics = 18,
+	var1 = 0,
+	var2 = 0,
+	nextstate = S_KOMBI_SHURIKEN
+}
+
+mobjinfo[MT_HL1_BULLET] = {
+spawnstate = S_KOMBI_SHURIKEN,
+spawnhealth = 100,
+deathstate = S_NULL,
+speed = 4*FRACUNIT,
+radius = 2*FRACUNIT,
+height = 2*FRACUNIT,
+dispoffset = 4,
+flags = MF_NOGRAVITY|MF_MISSILE,
+}
+
+mobjinfo[MT_HL1_ARGRENADE] = {
+spawnstate = S_KOMBI_SHURIKEN,
+spawnhealth = 100,
+deathstate = S_NULL,
+speed = 0*mobjinfo[MT_CORK].speed/2,
+radius = mobjinfo[MT_CORK].radius,
+height = mobjinfo[MT_CORK].height,
+dispoffset = 4,
+flags = MF_MISSILE,
+}
+
+mobjinfo[MT_HL1_HANDGRENADE] = {
+spawnstate = S_KOMBI_SHURIKEN,
+spawnhealth = 100,
+deathstate = S_NULL,
+speed = 3*mobjinfo[MT_CORK].speed/4,
+radius = mobjinfo[MT_CORK].radius,
+height = mobjinfo[MT_CORK].height,
+dispoffset = 4,
+flags = MF_BOUNCE,
+}
+
+mobjinfo[MT_HL1_SATCHEL] = {
+spawnstate = S_KOMBI_SHURIKEN,
+spawnhealth = 100,
+deathstate = S_NULL,
+speed = 3*mobjinfo[MT_CORK].speed/4,
+radius = mobjinfo[MT_CORK].radius,
+height = mobjinfo[MT_CORK].height,
+dispoffset = 4,
+flags = MF_SLIDEME,
+}
+
+mobjinfo[MT_HL1_TRIPMINE] = {
+spawnstate = S_KOMBI_SHURIKEN,
+spawnhealth = 100,
+deathstate = S_KOMBI_SNARKDIE,
+speed = 3*mobjinfo[MT_CORK].speed/4,
+radius = mobjinfo[MT_CORK].radius,
+height = mobjinfo[MT_CORK].height,
+dispoffset = 4,
+flags = MF_NOGRAVITY,
+}
+
+SafeFreeSlot("sfx_hl1wpn",
+"sfx_hlcbar","sfx_hlcbb1","sfx_hlcbb2","sfx_hlcbb3","sfx_hlcbh1","sfx_hlcbh2",
+"sfx_hl1g17","sfx_hl1pr1","sfx_hl1pr2",
+"sfx_hl3571","sfx_hl3572","sfx_hl357r",
+"sfx_hl1sr1","sfx_hl1sr2","sfx_hl1sr3",
+"sfx_hl1ar1","sfx_hl1ar2","sfx_hl1ar3","sfx_hlarr1","sfx_hlarr2","sfx_hlarg1","sfx_hlarg2",
+"sfx_hl1sg1","sfx_hl1sgc",
+"sfx_pistol","sfx_shotgn","sfx_dshtgn","sfx_dbopn","sfx_dbload","sfx_dbcls","sfx_dmbfg",
+"SPR_HLHITEFFECT","S_HL1_HIT")
+sfxinfo[sfx_hlcbar].caption = "Crowbar Swing"
+sfxinfo[sfx_hlcbh1].caption = "Crowbar Hit"
+sfxinfo[sfx_hlcbh2].caption = "Crowbar Hit"
+sfxinfo[sfx_hlcbb1].caption = "Crowbar Hit (Body)"
+sfxinfo[sfx_hlcbb2].caption = "Crowbar Hit (Body)"
+sfxinfo[sfx_hlcbb3].caption = "Crowbar Hit (Body)"
+sfxinfo[sfx_hl1g17].caption = "Pistol Firing"
+sfxinfo[sfx_hl1pr1].caption = "Pistol Clip Out"
+sfxinfo[sfx_hl1pr2].caption = "Pistol Clip In"
+sfxinfo[sfx_hl3571].caption = ".357 Firing"
+sfxinfo[sfx_hl3572].caption = ".357 Firing"
+sfxinfo[sfx_hl357r].caption = ".357 Reloading"
+sfxinfo[sfx_hl1ar1].caption = "MP5 Firing"
+sfxinfo[sfx_hl1ar2].caption = "MP5 Firing"
+sfxinfo[sfx_hl1ar3].caption = "MP5 Firing"
+sfxinfo[sfx_hlarr1].caption = "MP5 Clip Out"
+sfxinfo[sfx_hlarr2].caption = "MP5 Clip In"
+sfxinfo[sfx_hlarg1].caption = "MP5 Grenade Launched"
+sfxinfo[sfx_hlarg2].caption = "MP5 Grenade Launched"
+
+states[S_HL1_HIT] = {
+	sprite = SPR_HLHITEFFECT,
+	frame = A|FF_ANIMATE,
+	tics = 9,
+	var1 = 9,
+	var2 = 1,
+	nextstate = S_NULL
+}
+
+local skin = "kombifreeman"
+local fire = BT_ATTACK
+local altfire = BT_FIRENORMAL
+local sound = sfx_hl1g17
+
+rawset(_G, "VMDL_FLIP", 1)
+rawset(_G, "VBOB_NONE", 1)
+rawset(_G, "VBOB_DOOM", 2)
+rawset(_G, "WEAPON_NONE", -1)
+
+rawset(_G, "kombihl1viewmodels", {
+	["CROWBAR"] = {
+		["idleanims"] = 3,
+		["fireanims"] = 3,
+		["firehitanims"] = 3,
+		["flags"] = VMDL_FLIP,
+		["readyframes"] = {
+			{["frame"] = 0, ["duration"] = 3, ["rlelength"] = 3},
+		},
+		["fire1frames"] = {
+			{["frame"] = 4, ["duration"] = 2},
+			{["frame"] = 55, ["duration"] = 4},
+			{["frame"] = 56, ["duration"] = 3},
+			{["frame"] = 57, ["duration"] = 4},
+			{["frame"] = 58, ["duration"] = 3},
+			{["frame"] = 59, ["duration"] = 2},
+		},
+		["fire2frames"] = {
+			{["frame"] = 59, ["duration"] = 3, ["rlelength"] = 5},
+		},
+		["fire3frames"] = {
+			{["frame"] = 65, ["duration"] = 3, ["rlelength"] = 5},
+		},
+		["firehit1frames"] = {
+			{["frame"] = 71, ["duration"] = 3, ["rlelength"] = 4},
+		},
+		["firehit2frames"] = {
+			{["frame"] = 59, ["duration"] = 1},
+			{["frame"] = 60, ["duration"] = 2},
+			{["frame"] = 61, ["duration"] = 3, ["rlelength"] = 4},
+		},
+		["firehit3frames"] = {
+			{["frame"] = 82, ["duration"] = 1},
+			{["frame"] = 83, ["duration"] = 2},
+			{["frame"] = 84, ["duration"] = 3, ["rlelength"] = 4},
+		},
+		["idle1frames"] = {
+			{["frame"] = 4, ["duration"] = 10, ["rlelength"] = 9},
+		},
+		["idle2frames"] = {
+			{["frame"] = 15, ["duration"] = 8, ["rlelength"] = 19},
+		},
+		["idle3frames"] = {
+			{["frame"] = 35, ["duration"] = 8, ["rlelength"] = 19},
+		},
+	},
+	["PISTOL"] = {
+		["idleanims"] = 3,
+		["flags"] = VMDL_FLIP,
+		["readyframes"] = {
+			{["frame"] = 1, ["duration"] = 3, ["rlelength"] = 6},
+		},
+		["fireframes"] = {
+			{["frame"] = 53, ["duration"] = 2, ["rlelength"] = 8},
+		},
+		["altfireframes"] = {
+			{["frame"] = 59, ["duration"] = 1},
+			{["frame"] = 52, ["duration"] = 2, ["rlelength"] = 8},
+		},
+		["fireemptyframes"] = {
+			{["frame"] = 62,2, ["rlelength"] = 8},
+		},
+		["altfireemptyframes"] = {
+			{["frame"] = 59, ["duration"] = 1},
+			{["frame"] = 52, ["duration"] = 2, ["rlelength"] = 9},
+		},
+		["reloadframes"] = {
+			{["frame"] = 27, ["duration"] = 6},
+			{["frame"] = 84, ["duration"] = 6, ["rlelength"] = 1},
+			{["frame"] = 86, ["duration"] = 6, ["sound"] = sfx_hl1pr1, ["rlelength"] = 5},
+			{["frame"] = 92, ["duration"] = 6, ["sound"] = sfx_hl1pr2, ["rlelength"] = 4},
+		},
+		["idle1frames"] = {
+			{["frame"] = 27, ["duration"] = 8},
+			{["frame"] = 8, ["duration"] = 8, ["rlelength"] = 19},
+			{["frame"] = 27, ["duration"] = 8},
+		},
+		["idle2frames"] = {
+			{["frame"] = 27, ["duration"] = 8},
+			{["frame"] = 28, ["duration"] = 12, ["rlelength"] = 9},
+		},
+		["idle3frames"] = {
+			{["frame"] = 27, ["duration"] = 8},
+			{["frame"] = 37, ["duration"] = 10, ["rlelength"] = 14},
+		},
+	},
+	["357-"] = {
+		["idleanims"] = 4,
+		["flags"] = VMDL_FLIP,
+		["readyframes"] = {
+			{["frame"] = 0, ["duration"] = 3, ["rlelength"] = 6},
+		},
+		["fireframes"] = {
+			{["frame"] = 6, ["duration"] = 2},
+			{["frame"] = 120, ["duration"] = 3, ["rlelength"] = 8},
+		},
+		["reloadframes"] = {
+			{["frame"] = 6, ["duration"] = 6},
+			{["frame"] = 130, ["duration"] = 4, ["rlelength"] = 2},
+			{["frame"] = 133, ["duration"] = 3, ["rlelength"] = 18},
+			{["frame"] = 152, ["duration"] = 3, ["sound"] = sfx_hl357r, ["rlelength"] = 3},
+			{["frame"] = 156, ["duration"] = 8},
+		},
+		["idle1frames"] = {
+			{["frame"] = 6, ["duration"] = 6, ["rlelength"] = 18},
+			{["frame"] = 25, ["duration"] = 5},
+		},
+		["idle2frames"] = {
+			{["frame"] = 26, ["duration"] = 6, ["rlelength"] = 18},
+			{["frame"] = 45, ["duration"] = 5},
+		},
+		["idle3frames"] = {
+			{["frame"] = 46, ["duration"] = 6,["rlelength"]=24},
+			{["frame"] = 71,15},
+		},
+		["idle4frames"] = {
+			{["frame"] = 72, ["duration"] = 6,["rlelength"]=46},
+			{["frame"] = 119, ["duration"] = 10},
+		},
+	},
+	["SHOTGUN"] = {
+		["idleanims"] = 3,
+		["flags"] = VMDL_FLIP,
+		["bobtype"] = VBOB_DOOM,
+		["readyframes"] = {
+			{["frame"] = 0, ["duration"] = 3, ["rlelength"] = 4},
+		},
+		["fireframes"] = {
+			{["frame"] = 5, ["duration"] = 3},
+			{["frame"] = 43, ["duration"] = 3, ["rlelength"] = 4},
+			{["frame"] = 48, ["duration"] = 3, ["sound"] = sfx_hl1sgc, ["rlelength"] = 6},
+		},
+		["reloadframes"] = {
+			{["frame"] = 6, ["duration"] = 6},
+			{["frame"] = 130, ["duration"] = 4, ["rlelength"] = 2},
+			{["frame"] = 133, ["duration"] = 3, ["rlelength"] = 18},
+			{["frame"] = 152, ["duration"] = 3, ["sound"] = sfx_hl357r, ["rlelength"] = 3},
+			{["frame"] = 156, ["duration"] = 8},
+		},
+		["idle1frames"] = {
+			{["frame"] = 5, ["duration"] = 8, ["rlelength"] = 7},
+			{["frame"] = 12, ["duration"] = 8},
+		},
+		["idle2frames"] = {
+			{["frame"] = 5, ["duration"] = 8},
+			{["frame"] = 32, ["duration"] = 8, ["rlelength"] = 10},
+			{["frame"] = 42, ["duration"] = 5},
+		},
+		["idle3frames"] = {
+			{["frame"] = 5, ["duration"] = 8},
+			{["frame"] = 15, ["duration"] = 10, ["rlelength"]=15},
+			{["frame"] = 31, ["duration"] = 16},
+		},
+	},
+	["DOOMWP2-"] = {
+		["idleanims"] = 1,
+		["bobtype"] = VBOB_DOOM,
+		["readyframes"] = {
+			{["frame"] = 1, ["duration"] = 3},
+		},
+		["fireframes"] = {
+			{["frame"] = 4, ["duration"] = 6},
+			{["frame"] = 3, ["duration"] = 4},
+			{["frame"] = 2, ["duration"] = 5},
+		},
+		["reloadframes"] = {
+			{["frame"] = 2, ["duration"] = 6},
+		},
+		["idle1frames"] = {
+			{["frame"] = 1, ["duration"] = INT32_MAX},
+		},
+	},
+	["DOOMWP3-"] = {
+		["idleanims"] = 1,
+		["bobtype"] = VBOB_DOOM,
+		["readyframes"] = {
+			{1,3},
+		},
+		["fireframes"] = {
+			{["frame"] = 1, ["duration"] = 4,["overlay"] = 5},
+			{["frame"] = 1, ["duration"] = 3,["overlay"] = 6},
+			{["frame"] = 2, ["duration"] = 5,["rlelength"] = 1},
+			{["frame"] = 4, ["duration"] = 4},
+			{["frame"] = 3, ["duration"] = 5},
+			{["frame"] = 2, ["duration"] = 5},
+			{["frame"] = 1, ["duration"] = 3},
+			{["frame"] = 1, ["duration"] = 7},
+		},
+		["reloadframes"] = {
+			{["frame"] = 2, ["duration"] = 6},
+		},
+		["idle1frames"] = {
+			{["frame"] = 1, ["duration"] = INT32_MAX},
+		},
+	},
+	["DOOMWP3A-"] = {
+		["idleanims"] = 1,
+		["bobtype"] = VBOB_DOOM,
+		["readyframes"] = {
+			{["frame"] = 1,3},
+		},
+		["fireframes"] = {
+			{["frame"] = 1, ["duration"] = 3, ["overlay"] = 9},
+			{["frame"] = 1, ["duration"] = 4, ["overlay"] = 10},
+			{["frame"] = 2, ["duration"] = 7, ["rlelength"] = 1},
+			{["frame"] = 4, ["duration"] = 7, ["sound"] = sfx_dbopn,["rlelength"] = 1},
+			{["frame"] = 6, ["duration"] = 7, ["sound"] = sfx_dbload},
+			{["frame"] = 7, ["duration"] = 6},
+			{["frame"] = 8, ["duration"] = 6, ["sound"] = sfx_dbcls},
+		},
+		["reloadframes"] = {
+			{["frame"] = 2, ["duration"] = 6},
+		},
+		["idle1frames"] = {
+			{["frame"] = 1, ["duration"] = INT32_MAX},
+		},
+	},
+	["DOOMWP4-"] = {
+		["idleanims"] = 1,
+		["bobtype"] = VBOB_DOOM,
+		["readyframes"] = {
+			{["frame"] = 1, ["duration"] = 4},
+		},
+		["fireframes"] = {
+			{["frame"] = 1, ["duration"] = 4,["overlay"] = 3},
+			{["frame"] = 2, ["duration"] = 4,["overlay"] = 4},
+		},
+		["reloadframes"] = {
+			{["frame"] = 2, ["duration"] = 6},
+		},
+		["idle1frames"] = {
+			{["frame"] = 1, ["duration"] = INT32_MAX},
+		},
+	},
+})
+
+rawset(_G, "HL_WpnStats", {
+	["crowbar"] =
+	{
+		israycaster = true, -- the rest probably don't need this property. determines if the bullet object kills itself if it doesn't hit anything.
+		viewmodel = "CROWBAR", -- the graphic we'll use for the weapon. Graphic format is VMDL[vmdlkey][frame]!!
+		vmdlflip = true,
+		selectgraphic = "HL1HUDCROWBAR",
+		["neverdenyuse"] = true,
+		autoswitchweight = 0,
+		ammo = "melee",
+		ismelee = true, -- Gets affected by DoomGuy's berserk if set to true.
+		weaponslot = 1,
+		priority = 1,
+		clipsize = WEAPON_NONE,
+		shotcost = 0,
+		damage = 5,
+		firesound = sfx_hlcbar,
+		["firehitsound"] = sfx_hlcbh1,
+		["firehitsounds"] = 2,
+		maxdistance = 16,
+		altfire = false,
+		["firedelay"] = {
+			["ready"] = 12,
+			["normal"] = 18,
+			["hit"] = 9
+		},
+		realname = "Crowbar",
+	},
+	["9mmhandgun"] = 
+		{
+		viewmodel = "PISTOL",
+		crosshair = "XHRPIS",
+		selectgraphic = "HL1HUD9MM",
+		autoswitchweight = 10,
+		pickupgift = 17,
+		weaponslot = 2,
+		priority = 1,
+		ammo = "9mm",
+		clipsize = 17,
+		shotcost = 1,
+		damage = 8,
+		refireusesspread = true,
+		horizspread = 5*FRACUNIT,
+		vertspread = 5*FRACUNIT,
+		kickback = 5*FRACUNIT/2,
+		firesound = sfx_hl1g17,
+		autoreload = true,
+		["ammo2"] = "none",
+		["clipsize2"] = WEAPON_NONE,
+		["shotcost2"] = 1,
+		["horizspread2"] = 5,
+		["vertspread2"] = 5,
+		["kickback2"] = 5*FRACUNIT/2,
+		["firesound2"] = sfx_hl1g17,
+		altfire = true,
+		["altusesprimaryammo"] = true,
+		["firedelay"] = {
+			["ready"] = 12,
+			["normal"] = 12,
+			["alt"] = 6,
+			["reload"] = 53,
+			["reloadpost"] = 18,
+		},
+		realname = "9mm Handgun",
+	},
+	["357"] = 
+		{
+		viewmodel = "357-",
+		crosshair = "XHR357",
+		selectgraphic = "HL1HUD357",
+		autoswitchweight = 15,
+		pickupgift = 6,
+		weaponslot = 2,
+		priority = 2,
+		ammo = "357",
+		clipsize = 6,
+		shotcost = 1,
+		damage = 50,
+		horizspread = 0,
+		vertspread = 0,
+		kickback = 7*FRACUNIT,
+		firesound = sfx_hl3571,
+		["firesounds"] = 2,
+		autoreload = true,
+		altfire = false,
+		["altusesprimaryammo"] = true,
+		["firedelay"] = {
+			["ready"] = 18,
+			["normal"] = 26,
+			["alt"] = 18,
+			["reload"] = 92
+		},
+		realname = ".357",
+	},
+	["mp5"] = 
+		{
+		crosshair = "XHR9MM",
+		selectgraphic = "HL1HUDMP5",
+		autoswitchweight = 15,
+		pickupgift = 25,
+		ammo = "9mm",
+		weaponslot = 3,
+		priority = 1,
+		clipsize = 50,
+		shotcost = 1,
+		damage = 5,
+		horizspread = 4*FRACUNIT,
+		vertspread = 4*FRACUNIT,
+		kickback = 1*FRACUNIT,
+		["kickbackcanflip"] = true,
+		firesound = sfx_hl1ar1,
+		["firesounds"] = 3,
+		autoreload = true, -- don't do pickupgift2 here for redundancy reaasons
+		["ammo2"] = "none",
+		["clipsize2"] = WEAPON_NONE,
+		["shotcost2"] = 1,
+		["kickback2"] = 10*FRACUNIT,
+		["firesound2"] = sfx_hlarg1,
+		["firesounds2"] = 3,
+		altfire = true,
+		["altusesprimaryammo"] = true,
+		["firedelay"] = {
+			["ready"] = 12,
+			["normal"] = 4,
+			["alt"] = 20,
+			["denyalt"] = 30,
+			["reload"] = 53
+		},
+		realname = "MP5",
+	},
+	["shotgun"] = 
+		{
+		viewmodel = "SHOTGUN",
+		crosshair = "XHRSHOT",
+		selectgraphic = "HL1HUDSHOTGUN",
+		autoswitchweight = 15,
+		pickupgift = 12, -- why does the shotgun have 12 shells in it? is it stupid?
+		weaponslot = 3,
+		priority = 2,
+		ammo = "buckshot",
+		pellets = 6,
+		clipsize = 8,
+		shotcost = 1,
+		damage = 5,
+		horizspread = 7*FRACUNIT,
+		vertspread = 5*FRACUNIT,
+		kickback = 5*FRACUNIT/2,
+		firesound = sfx_hl1sg1,
+		autoreload = true,
+		["ammo2"] = "none",
+		["pellets2"] = 12,
+		["clipsize2"] = WEAPON_NONE,
+		["shotcost2"] = 2,
+		["horizspread2"] = 56*FRACUNIT/5,
+		["vertspread2"] = 71*FRACUNIT/10,
+		["kickback2"] = 5*FRACUNIT/2,
+		["firesound2"] = sfx_hl1sg1,
+		altfire = true,
+		["altusesprimaryammo"] = true,
+		["firedelay"] = {
+			["ready"] = 12,
+			["normal"] = 12,
+			["alt"] = 6,
+			["reload"] = 54,
+		},
+		realname = "SPAS-12",
+	},
+	-- everything past this point has unfinished properties!! do them already
+	["crossbow"] = 
+		{
+		viewmodel = "PISTOL",
+		crosshair = "XHRXBW",
+		selectgraphic = "HL1HUDCROSSBOW",
+		autoswitchweight = 10,
+		pickupgift = 5,
+		weaponslot = 3,
+		priority = 3,
+		ammo = "bolt",
+		clipsize = 5,
+		shotcost = 1,
+		damage = 50,
+		kickback = 3*FRACUNIT,
+		firesound = sfx_hl1g17,
+		autoreload = true,
+		altfire = false,
+		["firedelay"] = {
+			["ready"] = 16,
+			["normal"] = 24,
+			["reload"] = 104,
+			["reloadpost"] = 48,
+		},
+		realname = "Crossbow",
+	},
+	["rpg"] = 
+		{
+		viewmodel = "PISTOL",
+		crosshair = "XHRRPG",
+		selectgraphic = "HL1HUDRPG",
+		autoswitchweight = 20,
+		pickupgift = 1,
+		weaponslot = 4,
+		priority = 1,
+		ammo = "rocket",
+		clipsize = 5,
+		shotcost = 1,
+		kickback = 5*FRACUNIT/2,
+		firesound = sfx_hl1g17,
+		autoreload = true,
+		altfire = false,
+		["firedelay"] = {
+			["ready"] = 15,
+			["normal"] = 35,
+			["reload"] = 36,
+			["reloadpost"] = 24,
+		},
+		realname = "Rocket Launcher",
+	},
+	["gauss"] = 
+		{
+		viewmodel = "PISTOL",
+		crosshair = "XHRGAUS",
+		selectgraphic = "HL1HUDTAU",
+		autoswitchweight = 20,
+		pickupgift = 20,
+		weaponslot = 4,
+		priority = 2,
+		ammo = "uranium",
+		clipsize = WEAPON_NONE,
+		shotcost = 1,
+		kickback = 5*FRACUNIT/2,
+		firesound = sfx_hl1g17,
+		autoreload = true,
+		altfire = false,
+		["altusesprimaryammo"] = true,
+		["firedelay"] = {
+			["ready"] = 12,
+			["normal"] = 12,
+			["alt"] = 6,
+			["reload"] = 54,
+		},
+		realname = "Tau Cannon",
+	},
+	["egon"] = 
+		{
+		viewmodel = "PISTOL",
+		crosshair = "XHREGON",
+		selectgraphic = "HL1HUDGAUSS",
+		autoswitchweight = 20,
+		pickupgift = 20,
+		weaponslot = 4,
+		priority = 3,
+		ammo = "uranium",
+		clipsize = WEAPON_NONE,
+		shotcost = 1,
+		kickback = 5*FRACUNIT/2,
+		firesound = sfx_hl1g17,
+		autoreload = true,
+		altfire = false,
+		["altusesprimaryammo"] = true,
+		["firedelay"] = {
+			["ready"] = 12,
+			["normal"] = 12,
+			["alt"] = 6,
+			["reload"] = 54,
+		},
+		realname = "Gluon Gun",
+	},
+	["hornetgun"] = 
+		{
+		viewmodel = "PISTOL",
+		crosshair = "XHRHNET",
+		selectgraphic = "HL1HUDHORNET",
+		autoswitchweight = 15,
+		weaponslot = 4,
+		priority = 4,
+		ammo = "hornet",
+		clipsize = WEAPON_NONE,
+		["giveammoamount"] = 6,
+		["giveammoevery"] = 6, -- TODO: Replace with actual time!!
+		shotcost = 1,
+		kickback = 5*FRACUNIT/2,
+		firesound = sfx_hl1g17,
+		autoreload = true,
+		altfire = false,
+		["altusesprimaryammo"] = true,
+		["firedelay"] = {
+			["ready"] = 12,
+			["normal"] = 12,
+			["alt"] = 6,
+			["reload"] = 54,
+		},
+		realname = "Hivehand",
+	},
+	["handgrenade"] = 
+		{
+		viewmodel = "CROWBAR",
+		selectgraphic = "HL1HUDGRENADE",
+		autoswitchweight = 5,
+		pickupgift = 5,
+		weaponslot = 5,
+		priority = 1,
+		ammo = "grenade",
+		clipsize = WEAPON_NONE,
+		["shootmobj"] = MT_HL1_HANDGRENADE,
+		maxdistance = 3*TICRATE,
+		shotcost = 1,
+		damage = 1,
+		["explosionradius"] = 100,
+		firesound = sfx_none,
+		autoreload = true,
+		altfire = false,
+		["firedelay"] = {
+			["ready"] = 12,
+			["normal"] = 12,
+			["alt"] = 6,
+			["reload"] = 54,
+		},
+		realname = "Grenades",
+	},
+	["satchel"] = 
+		{
+		viewmodel = "PISTOL",
+		selectgraphic = "HL1HUDSATCHEL",
+		autoswitchweight = 5,
+		pickupgift = 1,
+		weaponslot = 5,
+		priority = 2,
+		ammo = "satchel",
+		clipsize = WEAPON_NONE,
+		shotcost = 1,
+		firesound = sfx_none,
+		autoreload = true,
+		altfire = false,
+		["firedelay"] = {
+			["ready"] = 12,
+			["normal"] = 12,
+			["alt"] = 6,
+			["reload"] = 54,
+		},
+		realname = "Satchels",
+	},
+	["tripmine"] = 
+		{
+		viewmodel = "PISTOL",
+		selectgraphic = "HL1HUDTRIPMINE",
+		autoswitchweight = -10, -- VERY unlikely we'll even need to check past here.
+		pickupgift = 1,
+		weaponslot = 5,
+		priority = 3,
+		ammo = "tripmine",
+		clipsize = WEAPON_NONE,
+		shotcost = 1,
+		firesound = sfx_none,
+		autoreload = true,
+		altfire = false,
+		["firedelay"] = {
+			["ready"] = 12,
+			["normal"] = 12,
+			["alt"] = 6,
+			["reload"] = 54,
+		},
+		realname = "Tripmines",
+	},
+	["snark"] = 
+		{
+		viewmodel = "PISTOL",
+		selectgraphic = "HL1HUDSNARK",
+		autoswitchweight = -10,
+		pickupgift = 1,
+		weaponslot = 5,
+		priority = 4,
+		ammo = "snark",
+		clipsize = WEAPON_NONE,
+		shotcost = 1,
+		["equipsound"] = sfx_none,
+		firesound = sfx_none,
+		autoreload = true,
+		altfire = false,
+		["firedelay"] = {
+			["ready"] = 12,
+			["normal"] = 12,
+			["alt"] = 6,
+			["reload"] = 54,
+		},
+		realname = "Snarks",
+	},
+})
+
+rawset(_G, "HL_AmmoStats", {
+	["9mm"] = {
+		max = 250 -- How much of an ammo type the player can hold.
+		-- shootmobj omitted because the MT_* that'd go here is the last resort, anyway.
+	},
+	["357"] = {
+		max = 36
+	},
+	["buckshot"] = {
+		max = 125
+	},
+	["bolt"] = {
+		max = 50,
+		shootmobj = MT_HL1_BOLT -- the default mobj to shoot if left unspecified.
+	},
+	["rocket"] = {
+		max = 5,
+		shootmobj = MT_HL1_ROCKET,
+		safetycatch = true, -- disable autofire so we don't suddenly eat rockets if we autoswitch to the RPG.
+		explosionradius = 128
+	},
+	["grenade"] = {
+		max = 10,
+		shootmobj = MT_HL1_HANDGRENADE,
+		safetycatch = true
+	},
+	["satchel"] = {
+		max = 5,
+		shootmobj = MT_HL1_SATCHEL,
+		safetycatch = true
+	},
+	["tripmine"] = {
+		max = 5,
+		shootmobj = MT_HL1_TRIPMINE,
+		safetycatch = true
+	},
+	["snark"] = {
+		max = 15,
+		shootmobj = MT_HL1_SNARK,
+		safetycatch = true
+	},
+	["uranium"] = {
+		max = 100,
+	},
+	["hornet"] = {
+		max = 8,
+		rechargerate = TICRATE/2, -- how long until we get more of this.
+		rechargeamount = 1, -- how many of this we get.
+		shootmobj = MT_HL1_HORNET
+	},
+	["argrenade"] = {
+		max = 10,
+		shootmobj = MT_HL1_ARGRENADE,
+		explosionradius = 128
+	},
+	-- DOOM
+	-- shootmobj properties are put in here when the DoomGuy addon gets loaded in. Default to nothing extra for errors' sake.
+	["bull"] = {
+		max = 200
+	},
+	["shel"] = {
+		max = 50
+	},
+	["rckt"] = {
+		max = 50,
+		safetycatch = true,
+		explosionradius = 128
+	},
+	["cell"] = {
+		max = 300
+	},
+})
+
+rawset(_G, "HL_PickupStats", {
+})
