@@ -31,6 +31,8 @@ hud.add(function(v,player)
 		hud.disable("time")
 		hud.disable("rings")
 		hud.disable("lives")
+		hud.disable("weaponrings")
+		hud.disable("crosshair")
 		if player.playerstate != PST_DEAD and camera.chase == false and player.hl1inventory[player.hl1weapon] -- I think somewhere in this massive heap of code is something that doesn't fall in line with 2.2.13's functions. Not fixing it until I remember to test in that version!
 			local angle = FixedAngle((leveltime*12)*FRACUNIT)
 			local kmbivmdl = HL_WpnStats[player.hl1weapon].viewmodel or "PISTOL"
