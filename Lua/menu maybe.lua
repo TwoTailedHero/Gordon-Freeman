@@ -1,3 +1,5 @@
+-- Stuff for a would-be GoldSrc menu when i get the time
+-- Hopefully this structure looks good for the others
 local kombiHL1LocalWindows = {
 	["Options"] =
 	{
@@ -102,7 +104,7 @@ local kombiHL1LocalWindows = {
 						type = "text", -- acts like HTML <input type="text">
 						x = 70,
 						y = 120,
-						label = "Based fucking text input that acts like a password box",
+						label = "Based fucking text input that acts like a text box",
 						tooltip = "FUUUCK!! I LOVE IT!!!",
 						placeholder = "i love luigi actually"
 						},
@@ -164,7 +166,7 @@ local function processWindowExtra(data, level, baseX, baseY)
 						key = key, 
 						type = "input", 
 						subtype = option.type, 
-						label = label or "\$option.type\", 
+						label = label or option.type, 
 						option = option,
 						x = itemX, y = itemY, 
 						tooltip = option.tooltip,

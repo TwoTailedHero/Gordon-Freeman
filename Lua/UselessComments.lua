@@ -1,3 +1,4 @@
+-- "Script" that's actually purely for reference at a later time
 /*
 AddMindscapeDialogSet(nil, {
     {"FA_ANGR", "Facciolo", "Your resolve is admirable, but futile!"},
