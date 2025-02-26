@@ -39,7 +39,6 @@ GS_RAILS_SKINS["kombifreeman"] = {
 	NOWINDLINES = false, --If true, doesn't spawn windlines when moving fast on rails.
 	NOSIDEHOPGFX = 0, --If 1, only spawns sidehop ghosts. If 2, only spawns sidehop speedlines. If 3, spawns neither.
 	NOFUNALLOWED = false, --If true, your character cannot use dunce poses with TOSS FLAG.
-	TRICKS = 4, --Our own custom variable to let us cut down on total lists
 	AUTOVERTICALAIM = false --Soon-to-be a way to let us shoot whatever enemy's flying past us
 	},
 }
