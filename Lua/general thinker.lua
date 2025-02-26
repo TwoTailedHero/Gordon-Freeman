@@ -76,6 +76,8 @@ COM_AddCommand("impulse", function(player, arg1)
 		for wepname, wepstats in pairs(HL_WpnStats) do
 			HL_AddWeapon(player, wepname, false, false)
 		end
+	elseif arg1 == "100"
+		-- TODO: Create a flashlight (otherwise known as illuminate the sector we're in) when this is ran!!
 	end
 end)
 
@@ -712,12 +714,3 @@ addHook("SeenPlayer", function(player,splayer)
 	kombilastseen = splayer -- "Do not alter player_t in HUD rendering code!" - ☝️🤓
 	kombiseentime = 7
 end)
-
-/*
-addHook("PlayerThink", function(player) -- "The Hook I Made Specifically Because I'm Tired Of Debugging This [$!$!]"
-	if not player.mo return end
-	if player.realmo.kombislopetimer and player.realmo.kombislopetimer >= 10 -- ^ this has nothing to do with shooting I just needed a quick and easy solution
-		player.powers[pw_strong] = STR_BUST|STR_ATTACK
-	end
-end)
-*/
