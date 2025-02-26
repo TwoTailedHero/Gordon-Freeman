@@ -413,6 +413,9 @@ local function HL_InitHealth(mobj) -- Sets up mobjs.
 		mobj.hl1health = 20 -- 20 HP for scientist users.
 	else
 		mobj.hl1health = $ or (HL1_DMGStats[mobj.type] and HL1_DMGStats[mobj.type].health) or max(1, FixedInt(FixedSqrt(FixedDiv(FixedMul(mobj.radius * 2, mobj.height),4*FRACUNIT/3))))
+		if type(mobj.hl1health) == "table"
+			mobj.hl1health = $.health
+		end
 		if mobj.type == MT_PLAYER
 			mobj.hl1armor = 100*FRACUNIT
 		end
