@@ -509,48 +509,6 @@ addHook("MobjMoveCollide", function(tmthing,thing)
 	end
 end, MT_HL1_BULLET)
 
-local function HL_GetDamage(inf)
-	if not HL1_DMGStats[inf.type].damage print("Aggressor has no associated stats!") return end
-	if type(HL1_DMGStats[inf.type].damage) == "number"
-		return HL1_DMGStats[inf.type].damage
-	elseif type(HL1_DMGStats[inf.type].damage) == "table"
-		local objdamage = HL1_DMGStats[inf.type].damage
-		if objdamage.min and objdamage.max
-			local max = objdamage.max
-			local min = objdamage.min
-			local increment = objdamage.increments
-			print(max, min, increment)
-			return (P_RandomByte()%(increment and max/increment or max/min) + 1)*(increment or min)
-		else
-			return objdamage.dmg
-		end
-	end
-end
-
-addHook("MobjDamage", function(target, inf, src, dmg, dmgType)
-	if target.skin == "kombifreeman"
-		local inf = inf.target or inf
-		HL.valuemodes["HLFreemanHurt"] = HL_LASTFUNC
-		local hookeddamage, hookeddamagetype = HL.RunHook("HLFreemanHurt", target, inf, src, dmg, dmgType)
-		if not (dmgType & DMG_DEATHMASK) and inf and not (inf.type and inf.type == MT_EGGMAN_ICON)
-			if inf.player
-				P_AddPlayerScore(inf.player, 50)
-			end
-		end
-		if not inf return end
-		local damage = hookeddamage or HL_GetDamage(inf)
-		if not HL1_DMGStats[inf.type] print("No DMGStats found for aggressor!") HL1_DMGStats[inf.type] = {damage = 0} end
-		local damagetype = hookeddamagetype or HL1_DMGStats[inf.type] and HL1_DMGStats[inf.type].damagetype
-		target.player.powers[pw_flashing] = 18
-		target.player.timeshit = $+1
-		P_PlayerEmeraldBurst(target.player,false)
-		P_PlayerWeaponAmmoBurst(target.player)
-		P_PlayerFlagBurst(target.player,false)
-		HL_DamageGordon(target, inf, damage, damagetype)
-		return true
-	end
-end, MT_PLAYER)
-
 /*
 addHook("MobjMoveBlocked", function(mobj, thing, line)
 	if line
