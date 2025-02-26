@@ -12,7 +12,7 @@ local function notice(str)
 	print("\x83NOTICE: \x80"..str);
 end
 
-local pickupnotifytime = TICRATE*3
+local pickupnotifytime = TICRATE*3 -- how long does each weapon notification last?
 
 rawset(_G, "DMG", { -- TYPEOFDAMAGE
 	GENERIC = 0,
@@ -107,7 +107,7 @@ rawset(_G, "HL_AddAmmo", function(freeman, ammotype, ammo) -- give player some m
 	return actualgain > 0
 end)
 
-rawset(_G, "HL_AddWeapon", function(freeman, weapon, silent, autoswitch)
+rawset(_G, "HL_AddWeapon", function(freeman, weapon, silent, autoswitch) -- give some amount of weapon to freeman
 	-- Push weapon to the weapon list if not already
 	local didsomething = false
 	if not freeman.hl1inventory
@@ -196,7 +196,7 @@ rawset(_G, "HL_TakeWeapon", function(freeman, weapon) -- no more weapon privileg
 	return didsomething
 end)
 
-rawset(_G, "HL_TakeAmmo", function(freeman, ammotype, ammocount) 
+rawset(_G, "HL_TakeAmmo", function(freeman, ammotype, ammocount) -- remove some amount of ammo from freeman
 	if not freeman.hl1ammo error("HL_TakeAmmo called, but no ammo inventory was found for the player!", 2) return end
 	ammocount = ammocount or 0
 	if not ammotype and not ammocount
@@ -212,7 +212,7 @@ rawset(_G, "HL_TakeAmmo", function(freeman, ammotype, ammocount)
 	end
 end)
 
-rawset(_G, "HL_TakeClip", function(player, weapon, amount, alt)
+rawset(_G, "HL_TakeClip", function(player, weapon, amount, alt) -- remove some amount of clip from freeman
 	if weapon == nil
 		for weapName, clips in pairs(player.hl1clips) do
 			if alt == nil -- search for SPECIFICALLY nil.
@@ -262,6 +262,26 @@ rawset(_G, "HL_TakeClip", function(player, weapon, amount, alt)
 			end
 		else
 			print("Invalid weapon: " .. tostring(weapon))
+		end
+	end
+end)
+
+rawset(_G, "HL_DamageGordon", function(thing, tmthing, dmg) -- expose our damage logic to outside sources
+	local hldamage = tmthing and tmthing.hl1damage or dmg
+	if not thing.hl1health
+		HL_InitHealth(thing)
+	end
+	if hldamage
+		if thing.hl1armor
+			thing.hl1armor = $-(2*(hldamage*FRACUNIT)/5)
+			thing.hl1health = $-hldamage/5+min(thing.hl1armor/FRACUNIT,0)
+			thing.hl1health = max($,0)
+			thing.hl1armor = max($,0)
+		else
+			thing.hl1health = $-hldamage
+		end
+		if thing.hl1health <= 0 -- get killed idiot
+			P_KillMobj(thing, tmthing, tmthing and tmthing.target or tmthing, 0)
 		end
 	end
 end)
