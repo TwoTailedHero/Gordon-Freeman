@@ -2201,6 +2201,7 @@ local flatsounds = {
 	["CRGRND2"] = "concrete",
 	["CRCROSS"] = "concrete",
 	["CRZDS"] = "dirt",
+	["173 crossfire zone THZFLR24"] = "concrete",
 }
 
 local playeraniminfo = {
@@ -2332,20 +2333,21 @@ addHook("PlayerThink", function(player)
 				player.wasfalling = true
 			end
 
-			if player.playsound			
+			if player.playsound
+				local mat = flatsounds["\$gamemap\ \$string.lower(G_BuildMapTitle(gamemap))\ \$player.groundtexture\"] or flatsounds[player.groundtexture]
 				if not (player.mo.eflags & MFE_GOOWATER)
-					if player.groundtexture and flatsounds[player.groundtexture] or flatsounds["\$gamemap\ \$string.lower(G_BuildMapTitle(gamemap))\ \$player.groundtexture\"]
-						material = flatsounds[player.groundtexture] or flatsounds["\$gamemap\ \$string.lower(G_BuildMapTitle(gamemap))\ \$player.groundtexture\"]
+					if player.groundtexture and mat
+						material = mat
 					else
-						if not flatsounds[player.groundtexture] or flatsounds["\$gamemap\ \$string.lower(G_BuildMapTitle(gamemap))\ \$player.groundtexture\"]
+						if not mat
 							CONS_Printf(player,"Attempt to index texture \$player.groundtexture\ in level \$gamemap\ \$string.lower(G_BuildMapTitle(gamemap))\ returned nil!","Make sure to complain to the creator with the above information if this slips through!!")
 						end
 						material = "concrete"
 					end
 				end
 				if (cv_hldebug.value & DEBUG_FOOTSTEP)
-						CONS_Printf(player,"indexing texture \$player.groundtexture\ in level \$gamemap\ \$string.lower(G_BuildMapTitle(gamemap))\, which is returning \$material\...")
-					end
+					CONS_Printf(player,"indexing texture \$player.groundtexture\ in level \$gamemap\ \$string.lower(G_BuildMapTitle(gamemap))\, which is returning \$material\...")
+				end
 				if (player.mo.eflags & MFE_TOUCHLAVA)
 					local sounds = soundinfolist["lava"][soundType]
 					if sounds ~= nil
