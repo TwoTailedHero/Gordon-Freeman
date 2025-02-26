@@ -396,6 +396,35 @@ end
 
 HL_GetAndSetDGStuff()
 
+local function HL_SetMTStats(mt, wishhealth, wishdamage)
+	local mobj = rawget(_G, mt)
+	if mobj
+		HL1_DMGStats[mobj] = {health = wishhealth, damage = wishdamage}
+	end
+end
+
+local function DoCustomEnemySupport()
+	-- SONIC DOOM II:
+	HL_SetMTStats("MT_SD2_COCONUTS", {health = 60, mult = 2*FRACUNIT}, {min = 8, max = 24, increments = 8})
+	HL_SetMTStats("MT_SD2_GROUNDER_PISTOL", {health = 20, mult = 2*FRACUNIT}, {min = 3, max = 15, increments = 3})
+	HL_SetMTStats("MT_SD2_GROUNDER_SHOTGUN", {health = 30, mult = 2*FRACUNIT}, {min = 3, max = 15, increments = 3})
+	HL_SetMTStats("MT_SD2_GROUNDER_CHAINGUN", {health = 30, mult = 2*FRACUNIT}, {min = 3, max = 15, increments = 3})
+	HL_SetMTStats("MT_SD2_METALSONIC", {health = 700, mult = 2*FRACUNIT}, {min = 3, max = 15, increments = 3})
+	HL_SetMTStats("MT_SD2_PSEUDOKNUCKLES", {health = 300, mult = 2*FRACUNIT}, {min = 3, max = 15, increments = 3})
+	HL_SetMTStats("MT_SD2_PSEUDOFLICKY", {health = 300, mult = 2*FRACUNIT}, {min = 3, max = 24, increments = 3})
+	HL_SetMTStats("MT_SD2_PSEUDOTAILS", {health = 400, mult = 2*FRACUNIT}, {min = 3, max = 24, increments = 3})
+	HL_SetMTStats("MT_SD2_VILE_FIRE", 0, {dmg = 90})
+	HL_SetMTStats("MT_SD2_OVASHORT", {health = 150, mult = 2*FRACUNIT}, {min = 4, max = 40, increments = 4})
+	HL_SetMTStats("MT_SD2_OVASHORT_SHADOW", {health = 150, mult = 2*FRACUNIT}, {min = 4, max = 40, increments = 4})
+	HL_SetMTStats("MT_SD2_OVASHOT", 0, {min = 8, max = 64, increments = 8})
+	HL_SetMTStats("MT_SD2_OVARED", {health = 1000, mult = 2*FRACUNIT}, {min = 10, max = 80, increments = 10})
+	HL_SetMTStats("MT_SD2_OVAGRAY", {health = 1000, mult = 2*FRACUNIT}, {min = 10, max = 80, increments = 10})
+	HL_SetMTStats("MT_SD2_PSEUDOSUPER", {health = 500, mult = 2*FRACUNIT}, 0)
+	HL_SetMTStats("MT_SD2_PSEUDOSUPER_BALL", 0, {min = 5, max = 40, increments = 5})
+	HL_SetMTStats("MT_SD2_REDMETALSONIC", {health = 4000, mult = 2*FRACUNIT}, {min = 10, max = 80, increments = 10})
+	HL_SetMTStats("MT_SD2_ROCKET", 0, {min = 20, max = 160, increments = 20})
+end
+
 addHook("AddonLoaded", function()
 	if OLDC and OLDC.SkinFullNames and not OLDC.SkinFullNames["kombifreeman"]
 		if P_RandomChance(FRACUNIT/4)
@@ -408,5 +437,7 @@ addHook("AddonLoaded", function()
 			OLDC.SkinFullNames["kombifreeman"] = "GORDON FREEMAN"
 		end
 	end
-	HL_GetAndSetDGStuff()
+	DoCustomEnemySupport()
 end)
+
+DoCustomEnemySupport()
