@@ -3,10 +3,7 @@ local function SafeFreeSlot(...)
 		if not rawget(_G, slot) sfxinfo[freeslot(slot)].caption = "/" end -- overlapping = wasting, how do we not waste (as many of) them? don't do it in the first place!
 	end
 end
--- everything but the uhh ramps in crossfire use the concrete SFX
--- the area by the button uses the tile SFX
--- and the ramps use the dirt SFX
--- and probably the thing to get to the button as well
+
 SafeFreeSlot(
 "sfx_hlco1", "sfx_hlco2", "sfx_hlco3", "sfx_hlco4",
 "sfx_hldi1", "sfx_hldi2", "sfx_hldi3", "sfx_hldi4",
@@ -2189,6 +2186,12 @@ local flatsounds = {
 	["CEZTRA1"] = "grass",
 	["XMAS20"] = "snow",
 	["ISSANDF"] = "sand",
+	["CRWLK"] = "dirt",
+	["CRWLKR"] = "dirt",
+	["CRGRND"] = "concrete",
+	["CRGRND2"] = "concrete",
+	["CRCROSS"] = "concrete",
+	["CRZDS"] = "dirt",
 }
 
 local playeraniminfo = {
