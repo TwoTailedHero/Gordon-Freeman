@@ -4,6 +4,15 @@ local function SafeFreeSlot(...)
 	end
 end
 
+local DEBUG_FOOTSTEP = 1 -- TODO: how put constant to below cvar
+
+rawset(_G, "cv_hldebug", CV_RegisterVar({
+	name = "hl_debug",
+	defaultvalue = "Off",
+	flags = CV_SAVE|CV_SHOWMODIF|CV_NETVAR,
+	PossibleValue = {Off = 0, Footsteps = 1},
+}))
+
 SafeFreeSlot(
 "sfx_hlco1", "sfx_hlco2", "sfx_hlco3", "sfx_hlco4",
 "sfx_hldi1", "sfx_hldi2", "sfx_hldi3", "sfx_hldi4",
@@ -2334,6 +2343,9 @@ addHook("PlayerThink", function(player)
 						material = "concrete"
 					end
 				end
+				if (cv_hldebug.value & DEBUG_FOOTSTEP)
+						CONS_Printf(player,"indexing texture \$player.groundtexture\ in level \$gamemap\ \$string.lower(G_BuildMapTitle(gamemap))\, which is returning \$material\...")
+					end
 				if (player.mo.eflags & MFE_TOUCHLAVA)
 					local sounds = soundinfolist["lava"][soundType]
 					if sounds ~= nil
