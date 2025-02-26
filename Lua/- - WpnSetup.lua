@@ -280,11 +280,23 @@ rawset(_G, "kombihl1viewmodels", {
 			{["frame"] = 48, ["duration"] = 3, ["sound"] = sfx_hl1sgc, ["rlelength"] = 6},
 		},
 		["reloadframes"] = {
-			{["frame"] = 6, ["duration"] = 6},
-			{["frame"] = 130, ["duration"] = 4, ["rlelength"] = 2},
-			{["frame"] = 133, ["duration"] = 3, ["rlelength"] = 18},
-			{["frame"] = 152, ["duration"] = 3, ["sound"] = sfx_hl357r, ["rlelength"] = 3},
-			{["frame"] = 156, ["duration"] = 8},
+			{["frame"] = 5, ["duration"] = 3},
+			{["frame"] = 75, ["duration"] = 3, ["rlelength"] = 5},
+		},
+		["reloadstartframes"] = {
+			{["frame"] = 5, ["duration"] = 3},
+			{["frame"] = 75, ["duration"] = 3, ["rlelength"] = 5},
+		},
+		["reloadloopframes"] = {
+			{["frame"] = 81, ["duration"] = 4, ["rlelength"] = 2},
+			{["frame"] = 83, ["duration"] = 4, ["sound"] = sfx_hl1sgc},
+			{["frame"] = 84, ["duration"] = 4, ["rlelength"] = 2},
+		},
+		["reloadendframes"] = {
+			{["frame"] = 80, ["duration"] = 4},
+			{["frame"] = 86, ["duration"] = 4, ["rlelength"] = 2},
+			{["frame"] = 88, ["duration"] = 4, ["sound"] = sfx_hl1sgc},
+			{["frame"] = 89, ["duration"] = 4, ["rlelength"] = 4},
 		},
 		["idle1frames"] = {
 			{["frame"] = 5, ["duration"] = 8, ["rlelength"] = 7},
