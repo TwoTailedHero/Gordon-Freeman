@@ -369,29 +369,6 @@ addHook("PlayerThink", function(player)
 	end
 end)
 
-addHook("PlayerThink", function(player)
-	if not player.mo return end
-	if player.mo.skin != skin return end
-	if (player.cmd.buttons & BT_WEAPONMASK)
-		if not player.kombipressingwpnkeys
-			player.kombiaccessinghl1menu = true
-			player.kombiprevhl1category = player.kombihl1category
-			player.kombihl1category = (player.cmd.buttons & BT_WEAPONMASK)
-
-			if player.kombiprevhl1category ~= player.kombihl1category
-				player.selectionlist = HL_GetWeapons(HL_WpnStats, player.kombihl1category, player)
-				player.kombihl1wpn = 1
-			else
-				player.kombihl1wpn = player.kombihl1wpn == player.selectionlist["weaponcount"] and 1 or player.kombihl1wpn + 1
-			end
-
-			player.kombipressingwpnkeys = true
-		end
-	elseif player.kombipressingwpnkeys
-		player.kombipressingwpnkeys = false
-	end
-end)
-
 rawset(_G, "HL1_DMGStats", {
 [MT_BLUECRAWLA] = {health = 30, damage = 15},
 [MT_REDCRAWLA] = {health = 60, damage = 20},
@@ -508,26 +485,6 @@ if not duke_roboinfo
 end
 
 duke_roboinfo[MT_HL1_BULLET] = {unshrinkable = true, damage = 1, ringslingerdamage = true}
-
-rawset(_G, "HL_DamageGordon", function(thing, tmthing, dmg) -- expose our damage logic to outside sources
-	local hldamage = tmthing and tmthing.hl1damage or dmg
-	if not thing.hl1health
-		HL_InitHealth(thing)
-	end
-	if hldamage
-		if thing.hl1armor
-			thing.hl1armor = $-(2*(hldamage*FRACUNIT)/5)
-			thing.hl1health = $-hldamage/5+min(thing.hl1armor/FRACUNIT,0)
-			thing.hl1health = max($,0)
-			thing.hl1armor = max($,0)
-		else
-			thing.hl1health = $-hldamage
-		end
-		if thing.hl1health <= 0 -- get killed idiot
-			P_KillMobj(thing, tmthing, tmthing and tmthing.target or tmthing, 0)
-		end
-	end
-end)
 
 if not duke_roboinfo
 	rawset(_G, "duke_roboinfo", {})
