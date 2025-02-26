@@ -259,8 +259,8 @@ rawset(_G, "kombihl1viewmodels", {
 			{["frame"] = 45, ["duration"] = 5},
 		},
 		["idle3frames"] = {
-			{["frame"] = 46, ["duration"] = 6,["rlelength"]=24},
-			{["frame"] = 71,15},
+			{["frame"] = 46, ["duration"] = 6,["rlelength"]= 24},
+			{["frame"] = 71, ["duration"] = 15},
 		},
 		["idle4frames"] = {
 			{["frame"] = 72, ["duration"] = 6,["rlelength"]=46},
@@ -270,7 +270,6 @@ rawset(_G, "kombihl1viewmodels", {
 	["SHOTGUN"] = {
 		["idleanims"] = 3,
 		["flags"] = VMDL_FLIP,
-		["bobtype"] = VBOB_DOOM,
 		["readyframes"] = {
 			{["frame"] = 0, ["duration"] = 3, ["rlelength"] = 4},
 		},
@@ -414,7 +413,7 @@ rawset(_G, "HL_WpnStats", {
 		firesound = sfx_hlcbar,
 		["firehitsound"] = sfx_hlcbh1,
 		["firehitsounds"] = 2,
-		maxdistance = 16,
+		maxdistance = 32,
 		altfire = false,
 		["firedelay"] = {
 			["ready"] = 12,
@@ -532,6 +531,7 @@ rawset(_G, "HL_WpnStats", {
 		selectgraphic = "HL1HUDSHOTGUN",
 		autoswitchweight = 15,
 		pickupgift = 12, -- why does the shotgun have 12 shells in it? is it stupid?
+		reloadincrement = 1,
 		weaponslot = 3,
 		priority = 2,
 		ammo = "buckshot",
@@ -558,11 +558,12 @@ rawset(_G, "HL_WpnStats", {
 			["ready"] = 12,
 			["normal"] = 12,
 			["alt"] = 6,
-			["reload"] = 54,
+			["reloadstart"] = 18,
+			["reloadloop"] = 20,
 		},
 		realname = "SPAS-12",
 	},
-	-- everything past this point has unfinished properties!! do them already
+	-- everything past this point has unfinished properties!!
 	["crossbow"] = 
 		{
 		viewmodel = "PISTOL",
