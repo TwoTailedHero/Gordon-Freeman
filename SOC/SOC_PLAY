@@ -1,5 +1,8 @@
 Character
 SkinName = kombifreeman
 DisplayName = "GORDON#FREEMAN"
+TagTextColor = SKINCOLOR_ORANGE
+OppositeColor = SKINCOLOR_ORANGE
+TagOutlineColor = SKINCOLOR_BLACK
 PlayerText = You know who ELSE is holding their place?
 #
