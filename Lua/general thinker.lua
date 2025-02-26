@@ -209,10 +209,11 @@ addHook("PlayerThink", function(player)
 		}
 	end
 
-	-- Handle reloading
+	-- Set-up reloading
 	local weapon_stats = HL_WpnStats[player.hl1weapon]
 	local weapon_clips = player.hl1clips[player.hl1weapon]
 	local ammo_type = weapon_stats.ammo
+	local reload_increment = weapon_stats.reloadincrement
 
 	if (not weapon_clips[1]
 		or ((player.cmd.buttons & BT_CUSTOM1) and weapon_clips[1] < weapon_stats.clipsize))
@@ -221,26 +222,47 @@ addHook("PlayerThink", function(player)
 		and (player.hl1ammo[ammo_type] or 0) > 0
 
 		player.kombireloading = 1
-		player.hl1weapondelay = weapon_stats["firedelay"]["reload"]
-		player.hl1viewmdaction = "reload"
+		player.hl1weapondelay = weapon_stats["firedelay"]["reloadstart"] or weapon_stats["firedelay"]["reload"]
 		player.hl1frameindex = 1
-		player.hl1frame = viewmodel["reloadframes"][1][1]
-		player.hl1frameclock = viewmodel["reloadframes"][1][2]
+		local start_frames = viewmodel["reloadstartframes"] or viewmodel["reloadframes"]
+		player.hl1viewmdaction = viewmodel["reloadstartframes"] and "reloadstart" or "reload"
+		player.hl1frame = start_frames[1][1]
+		player.hl1frameclock = start_frames[1][2]
 	end
 
-	-- Finalize reloading
+	-- Now do the reloading
 	if player.kombireloading == 1 and player.hl1weapondelay == 0
-		if weapon_stats.clipsize and ammo_type
+		if weapon_stats.clipsize and ammo_type then
 			local max_reload = weapon_stats.clipsize - weapon_clips[1]
 			local available_ammo = player.hl1ammo[ammo_type]
-			local to_reload = min(max_reload, available_ammo)
-
-			player.hl1ammo[ammo_type] = $ - to_reload
-			weapon_clips[1] = $ + to_reload
+			
+			if reload_increment then
+				local to_reload = min(reload_increment, max_reload, available_ammo)
+				weapon_clips[1] = $ + to_reload
+				player.hl1ammo[ammo_type] = $ - to_reload
+				
+				if weapon_clips[1] >= weapon_stats.clipsize or player.hl1ammo[ammo_type] <= 0 then
+					local end_frames = viewmodel["reloadendframes"] or viewmodel["reloadframes"]
+					player.hl1viewmdaction = viewmodel["reloadendframes"] and "reloadend" or "reload"
+					player.hl1frame = end_frames[1][1]
+					player.hl1frameclock = end_frames[1][2]
+					player.kombireloading = 0 -- Stop reloading if full or out of ammo
+				else
+					local loop_frames = viewmodel["reloadloopframes"] or viewmodel["reloadframes"]
+					player.hl1viewmdaction = viewmodel["reloadloopframes"] and "reloadloop" or "reload"
+					player.hl1frame = loop_frames[1][1]
+					player.hl1frameclock = loop_frames[1][2]
+					player.hl1weapondelay = weapon_stats["firedelay"]["reloadloop"] or weapon_stats["firedelay"]["reload"] -- Continue reloading incrementally
+				end
+			else
+				local to_reload = min(max_reload, available_ammo)
+				player.hl1ammo[ammo_type] = $ - to_reload
+				weapon_clips[1] = $ + to_reload
+				player.kombireloading = 0
+			end
 		else
 			print("Weapon \$player.hl1weapon\ missing necessary stats! Check 'clipsize' and 'ammo'.")
 		end
-		player.kombireloading = 0
 	end
 end)
 
