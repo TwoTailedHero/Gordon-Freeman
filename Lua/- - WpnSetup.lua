@@ -114,6 +114,9 @@ sfxinfo[sfx_hlcbh2].caption = "Crowbar Hit"
 sfxinfo[sfx_hlcbb1].caption = "Crowbar Hit (Body)"
 sfxinfo[sfx_hlcbb2].caption = "Crowbar Hit (Body)"
 sfxinfo[sfx_hlcbb3].caption = "Crowbar Hit (Body)"
+sfxinfo[sfx_hl1sr1].caption = "Shotgun Loading"
+sfxinfo[sfx_hl1sr2].caption = "Shotgun Loading"
+sfxinfo[sfx_hl1sr3].caption = "Shotgun Loading"
 sfxinfo[sfx_hl1g17].caption = "Pistol Firing"
 sfxinfo[sfx_hl1pr1].caption = "Pistol Clip Out"
 sfxinfo[sfx_hl1pr2].caption = "Pistol Clip In"
@@ -288,7 +291,7 @@ rawset(_G, "kombihl1viewmodels", {
 		},
 		["reloadloopframes"] = {
 			{["frame"] = 81, ["duration"] = 4, ["rlelength"] = 2},
-			{["frame"] = 83, ["duration"] = 4, ["sound"] = sfx_hl1sgc},
+			{["frame"] = 83, ["duration"] = 4, ["sound"] = sfx_hl1sr1, sounds = 3},
 			{["frame"] = 84, ["duration"] = 4, ["rlelength"] = 2},
 		},
 		["reloadendframes"] = {
@@ -673,8 +676,6 @@ rawset(_G, "HL_WpnStats", {
 		priority = 4,
 		ammo = "hornet",
 		clipsize = WEAPON_NONE,
-		["giveammoamount"] = 6,
-		["giveammoevery"] = 6, -- TODO: Replace with actual time!!
 		shotcost = 1,
 		kickback = 5*FRACUNIT/2,
 		firesound = sfx_hl1g17,
