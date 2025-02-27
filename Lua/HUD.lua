@@ -63,6 +63,9 @@ hud.add(function(v,player)
 				v.getSectorColormap(player.mo.subsector.sector, player.mo.x, player.mo.y, player.mo.z, player.mo.subsector.sector.lightlevel))
 		end
 	end
+end, "game")
+
+hud.add(function(v,player)
 	if not (HL_WpnStats[player.hl1weapon].ammo == "melee")
 		K_DrawHL1Number(v,player.hl1ammo[HL_WpnStats[player.hl1weapon].ammo],315*FRACUNIT,196*FRACUNIT,V_ADD|V_PERPLAYER,v.getColormap(nil, player.skincolor))
 	end
@@ -211,4 +214,4 @@ hud.add(function(v,player)
 				V_PERPLAYER)
 		end
 	end
-end)
+end, "game")
