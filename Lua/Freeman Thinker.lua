@@ -27,13 +27,37 @@ addHook("PlayerCanEnterSpinGaps", function(player) -- just let us use PlayerHeig
 	if player.realmo.state == S_PLAY_FREEMCROUCH return true end
 end)
 
+local srb2defviewheight = 41*FRACUNIT
+
 addHook("PlayerThink", function(player)
 	if not player.mo return end
 	if player.mo.skin != skin return end
-	if (player.cmd.buttons & BT_SPIN)
+	local sectorcheck = P_CeilingzAtPos(player.mo.x-player.mo.momx, player.mo.y-player.mo.momy, player.mo.z-player.mo.momz, player.mo.height) - P_FloorzAtPos(player.mo.x, player.mo.y, player.mo.z, player.mo.height)
+	if (player.cmd.buttons & BT_SPIN) or sectorcheck < P_GetPlayerHeight(player)
+		if not ((player.mo.eflags & MFE_JUSTHITFLOOR) or P_IsObjectOnGround(player.mo)) and player.mo.state != S_PLAY_FREEMCROUCH
+			if (player.mo.eflags & MFE_VERTICALFLIP)
+				player.mo.z = $ - abs(P_GetPlayerHeight(player) - P_GetPlayerSpinHeight(player))
+			else
+				player.mo.z = $ + abs(P_GetPlayerHeight(player) - P_GetPlayerSpinHeight(player))
+			end
+		end
 		player.realmo.state = S_PLAY_FREEMCROUCH
+		player.normalspeed = skins[player.realmo.skin].normalspeed/4
 	elseif player.realmo.state == S_PLAY_FREEMCROUCH
+		if not ((player.mo.eflags & MFE_JUSTHITFLOOR) or P_IsObjectOnGround(player.mo))
+			if (player.mo.eflags & MFE_VERTICALFLIP)
+				player.mo.z = $ + abs(P_GetPlayerHeight(player) - P_GetPlayerSpinHeight(player))
+			else
+				player.mo.z = $ - abs(P_GetPlayerHeight(player) - P_GetPlayerSpinHeight(player))
+			end
+		end
 		player.realmo.state = S_PLAY_STND
+		player.normalspeed = skins[player.realmo.skin].normalspeed
+	end
+	if player.realmo.state == S_PLAY_FREEMCROUCH
+		player.viewheight = srb2defviewheight/2
+	else
+		player.viewheight = srb2defviewheight
 	end
 end)
 
