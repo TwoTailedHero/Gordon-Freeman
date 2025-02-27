@@ -281,6 +281,7 @@ addHook("PlayerThink", function(player)
 	end
 	if not player.hl1inventory[player.hl1weapon] return end
 	if (player.cmd.buttons & fire) or player.currentvolley
+		player.kombireloading = 0 -- interrupt reloading if we're in one
 		if player.kombihl1wpn and player.selectionlist["weapons"][player.kombihl1wpn] and not player.currentvolley
 			if viewmodel["readyframes"] and player.hl1weapon != player.selectionlist["weapons"][player.kombihl1wpn]["name"]
 				player.hl1viewmdaction = "ready"
