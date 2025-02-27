@@ -51,9 +51,17 @@ hud.add(function(v,player)
 			v.drawScaled((160*FRACUNIT)+bobx,
 				(106*FRACUNIT)+boby,
 				FRACUNIT,
+				v.cachePatch("VMDL\$kmbivmdl\\$curframe\"),
+				vmdlflags,
+				v.getSectorColormap(player.mo.subsector.sector, player.mo.x, player.mo.y, player.mo.z, player.mo.subsector.sector.lightlevel))
+			if vmdl and vmdl['overlay']
+			v.drawScaled((160*FRACUNIT)+bobx,
+				(106*FRACUNIT)+boby,
+				FRACUNIT,
 				v.cachePatch("VMDL\$kmbivmdl\\$vmdl['overlay']\"),
 				vmdlflags,
 				v.getSectorColormap(player.mo.subsector.sector, player.mo.x, player.mo.y, player.mo.z, player.mo.subsector.sector.lightlevel))
+			end
 		else
 			v.drawScaled(160*FRACUNIT,
 				106*FRACUNIT,
