@@ -787,47 +787,57 @@ rawset(_G, "HL_WpnStats", {
 
 rawset(_G, "HL_AmmoStats", {
 	["9mm"] = {
-		max = 250 -- How much of an ammo type the player can hold.
+		max = 250, -- How much of an ammo type the player can hold.
+		icon = "HUDSELBUCKET1",
 		-- shootmobj omitted because the MT_* that'd go here is the last resort, anyway.
 	},
 	["357"] = {
-		max = 36
+		max = 36,
+		icon = "HUDSELBUCKET1",
 	},
 	["buckshot"] = {
-		max = 125
+		max = 125,
+		icon = "HUDSELBUCKET1",
 	},
 	["bolt"] = {
 		max = 50,
+		icon = "HUDSELBUCKET1",
 		shootmobj = MT_HL1_BOLT -- the default mobj to shoot if left unspecified.
 	},
 	["rocket"] = {
 		max = 5,
 		shootmobj = MT_HL1_ROCKET,
+		icon = "HUDSELBUCKET1",
 		safetycatch = true, -- disable autofire so we don't suddenly eat rockets if we autoswitch to the RPG.
 		explosionradius = 128
 	},
 	["grenade"] = {
 		max = 10,
 		shootmobj = MT_HL1_HANDGRENADE,
+		icon = "HUDSELBUCKET1",
 		safetycatch = true
 	},
 	["satchel"] = {
 		max = 5,
+		icon = "HUDSELBUCKET1",
 		shootmobj = MT_HL1_SATCHEL,
 		safetycatch = true
 	},
 	["tripmine"] = {
 		max = 5,
+		icon = "HUDSELBUCKET1",
 		shootmobj = MT_HL1_TRIPMINE,
 		safetycatch = true
 	},
 	["snark"] = {
 		max = 15,
+		icon = "HUDSELBUCKET1",
 		shootmobj = MT_HL1_SNARK,
 		safetycatch = true
 	},
 	["uranium"] = {
 		max = 100,
+		icon = "HUDSELBUCKET1",
 	},
 	["hornet"] = {
 		max = 8,
@@ -837,24 +847,29 @@ rawset(_G, "HL_AmmoStats", {
 	},
 	["argrenade"] = {
 		max = 10,
+		icon = "HUDSELBUCKET1",
 		shootmobj = MT_HL1_ARGRENADE,
 		explosionradius = 128
 	},
 	-- DOOM
 	-- shootmobj properties are put in here when the DoomGuy addon gets loaded in. Default to nothing extra for errors' sake.
 	["bull"] = {
-		max = 200
+		max = 200,
+		icon = "HUDSELBUCKET1",
 	},
 	["shel"] = {
-		max = 50
+		max = 50,
+		icon = "HUDSELBUCKET1",
 	},
 	["rckt"] = {
 		max = 50,
+		icon = "HUDSELBUCKET1",
 		safetycatch = true,
 		explosionradius = 128
 	},
 	["cell"] = {
-		max = 300
+		max = 300,
+		icon = "HUDSELBUCKET1",
 	},
 })
 
