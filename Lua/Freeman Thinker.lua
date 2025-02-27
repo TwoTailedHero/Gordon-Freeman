@@ -61,7 +61,7 @@ addHook("PlayerThink", function(player)
 end)
 
 local function HL_GetDamage(inf)
-	if not HL1_DMGStats[inf.type].damage print("Aggressor has no associated stats!") return end
+	if not HL1_DMGStats[inf.type] print("Aggressor has no associated stats!") return end
 	if type(HL1_DMGStats[inf.type].damage) == "number"
 		return HL1_DMGStats[inf.type].damage
 	elseif type(HL1_DMGStats[inf.type].damage) == "table"
