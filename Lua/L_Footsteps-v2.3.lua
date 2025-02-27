@@ -2202,6 +2202,10 @@ local flatsounds = {
 	["CRCROSS"] = "concrete",
 	["CRZDS"] = "dirt",
 	["173 crossfire zone THZFLR24"] = "concrete",
+	["GRIDGREY"] = "concrete",
+	["GRIDORAN"] = "concrete",
+	["MGGRASS"] = "grass",
+	["SPFLOOR1"] = "concrete",
 }
 
 local playeraniminfo = {
