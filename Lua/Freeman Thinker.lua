@@ -94,7 +94,6 @@ local function HL_GetDamage(inf)
 			local max = objdamage.max
 			local min = objdamage.min
 			local increment = objdamage.increments
-			print(max, min, increment)
 			return (P_RandomByte()%(increment and max/increment or max/min) + 1)*(increment or min)
 		else
 			return objdamage.dmg
@@ -102,9 +101,9 @@ local function HL_GetDamage(inf)
 	end
 end
 
-addHook("MobjDamage", function(target, inf, src, dmg, dmgType)
+addHook("MobjDamage", function(target, hurter, src, dmg, dmgType)
 	if target.skin == "kombifreeman"
-		local inf = inf.target or inf
+		local inf = (not HL1_DMGStats[src.type].damage.preferaggressor and src) or hurter
 		HL.valuemodes["HLFreemanHurt"] = HL_LASTFUNC
 		local hookeddamage, hookeddamagetype = HL.RunHook("HLFreemanHurt", target, inf, src, dmg, dmgType)
 		if not (dmgType & DMG_DEATHMASK) and inf and not (inf.type and inf.type == MT_EGGMAN_ICON)
