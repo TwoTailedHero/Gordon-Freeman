@@ -1,109 +1,59 @@
-local function HL_GetAndSetDGStuff()
-	if doomclient and doomgameplay and doomcheats -- make REAL good sure we have Doomguy installed.
-	HL_PickupStats = {
-		[MT_ITEM_STIMPACK] = {
-			health = {give = 10}
-		},
-		[MT_ITEM_HEALTHPACK] = {
-			health = {give = 25}
-			
-		},
-		[MT_ITEM_COMBAT_ARMOR] = {
-			armor = {set = 200, limit = 200}
-		},
-		[MT_ITEM_SECURITY_ARMOR] = {
-			armor = {set = 100, limit = 100}
-		},
-		[MT_ITEM_SOUL] = {
-			health = {give = 100, limit = 200}
-		},
-		[MT_ITEM_MEGA] = {
-			health = {set = 200, limit = 200},
-			armor = {set = 200, limit = 200}
-		},
-		[MT_ITEM_INVULNERABILITY] = {
-			invuln = {set = 20*TICRATE}
-		},
-		[MT_POWERUP_BERSERK] = {
-			berserk = INT32_MAX,
-		},
-		[MT_POWERUP_BACKPACK] = {
-			ammo = {type = {
-				"bull",
-				"shel",
-				"rckt",
-				"cell"
-				},
-				give = {
-				10,
-				4,
-				1,
-				20
-				},
-			},
-			doubleammo = true,
-		},
-		[MT_ITEM_HEALTH] = {
-			health = {give = 1, limit = 200}
-		},
-		[MT_ITEM_ARMOR] = {
-			armor = {give = 1, limit = 200}
-		},
-		[MT_AMMO_CLIP] = {
-			ammo = {type = "bull", give = 10}
-		},
-		[MT_AMMO_CLIP_BOX] = {
-			ammo = {type = "bull", give = 50}
-		},
-		[MT_AMMO_SHELL] = {
-			ammo = {type = "shel", give = 4}
-		},
-		[MT_AMMO_SHELL_BOX] = {
-			ammo = {type = "shel", give = 20}
-		},
-		[MT_AMMO_ROCKET] = {
-			ammo = {type = "rckt", give = 1}
-		},
-		[MT_AMMO_ROCKET_BOX] = {
-			ammo = {type = "rckt", give = 5}
-		},
-		[MT_AMMO_CELL] = {
-			ammo = {type = "cell", give = 20}
-		},
-		[MT_AMMO_CELL_PACK] = {
-			ammo = {type = "cell", give = 200}
-		},
-		[MT_WEAPON_CHAINSAW] = {
-			weapon = "doomchainsaw"
-		},
-		[MT_WEAPON_PISTOL] = {
-			weapon = "doompistol"
-		},
-		[MT_WEAPON_SHOTGUN] = {
-			weapon = "doomshotgun"
-		},
-		[MT_WEAPON_SUPERSHOTGUN] = {
-			weapon = "doomsupershotgun"
-		},
-		[MT_WEAPON_CHAINGUN] = {
-			weapon = "doomchaingun"
-		},
-		[MT_WEAPON_ROCKETLAUNCHER] = {
-			weapon = "doomrpg"
-		},
-		[MT_WEAPON_PLASMARIFLE] = {
-			weapon = "doomplasmarifle"
-		},
-		[MT_WEAPON_BFG9000] = {
-			weapon = "doombfg9000"
-		},
+local function HL_CreateItem(mt, health, armor, ammo, special, specialthing)
+	local mobj = rawget(_G, mt)
+	if not mobj return end
+	HL_PickupStats[mobj] = {
+		health = health,
+		armor = armor,
+		ammo = ammo,
+		special = specialthing
 	}
-	HL_WpnStats["doomchainsaw"] = 
-		{
+end
+local function HL_DefineWeapon(name, stats)
+	HL_WpnStats[name] = stats
+end
+
+local function HL_SetMTStats(mt, wishhealth, wishdamage)
+	local mobj = rawget(_G, mt)
+	if not mobj return end
+	HL1_DMGStats[mobj] = {health = wishhealth, damage = wishdamage}
+end
+
+local function CheckAddons()
+	-- DOOM:
+	HL_CreateItem("MT_ITEM_STIMPACK", {give = 10})
+	HL_CreateItem("MT_ITEM_HEALTHPACK", {give = 25})
+	HL_CreateItem("MT_ITEM_COMBAT_ARMOR", nil, {set = "limit", maxmult = FRACUNIT*2})
+	HL_CreateItem("MT_ITEM_SECURITY_ARMOR", nil, {set = "limit", maxmult = FRACUNIT})
+	HL_CreateItem("MT_ITEM_SOUL", {give = "maxhp", maxmult = FRACUNIT*2})
+	HL_CreateItem("MT_ITEM_MEGA", {give = "limit", maxmult = FRACUNIT*2}, {give = "limit", maxmult = FRACUNIT*2})
+	HL_CreateItem("MT_ITEM_INVULNERABILITY", nil, nil, nil, "invuln", {set = 20*TICRATE})
+	HL_CreateItem("MT_POWERUP_BERSERK", nil, nil, nil, "berserk", INT32_MAX)
+	HL_CreateItem("MT_POWERUP_BACKPACK", nil, nil, {type = {"bull","shel","rckt","cell"}, give = {10,4,1,20}}, doubleammo, true)
+	HL_CreateItem("MT_ITEM_HEALTH", {give = 1, maxmult = FRACUNIT*2})
+	HL_CreateItem("MT_ITEM_ARMOR", nil, {give = 1, maxmult = FRACUNIT*2})
+	HL_CreateItem("MT_AMMO_CLIP", nil, nil, {type = "bull", give = 10})
+	HL_CreateItem("MT_AMMO_CLIP_BOX", nil, nil, {type = "bull", give = 50})
+	HL_CreateItem("MT_AMMO_SHELL", nil, nil, {type = "shel", give = 4})
+	HL_CreateItem("MT_AMMO_SHELL_BOX", nil, nil, {type = "shel", give = 20})
+	HL_CreateItem("MT_AMMO_ROCKET", nil, nil, {type = "rckt", give = 1})
+	HL_CreateItem("MT_AMMO_ROCKET_BOX", nil, nil, {type = "rckt", give = 5})
+	HL_CreateItem("MT_AMMO_CELL", nil, nil, {type = "cell", give = 20})
+	HL_CreateItem("MT_AMMO_CELL_PACK", nil, nil, {type = "cell", give = 200})
+	HL_CreateItem("MT_WEAPON_CHAINSAW", nil, nil, nil, weapon, "doomchainsaw")
+	HL_CreateItem("MT_WEAPON_PISTOL", nil, nil, nil, weapon, "doompistol")
+	HL_CreateItem("MT_WEAPON_SHOTGUN", nil, nil, nil, weapon, "doomshotgun")
+	HL_CreateItem("MT_WEAPON_SUPERSHOTGUN", nil, nil, nil, weapon, "doomsupershotgun")
+	HL_CreateItem("MT_WEAPON_CHAINGUN", nil, nil, nil, weapon, "doomchaingun")
+	HL_CreateItem("MT_WEAPON_ROCKETLAUNCHER", nil, nil, nil, weapon, "doomrpg")
+	HL_CreateItem("MT_WEAPON_PLASMARIFLE", nil, nil, nil, weapon, "doomplasmarifle")
+	HL_CreateItem("MT_WEAPON_BFG9000", nil, nil, nil, weapon, "doombfg9000")
+
+	HL_DefineWeapon("doomchainsaw", {
 		viewmodel = "DOOMWP2-",
 		crosshair = "XHRPIS",
 		doombob = true,
 		doomweaponraise = true,
+		weaponclass = "doom",
 		["neverdenyuse"] = true,
 		weaponslot = 1,
 		priority = 999,
@@ -111,7 +61,9 @@ local function HL_GetAndSetDGStuff()
 		volley = 2,
 		clipsize = WEAPON_NONE,
 		shotcost = 0,
-		damage = 2*P_RandomRange(1,10),
+		damagemin = 2,
+		damagemax = 20,
+		damageincs = 2,
 		horizspread = 0,
 		vertspread = 0,
 		firesound = sfx_sawful,
@@ -127,20 +79,22 @@ local function HL_GetAndSetDGStuff()
 			["normal"] = 4,
 		},
 		realname = "Chainsaw (DOOM)",
-	}
-	HL_WpnStats["doompistol"] = 
-		{
+	})
+	HL_DefineWeapon("doompistol", {
 		viewmodel = "DOOMWP2-",
 		crosshair = "XHRPIS",
 		doombob = true,
 		doomweaponraise = true,
+		weaponclass = "doom",
 		weaponslot = 2,
 		priority = 999,
 		ammo = "bull", -- Holy shit, DoomGuy uses live bulls as ammunition?! (no
 		refireusesspread = true,
 		clipsize = WEAPON_NONE,
 		shotcost = 1,
-		damage = 5*P_RandomRange(1,3),
+		damagemin = 5,
+		damagemax = 15,
+		damageincs = 5,
 		horizspread = 11*FRACUNIT/2,
 		vertspread = 11*FRACUNIT/2,
 		firesound = sfx_pist,
@@ -153,20 +107,22 @@ local function HL_GetAndSetDGStuff()
 			["normal"] = 14,
 		},
 		realname = "Pistol (DOOM)",
-	}
-	HL_WpnStats["doomshotgun"] = 
-		{
+	})
+	HL_DefineWeapon("doomshotgun", {
 		viewmodel = "DOOMWP3-",
 		crosshair = "XHRPIS",
 		doombob = true,
 		doomweaponraise = true,
+		weaponclass = "doom",
 		weaponslot = 3,
 		priority = 999,
 		ammo = "shel",
 		pellets = 7,
 		clipsize = WEAPON_NONE,
 		shotcost = 1,
-		damage = 5*P_RandomRange(1,3),
+		damagemin = 5,
+		damagemax = 15,
+		damageincs = 5,
 		horizspread = 11*FRACUNIT/2,
 		vertspread = 11*FRACUNIT/2,
 		firesound = sfx_ssg,
@@ -179,20 +135,22 @@ local function HL_GetAndSetDGStuff()
 			["normal"] = 41,
 		},
 		realname = "Shotgun (DOOM)",
-	}
-	HL_WpnStats["doomsupershotgun"] = 
-		{
+	})
+	HL_DefineWeapon("doomsupershotgun", {
 		viewmodel = "DOOMWP3A-",
 		crosshair = "XHRPIS",
 		doombob = true,
 		doomweaponraise = true,
+		weaponclass = "doom",
 		weaponslot = 3,
 		priority = 998,
 		ammo = "shel",
 		pellets = 20,
 		clipsize = WEAPON_NONE,
 		shotcost = 2,
-		damage = 5*P_RandomRange(1,3),
+		damagemin = 5,
+		damagemax = 15,
+		damageincs = 5,
 		horizspread = 11*FRACUNIT/2,
 		vertspread = 11*FRACUNIT/2,
 		firesound = sfx_sht,
@@ -205,13 +163,13 @@ local function HL_GetAndSetDGStuff()
 			["normal"] = 48,
 		},
 		realname = "Super Shotgun",
-	}
-	HL_WpnStats["doomchaingun"] = 
-		{
+	})
+	HL_DefineWeapon("doomchaingun", {
 		viewmodel = "DOOMWP4-",
 		crosshair = "XHRPIS",
 		doombob = true,
 		doomweaponraise = true,
+		weaponclass = "doom",
 		weaponslot = 4,
 		priority = 999,
 		ammo = "bull",
@@ -219,7 +177,9 @@ local function HL_GetAndSetDGStuff()
 		volley = 2,
 		clipsize = WEAPON_NONE,
 		shotcost = 1,
-		damage = 5*P_RandomRange(1,3),
+		damagemin = 5,
+		damagemax = 15,
+		damageincs = 5,
 		horizspread = 11*FRACUNIT/2,
 		vertspread = 11*FRACUNIT/2,
 		firesound = sfx_pist,
@@ -232,19 +192,21 @@ local function HL_GetAndSetDGStuff()
 			["normal"] = 4,
 		},
 		realname = "Chaingun",
-	}
-	HL_WpnStats["doomrpg"] = 
-		{
+	})
+	HL_DefineWeapon("doomrpg", {
 		viewmodel = "DOOMWP3-",
 		crosshair = "XHRPIS",
 		doombob = true,
 		doomweaponraise = true,
+		weaponclass = "doom",
 		weaponslot = 5,
 		priority = 999,
 		ammo = "rckt",
 		clipsize = WEAPON_NONE,
 		shotcost = 1,
-		damage = 20*P_RandomRange(1,8),
+		damagemin = 20,
+		damagemax = 160,
+		damageincs = 20,
 		["explosionradius"] = 128,
 		["safety"] = true,
 		horizspread = 0,
@@ -259,19 +221,21 @@ local function HL_GetAndSetDGStuff()
 			["normal"] = 18,
 		},
 		realname = "Rocket Launcher (DOOM)",
-	}
-	HL_WpnStats["doomplasmarifle"] = 
-		{
+	})
+	HL_DefineWeapon("doomplasmarifle", {
 		viewmodel = "DOOMWP3-",
 		crosshair = "XHRPIS",
 		doombob = true,
 		doomweaponraise = true,
+		weaponclass = "doom",
 		weaponslot = 6,
 		priority = 999,
 		ammo = "cell",
 		clipsize = WEAPON_NONE,
 		shotcost = 1,
-		damage = 5*P_RandomRange(1,8),
+		damagemin = 5,
+		damagemax = 40,
+		damageincs = 5,
 		horizspread = 0,
 		vertspread = 0,
 		firesound = sfx_plasma,
@@ -285,19 +249,21 @@ local function HL_GetAndSetDGStuff()
 			["pause"] = 20,
 		},
 		realname = "Plasma Rifle",
-	}
-	HL_WpnStats["doombfg9000"] = -- UNFINISHED!!
-		{
+	})
+	HL_DefineWeapon("doombfg9000", { -- UNFINISHED!!
 		viewmodel = "DOOMWP3-",
 		crosshair = "XHRPIS",
 		doombob = true,
 		doomweaponraise = true,
+		weaponclass = "doom",
 		weaponslot = 7,
 		priority = 999,
 		ammo = "cell",
 		clipsize = WEAPON_NONE,
 		shotcost = 1,
-		damage = 100*P_RandomRange(1,8),
+		damagemin = 100,
+		damagemax = 800,
+		damageincs = 100,
 		horizspread = 0,
 		vertspread = 0,
 		firesound = sfx_bfg,
@@ -308,20 +274,32 @@ local function HL_GetAndSetDGStuff()
 		["firedelay"] = {
 			["ready"] = 14,
 			["normal"] = 40,
-			["pause"] = 30,
+			["tilshot"] = 30,
 		},
 		realname = "BFG9000",
-	}
-	end
-end
-
-local function mobjtype_exists_aux(mt) return _G[mt] end
-local function MobjTypeExists(mt) return pcall(mobjtype_exists_aux, mt) end -- pcall ensures we can continue executing code even if the mobjtype doesn't exist
-
-local function HL_GetAndSetW3DStuff()
-	if not MobjTypeExists(MT_WOLFCGUNPICKUP) return end
-	HL_WpnStats["wolf3dpistol"] = -- UNFINISHED!!
-		{
+	})
+	-- SONIC DOOM II:
+	HL_SetMTStats("MT_SD2_BUZZBOMBER", {health = 400, dmgdmgmult = 2*FRACUNIT, flinches = true}, {min = 10, max = 80, increments = 10})
+	HL_SetMTStats("MT_SD2_COCONUTS", {health = 60, dmgmult = 2*FRACUNIT, flinches = true}, {min = 8, max = 24, increments = 8})
+	HL_SetMTStats("MT_SD2_GROUNDER_PISTOL", {health = 20, dmgmult = 2*FRACUNIT, flinches = true}, {min = 3, max = 15, increments = 3})
+	HL_SetMTStats("MT_SD2_GROUNDER_SHOTGUN", {health = 30, dmgmult = 2*FRACUNIT, flinches = true}, {min = 3, max = 15, increments = 3})
+	HL_SetMTStats("MT_SD2_GROUNDER_CHAINGUN", {health = 30, dmgmult = 2*FRACUNIT, flinches = true}, {min = 3, max = 15, increments = 3})
+	HL_SetMTStats("MT_SD2_METALSONIC", {health = 700, dmgmult = 2*FRACUNIT, flinches = true}, {min = 3, max = 15, increments = 3})
+	HL_SetMTStats("MT_SD2_PSEUDOKNUCKLES", {health = 300, dmgmult = 2*FRACUNIT, flinches = true}, {min = 3, max = 15, increments = 3})
+	HL_SetMTStats("MT_SD2_PSEUDOFLICKY", {health = 300, dmgmult = 2*FRACUNIT, flinches = true}, {min = 3, max = 24, increments = 3})
+	HL_SetMTStats("MT_SD2_PSEUDOTAILS", {health = 400, dmgmult = 2*FRACUNIT, flinches = true}, {min = 3, max = 24, increments = 3})
+	HL_SetMTStats("MT_SD2_VILE_FIRE", 0, {dmg = 90})
+	HL_SetMTStats("MT_SD2_OVASHORT", {health = 150, dmgmult = 2*FRACUNIT, flinches = true}, {min = 4, max = 40, increments = 4})
+	HL_SetMTStats("MT_SD2_OVASHORT_SHADOW", {health = 150, dmgmult = 2*FRACUNIT, flinches = true}, {min = 4, max = 40, increments = 4})
+	HL_SetMTStats("MT_SD2_OVASHOT", 0, {min = 8, max = 64, increments = 8})
+	HL_SetMTStats("MT_SD2_OVARED", {health = 1000, dmgmult = 2*FRACUNIT, flinches = true}, {min = 10, max = 80, increments = 10})
+	HL_SetMTStats("MT_SD2_OVAGRAY", {health = 1000, dmgmult = 2*FRACUNIT, flinches = true}, {min = 10, max = 80, increments = 10})
+	HL_SetMTStats("MT_SD2_PSEUDOSUPER", {health = 500, dmgmult = 2*FRACUNIT, flinches = true}, 0)
+	HL_SetMTStats("MT_SD2_PSEUDOSUPER_BALL", 0, {min = 5, max = 40, increments = 5})
+	HL_SetMTStats("MT_SD2_REDMETALSONIC", {health = 4000, dmgmult = 2*FRACUNIT, flinches = true}, {min = 10, max = 80, increments = 10})
+	HL_SetMTStats("MT_SD2_ROCKET", 0, {min = 20, max = 160, increments = 20})
+	-- WOLF3D:
+	HL_DefineWeapon("wolf3dpistol", {
 		viewmodel = "WOLFWP2-",
 		crosshair = "XHRPIS",
 		nobob = true,
@@ -343,9 +321,8 @@ local function HL_GetAndSetW3DStuff()
 			["normal"] = 12,
 		},
 		realname = "Pistol (Wolfenstein 3D)",
-	}
-	HL_WpnStats["wolf3dminigun"] = -- UNFINISHED!!
-		{
+	})
+	HL_DefineWeapon("wolf3dminigun", {
 		viewmodel = "WOLFWP3-",
 		crosshair = "XHRPIS",
 		doombob = true,
@@ -367,9 +344,8 @@ local function HL_GetAndSetW3DStuff()
 			["normal"] = 8,
 		},
 		realname = "Minigun (Wolfenstein 3D)",
-	}
-	HL_WpnStats["wolf3dchaingun"] = -- UNFINISHED!!
-		{
+	})
+	HL_DefineWeapon("wolf3dchaingun", {
 		viewmodel = "WOLFWP4-",
 		crosshair = "XHRPIS",
 		doombob = true,
@@ -391,38 +367,7 @@ local function HL_GetAndSetW3DStuff()
 			["normal"] = 8,
 		},
 		realname = "Chaingun (Wolfenstein 3D)",
-	}
-end
-
-HL_GetAndSetDGStuff()
-
-local function HL_SetMTStats(mt, wishhealth, wishdamage)
-	local mobj = rawget(_G, mt)
-	if mobj
-		HL1_DMGStats[mobj] = {health = wishhealth, damage = wishdamage}
-	end
-end
-
-local function DoCustomEnemySupport()
-	-- SONIC DOOM II:
-	HL_SetMTStats("MT_SD2_COCONUTS", {health = 60, mult = 2*FRACUNIT}, {min = 8, max = 24, increments = 8})
-	HL_SetMTStats("MT_SD2_GROUNDER_PISTOL", {health = 20, mult = 2*FRACUNIT}, {min = 3, max = 15, increments = 3})
-	HL_SetMTStats("MT_SD2_GROUNDER_SHOTGUN", {health = 30, mult = 2*FRACUNIT}, {min = 3, max = 15, increments = 3})
-	HL_SetMTStats("MT_SD2_GROUNDER_CHAINGUN", {health = 30, mult = 2*FRACUNIT}, {min = 3, max = 15, increments = 3})
-	HL_SetMTStats("MT_SD2_METALSONIC", {health = 700, mult = 2*FRACUNIT}, {min = 3, max = 15, increments = 3})
-	HL_SetMTStats("MT_SD2_PSEUDOKNUCKLES", {health = 300, mult = 2*FRACUNIT}, {min = 3, max = 15, increments = 3})
-	HL_SetMTStats("MT_SD2_PSEUDOFLICKY", {health = 300, mult = 2*FRACUNIT}, {min = 3, max = 24, increments = 3})
-	HL_SetMTStats("MT_SD2_PSEUDOTAILS", {health = 400, mult = 2*FRACUNIT}, {min = 3, max = 24, increments = 3})
-	HL_SetMTStats("MT_SD2_VILE_FIRE", 0, {dmg = 90})
-	HL_SetMTStats("MT_SD2_OVASHORT", {health = 150, mult = 2*FRACUNIT}, {min = 4, max = 40, increments = 4})
-	HL_SetMTStats("MT_SD2_OVASHORT_SHADOW", {health = 150, mult = 2*FRACUNIT}, {min = 4, max = 40, increments = 4})
-	HL_SetMTStats("MT_SD2_OVASHOT", 0, {min = 8, max = 64, increments = 8})
-	HL_SetMTStats("MT_SD2_OVARED", {health = 1000, mult = 2*FRACUNIT}, {min = 10, max = 80, increments = 10})
-	HL_SetMTStats("MT_SD2_OVAGRAY", {health = 1000, mult = 2*FRACUNIT}, {min = 10, max = 80, increments = 10})
-	HL_SetMTStats("MT_SD2_PSEUDOSUPER", {health = 500, mult = 2*FRACUNIT}, 0)
-	HL_SetMTStats("MT_SD2_PSEUDOSUPER_BALL", 0, {min = 5, max = 40, increments = 5})
-	HL_SetMTStats("MT_SD2_REDMETALSONIC", {health = 4000, mult = 2*FRACUNIT}, {min = 10, max = 80, increments = 10})
-	HL_SetMTStats("MT_SD2_ROCKET", 0, {min = 20, max = 160, increments = 20})
+	})
 end
 
 addHook("AddonLoaded", function()
@@ -437,7 +382,7 @@ addHook("AddonLoaded", function()
 			OLDC.SkinFullNames["kombifreeman"] = "GORDON FREEMAN"
 		end
 	end
-	DoCustomEnemySupport()
+	CheckAddons()
 end)
 
-DoCustomEnemySupport()
+CheckAddons()
