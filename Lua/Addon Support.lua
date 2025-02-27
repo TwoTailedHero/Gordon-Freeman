@@ -1,12 +1,7 @@
-local function HL_CreateItem(mt, health, armor, ammo, special, specialthing)
+local function HL_CreateItem(mt, stats)
 	local mobj = rawget(_G, mt)
 	if not mobj return end
-	HL_PickupStats[mobj] = {
-		health = health,
-		armor = armor,
-		ammo = ammo,
-		special = specialthing
-	}
+	HL_PickupStats[mobj] = stats
 end
 local function HL_DefineWeapon(name, stats)
 	HL_WpnStats[name] = stats
@@ -20,33 +15,33 @@ end
 
 local function CheckAddons()
 	-- DOOM:
-	HL_CreateItem("MT_ITEM_STIMPACK", {give = 10})
-	HL_CreateItem("MT_ITEM_HEALTHPACK", {give = 25})
-	HL_CreateItem("MT_ITEM_COMBAT_ARMOR", nil, {set = "limit", maxmult = FRACUNIT*2})
-	HL_CreateItem("MT_ITEM_SECURITY_ARMOR", nil, {set = "limit", maxmult = FRACUNIT})
-	HL_CreateItem("MT_ITEM_SOUL", {give = "maxhp", maxmult = FRACUNIT*2})
-	HL_CreateItem("MT_ITEM_MEGA", {give = "limit", maxmult = FRACUNIT*2}, {give = "limit", maxmult = FRACUNIT*2})
-	HL_CreateItem("MT_ITEM_INVULNERABILITY", nil, nil, nil, "invuln", {set = 20*TICRATE})
-	HL_CreateItem("MT_POWERUP_BERSERK", nil, nil, nil, "berserk", INT32_MAX)
-	HL_CreateItem("MT_POWERUP_BACKPACK", nil, nil, {type = {"bull","shel","rckt","cell"}, give = {10,4,1,20}}, doubleammo, true)
-	HL_CreateItem("MT_ITEM_HEALTH", {give = 1, maxmult = FRACUNIT*2})
-	HL_CreateItem("MT_ITEM_ARMOR", nil, {give = 1, maxmult = FRACUNIT*2})
-	HL_CreateItem("MT_AMMO_CLIP", nil, nil, {type = "bull", give = 10})
-	HL_CreateItem("MT_AMMO_CLIP_BOX", nil, nil, {type = "bull", give = 50})
-	HL_CreateItem("MT_AMMO_SHELL", nil, nil, {type = "shel", give = 4})
-	HL_CreateItem("MT_AMMO_SHELL_BOX", nil, nil, {type = "shel", give = 20})
-	HL_CreateItem("MT_AMMO_ROCKET", nil, nil, {type = "rckt", give = 1})
-	HL_CreateItem("MT_AMMO_ROCKET_BOX", nil, nil, {type = "rckt", give = 5})
-	HL_CreateItem("MT_AMMO_CELL", nil, nil, {type = "cell", give = 20})
-	HL_CreateItem("MT_AMMO_CELL_PACK", nil, nil, {type = "cell", give = 200})
-	HL_CreateItem("MT_WEAPON_CHAINSAW", nil, nil, nil, weapon, "doomchainsaw")
-	HL_CreateItem("MT_WEAPON_PISTOL", nil, nil, nil, weapon, "doompistol")
-	HL_CreateItem("MT_WEAPON_SHOTGUN", nil, nil, nil, weapon, "doomshotgun")
-	HL_CreateItem("MT_WEAPON_SUPERSHOTGUN", nil, nil, nil, weapon, "doomsupershotgun")
-	HL_CreateItem("MT_WEAPON_CHAINGUN", nil, nil, nil, weapon, "doomchaingun")
-	HL_CreateItem("MT_WEAPON_ROCKETLAUNCHER", nil, nil, nil, weapon, "doomrpg")
-	HL_CreateItem("MT_WEAPON_PLASMARIFLE", nil, nil, nil, weapon, "doomplasmarifle")
-	HL_CreateItem("MT_WEAPON_BFG9000", nil, nil, nil, weapon, "doombfg9000")
+	HL_CreateItem("MT_ITEM_STIMPACK", {health = {give = 10}})
+	HL_CreateItem("MT_ITEM_HEALTHPACK", {health = {give = 25}})
+	HL_CreateItem("MT_ITEM_COMBAT_ARMOR", {armor = {set = "limit", maxmult = FRACUNIT*2}})
+	HL_CreateItem("MT_ITEM_SECURITY_ARMOR", {armor = {set = "limit", maxmult = FRACUNIT}})
+	HL_CreateItem("MT_ITEM_SOUL", {health = {give = "maxhp", maxmult = FRACUNIT*2}})
+	HL_CreateItem("MT_ITEM_MEGA", {health = {give = "limit", maxmult = FRACUNIT*2}, armor = {give = "limit", maxmult = FRACUNIT*2}})
+	HL_CreateItem("MT_ITEM_INVULNERABILITY", {invuln = {set = 20*TICRATE}})
+	HL_CreateItem("MT_POWERUP_BERSERK", {berserk = INT32_MAX})
+	HL_CreateItem("MT_POWERUP_BACKPACK", {ammo = {type = {"bull","shel","rckt","cell"}, give = {10,4,1,20}}, doubleammo = true})
+	HL_CreateItem("MT_ITEM_HEALTH", {health = {give = 1, maxmult = FRACUNIT*2}})
+	HL_CreateItem("MT_ITEM_ARMOR", {armor = {give = 1, maxmult = FRACUNIT*2}})
+	HL_CreateItem("MT_AMMO_CLIP", {ammo = {type = "bull", give = 10}})
+	HL_CreateItem("MT_AMMO_CLIP_BOX", {ammo = {type = "bull", give = 50}})
+	HL_CreateItem("MT_AMMO_SHELL", {ammo = {type = "shel", give = 4}})
+	HL_CreateItem("MT_AMMO_SHELL_BOX", {ammo = {type = "shel", give = 20}})
+	HL_CreateItem("MT_AMMO_ROCKET", {ammo = {type = "rckt", give = 1}})
+	HL_CreateItem("MT_AMMO_ROCKET_BOX", {ammo = {type = "rckt", give = 5}})
+	HL_CreateItem("MT_AMMO_CELL", {ammo = {type = "cell", give = 20}})
+	HL_CreateItem("MT_AMMO_CELL_PACK", {ammo = {type = "cell", give = 200}})
+	HL_CreateItem("MT_WEAPON_CHAINSAW", {weapon = "doomchainsaw"})
+	HL_CreateItem("MT_WEAPON_PISTOL", {weapon = "doompistol"})
+	HL_CreateItem("MT_WEAPON_SHOTGUN", {weapon = "doomshotgun"})
+	HL_CreateItem("MT_WEAPON_SUPERSHOTGUN", {weapon = "doomsupershotgun"})
+	HL_CreateItem("MT_WEAPON_CHAINGUN", {weapon = "doomchaingun"})
+	HL_CreateItem("MT_WEAPON_ROCKETLAUNCHER", {weapon = "doomrpg"})
+	HL_CreateItem("MT_WEAPON_PLASMARIFLE", {weapon = "doomplasmarifle"})
+	HL_CreateItem("MT_WEAPON_BFG9000", {weapon = "doombfg9000"})
 
 	HL_DefineWeapon("doomchainsaw", {
 		viewmodel = "DOOMWP2-",
