@@ -765,7 +765,7 @@ rawset(_G, "HL_WpnStats", {
 		viewmodel = "PISTOL",
 		selectgraphic = "HL1HUDSNARK",
 		autoswitchweight = -10,
-		pickupgift = 1,
+		pickupgift = 5,
 		weaponslot = 5,
 		priority = 4,
 		ammo = "snark",
