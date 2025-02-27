@@ -85,7 +85,7 @@ local theproj = MT_NULL
 
 local function HL1DecrementAmmo(player,secondary)
 	if secondary
-		if HL_WpnStats[player.hl1weapon]["altusesprimaryammo"]
+		if HL_WpnStats[player.hl1weapon].altusesprimaryclip
 			if HL_WpnStats[player.hl1weapon].shotcost
 				if HL_WpnStats[player.hl1weapon].clipsize > 0
 					player.hl1clips[player.hl1weapon][1] = $-HL_WpnStats[player.hl1weapon].shotcost
@@ -226,8 +226,8 @@ addHook("PlayerThink", function(player)
 		player.hl1frameindex = 1
 		local start_frames = viewmodel["reloadstartframes"] or viewmodel["reloadframes"]
 		player.hl1viewmdaction = viewmodel["reloadstartframes"] and "reloadstart" or "reload"
-		player.hl1frame = start_frames[1][1]
-		player.hl1frameclock = start_frames[1][2]
+		player.hl1frame = start_frames[1]["frame"]
+		player.hl1frameclock = start_frames[1]["duration"]
 	end
 
 	-- Now do the reloading
@@ -237,22 +237,26 @@ addHook("PlayerThink", function(player)
 			local available_ammo = player.hl1ammo[ammo_type]
 			
 			if reload_increment then
-				local to_reload = min(reload_increment, max_reload, available_ammo)
-				weapon_clips[1] = $ + to_reload
-				player.hl1ammo[ammo_type] = $ - to_reload
+				if player.hl1doreload
+					local to_reload = min(reload_increment, max_reload, available_ammo)
+					weapon_clips[1] = $ + to_reload
+					player.hl1ammo[ammo_type] = $ - to_reload
+				end
 				
 				if weapon_clips[1] >= weapon_stats.clipsize or player.hl1ammo[ammo_type] <= 0 then
 					local end_frames = viewmodel["reloadendframes"] or viewmodel["reloadframes"]
 					player.hl1viewmdaction = viewmodel["reloadendframes"] and "reloadend" or "reload"
-					player.hl1frame = end_frames[1][1]
-					player.hl1frameclock = end_frames[1][2]
+					player.hl1frame = end_frames[1]["frame"]
+					player.hl1frameclock = end_frames[1]["duration"]
 					player.kombireloading = 0 -- Stop reloading if full or out of ammo
+					player.hl1doreload = nil -- de-init this variable.
 				else
 					local loop_frames = viewmodel["reloadloopframes"] or viewmodel["reloadframes"]
 					player.hl1viewmdaction = viewmodel["reloadloopframes"] and "reloadloop" or "reload"
-					player.hl1frame = loop_frames[1][1]
-					player.hl1frameclock = loop_frames[1][2]
+					player.hl1frame = loop_frames[1]["frame"]
+					player.hl1frameclock = loop_frames[1]["duration"]
 					player.hl1weapondelay = weapon_stats["firedelay"]["reloadloop"] or weapon_stats["firedelay"]["reload"] -- Continue reloading incrementally
+					player.hl1doreload = true -- allow reloading to start
 				end
 			else
 				local to_reload = min(max_reload, available_ammo)
@@ -280,7 +284,7 @@ addHook("PlayerThink", function(player)
 		player.refire = false
 	end
 	if not player.hl1inventory[player.hl1weapon] return end
-	if (player.cmd.buttons & fire) or player.currentvolley
+	if (player.cmd.buttons & fire) or player.currentvolley and player.hl1clips[player.hl1weapon][1]
 		player.kombireloading = 0 -- interrupt reloading if we're in one
 		if player.kombihl1wpn and player.selectionlist["weapons"][player.kombihl1wpn] and not player.currentvolley
 			if viewmodel["readyframes"] and player.hl1weapon != player.selectionlist["weapons"][player.kombihl1wpn]["name"]
@@ -397,6 +401,7 @@ local function HL_InitBullet(mobj) -- Does the setting up for our HL1 Projctiles
 		mobj.target = kombilocalplayer.mo
 		mobj.stats = HL_WpnStats[kombilocalplayer.hl1weapon]
 		mobj.hl1damage = HL_WpnStats[kombilocalplayer.hl1weapon].damage or 0
+		mobj.z = $+(kombilocalplayer.viewheight/2)
 		if HL_WpnStats[kombilocalplayer.hl1weapon].ismelee and kombilocalplayer.doom and kombilocalplayer.doom.powers[POWERS_BERSERK]
 			mobj.hl1damage = $*10
 		end
@@ -413,7 +418,7 @@ local function HL_InitHealth(mobj) -- Sets up mobjs.
 	if (mobj.skin == "scieinstein" or mobj.skin == "scinerd" or mobj.skin == "sciluther" or mobj.skin == "scislick")
 		mobj.hl1health = 20 -- 20 HP for scientist users.
 	else
-		mobj.hl1health = $ or (HL1_DMGStats[mobj.type] and HL1_DMGStats[mobj.type].health) or max(1, FixedInt(FixedSqrt(FixedDiv(FixedMul(mobj.radius * 2, mobj.height),4*FRACUNIT/3))))
+		mobj.hl1health = $ or (HL1_DMGStats[mobj.type] and HL1_DMGStats[mobj.type].health) or max(1, FixedInt(FixedSqrt(max(1, FixedDiv(FixedMul(mobj.radius * 2, mobj.height),4*FRACUNIT/3)))))
 		if type(mobj.hl1health) == "table"
 			mobj.hl1health = $.health
 		end
@@ -552,6 +557,8 @@ addHook("PostThinkFrame", function()
 		if player.hl1kickback
 			player.aiming = (player.cmd.aiming + player.hl1kickback)<<16
 		end
+		player.bob = 0
+		player.deltaviewheight = 0
 	end
 end)
 
