@@ -33,19 +33,15 @@ addHook("PlayerThink", function(player)
 	if not player.mo then return end
 	if player.mo.skin ~= skin then return end
 
-	-- Check how much vertical space is available
-	local ceilingz = P_CeilingzAtPos(player.mo.x, player.mo.y, player.mo.z, player.mo.height)
-	local floorz = P_FloorzAtPos(player.mo.x, player.mo.y, player.mo.z, player.mo.height)
-	local availableSpace = ceilingz - floorz
-
 	local spinHeight = P_GetPlayerSpinHeight(player)
 	local normalHeight = P_GetPlayerHeight(player)
-
-	-- If SPIN is held OR there's not enough space, enter crouch mode
-	if (player.cmd.buttons & BT_SPIN) or availableSpace < normalHeight then
-		-- Only change if not already in crouch mode
-		if player.realmo.state != S_PLAY_FREEMCROUCH then
-			-- Adjust vertical position if needed
+	local oldHeight = player.mo.height -- get our current height for this tic
+	
+	player.mo.height = normalHeight
+	-- If SPIN is held or there's not enough space, enter crouch mode
+	if (player.cmd.buttons & BT_SPIN) or not P_TryMove(player.mo, player.mo.x, player.mo.y, true) then
+		if player.realmo.state ~= S_PLAY_FREEMCROUCH then
+			-- Adjust vertical position when entering crouch mode
 			if not ((player.mo.eflags & MFE_JUSTHITFLOOR) or P_IsObjectOnGround(player.mo)) then
 				if player.mo.eflags & MFE_VERTICALFLIP then
 					player.mo.z = $ - abs(normalHeight - spinHeight)
@@ -56,8 +52,9 @@ addHook("PlayerThink", function(player)
 			player.realmo.state = S_PLAY_FREEMCROUCH
 			player.normalspeed = skins[player.realmo.skin].normalspeed / 4
 		end
-	-- If there's room and SPIN isn't held, return to normal standing
-	elseif player.realmo.state == S_PLAY_FREEMCROUCH and availableSpace >= normalHeight then
+	-- If SPIN isn't held and there's enough space for standing, return to normal state
+	elseif player.realmo.state == S_PLAY_FREEMCROUCH then
+		-- Adjust vertical position when standing up
 		if not ((player.mo.eflags & MFE_JUSTHITFLOOR) or P_IsObjectOnGround(player.mo)) then
 			if player.mo.eflags & MFE_VERTICALFLIP then
 				player.mo.z = $ + abs(normalHeight - spinHeight)
@@ -68,8 +65,9 @@ addHook("PlayerThink", function(player)
 		player.realmo.state = S_PLAY_STND
 		player.normalspeed = skins[player.realmo.skin].normalspeed
 	end
+	player.mo.height = oldHeight
 
-	-- Adjust view height
+	-- Adjust view height based on crouch state
 	player.viewheight = (player.realmo.state == S_PLAY_FREEMCROUCH) and (srb2defviewheight / 2) or srb2defviewheight
 end)
 
