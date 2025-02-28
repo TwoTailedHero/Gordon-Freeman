@@ -207,7 +207,7 @@ HL_AmmoStats
 	max: Maximum ammo the player can hold.
 	icon: UI icon representing the ammo type.
 	shootmobj: Default projectile or entity spawned when firing.
-	safetycatch: If true, prevents automatic firing on weapon switch.
+	safetycatch: If true, prevents firing after a weapon autoswitch while the trigger is held, requiring you to release the attack key before firing.
 	explosionradius: Explosion radius for applicable ammo types.
 	rechargerate: Time until the ammo starts recharging.
 	rechargeamount: Amount of ammo gained per recharge cycle.
