@@ -179,4 +179,30 @@ HL_DamageGordon
 	Description:
 	This function applies damage to an entity (thing) using Half-Life 1’s damage calculation rules. It determines the effective damage based on either the provided dmg or an overridden damage value (tmthing.hl1damage). If the entity has armor, the damage is partially absorbed by reducing the armor first, and the remainder is subtracted from health.
 	Health and armor values are then clamped to a minimum of zero. If the entity’s health drops to zero or below, the function triggers its death using the P_KillMobj method.
+
+HL_CreateItem
+
+	Function format:
+	function(type, stats)
+
+	Description:
+	Defines item behaviors based on the type and stats table. Supported properties include:
+
+	health: {give, set, limit, maxmult}
+
+	armor: {give, set, limit, maxmult}
+
+	ammo: {type, give}
+
+	weapon: Weapon identifier or list
+
+	invuln: {set}
+
+	berserk: Duration
+
+	doubleammo: Boolean
+
+HL_PickupStats
+
+	Table containing item properties indexed by item type. Used during pickups to apply health, armor, ammo, and powerup effects.
 */

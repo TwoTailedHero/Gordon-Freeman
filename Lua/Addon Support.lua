@@ -19,8 +19,8 @@ local function CheckAddons()
 	HL_CreateItem("MT_ITEM_HEALTHPACK", {health = {give = 25}})
 	HL_CreateItem("MT_ITEM_COMBAT_ARMOR", {armor = {set = "limit", maxmult = FRACUNIT*2}})
 	HL_CreateItem("MT_ITEM_SECURITY_ARMOR", {armor = {set = "limit", maxmult = FRACUNIT}})
-	HL_CreateItem("MT_ITEM_SOUL", {health = {give = "maxhp", maxmult = FRACUNIT*2}})
-	HL_CreateItem("MT_ITEM_MEGA", {health = {give = "limit", maxmult = FRACUNIT*2}, armor = {give = "limit", maxmult = FRACUNIT*2}})
+	HL_CreateItem("MT_ITEM_SOUL", {health = {give = "maxhp", maxmult = FRACUNIT*2}}) -- give the amount of HP equivalent to our current max health.
+	HL_CreateItem("MT_ITEM_MEGA", {health = {give = "limit", maxmult = FRACUNIT*2}, armor = {give = "limit", maxmult = FRACUNIT*2}}) -- Set BOTH armor and HP to the maximum this allows.
 	HL_CreateItem("MT_ITEM_INVULNERABILITY", {invuln = {set = 20*TICRATE}})
 	HL_CreateItem("MT_POWERUP_BERSERK", {berserk = INT32_MAX})
 	HL_CreateItem("MT_POWERUP_BACKPACK", {ammo = {type = {"bull","shel","rckt","cell"}, give = {10,4,1,20}}, doubleammo = true})

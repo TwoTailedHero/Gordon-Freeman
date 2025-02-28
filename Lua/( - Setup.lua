@@ -381,10 +381,10 @@ addHook("TouchSpecial", function(item, mobj)
 			end
 			table.insert(player.pickuphistory, {
 				thing = "medikit", -- What did we get?
-				type = "weapon", -- What kind?
+				type = "special", -- What kind?
 				time = pickupnotifytime -- Clock
 			})
-			mobj.hl1health = min(mobj.hl1health, stats.health.limit or mobj.hl1maxhealth)
+			mobj.hl1health = min(mobj.hl1health, FixedMul(mobj.hl1maxhealth, stats.health.maxmult) or stats.health.limit or mobj.hl1maxhealth)
 		end
 	end
 
@@ -401,10 +401,10 @@ addHook("TouchSpecial", function(item, mobj)
 			end
 			table.insert(player.pickuphistory, {
 				thing = "hevbattery", -- What did we get?
-				type = "weapon", -- What kind?
+				type = "special", -- What kind?
 				time = pickupnotifytime -- Clock
 			})
-			mobj.hl1armor = min(mobj.hl1armor, (stats.armor.limit or 0) * FRACUNIT or mobj.hl1maxarmor)
+			mobj.hl1armor = min(mobj.hl1armor, FixedMul(mobj.hl1maxarmor, stats.armor.maxmult) or (stats.armor.limit or 0) * FRACUNIT or mobj.hl1maxarmor)
 		end
 	end
 
