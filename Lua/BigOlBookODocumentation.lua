@@ -189,20 +189,28 @@ HL_CreateItem
 	Defines item behaviors based on the type and stats table. Supported properties include:
 
 	health: {give, set, limit, maxmult}
-
 	armor: {give, set, limit, maxmult}
-
 	ammo: {type, give}
-
 	weapon: Weapon identifier or list
-
 	invuln: {set}
-
 	berserk: Duration
-
 	doubleammo: Boolean
 
 HL_PickupStats
 
 	Table containing item properties indexed by item type. Used during pickups to apply health, armor, ammo, and powerup effects.
+	
+HL_AmmoStats
+
+	Table containing properties for various ammo types:
+
+	max: Maximum ammo the player can hold.
+	icon: UI icon representing the ammo type.
+	shootmobj: Default projectile or entity spawned when firing.
+	safetycatch: If true, prevents automatic firing on weapon switch.
+	explosionradius: Explosion radius for applicable ammo types.
+	rechargerate: Time until the ammo starts recharging.
+	rechargeamount: Amount of ammo gained per recharge cycle.
+
+	Note that for any property, besides max and icon, weapon-defined properties take priority over ammo-defined properties.
 */
