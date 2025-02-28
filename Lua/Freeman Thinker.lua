@@ -18,47 +18,59 @@ states[S_PLAY_FREEMCROUCH] = {
 }
 
 addHook("PlayerHeight", function(player)
-	if not player.mo return end
-	if player.realmo.state == S_PLAY_FREEMCROUCH return player.spinheight end
+	if not player.mo then return end
+	if player.realmo.state == S_PLAY_FREEMCROUCH then return player.spinheight end
 end)
 
-addHook("PlayerCanEnterSpinGaps", function(player) -- just let us use PlayerHeight and be done with it dude
-	if not player.mo return end
-	if player.realmo.state == S_PLAY_FREEMCROUCH return true end
+addHook("PlayerCanEnterSpinGaps", function(player)
+	if not player.mo then return end
+	if player.realmo.state == S_PLAY_FREEMCROUCH then return true end
 end)
 
-local srb2defviewheight = 41*FRACUNIT
+local srb2defviewheight = 41 * FRACUNIT
 
 addHook("PlayerThink", function(player)
-	if not player.mo return end
-	if player.mo.skin != skin return end
-	local sectorcheck = P_CeilingzAtPos(player.mo.x-player.mo.momx, player.mo.y-player.mo.momy, player.mo.z-player.mo.momz, player.mo.height) - P_FloorzAtPos(player.mo.x, player.mo.y, player.mo.z, player.mo.height)
-	if (player.cmd.buttons & BT_SPIN) or sectorcheck < P_GetPlayerHeight(player)
-		if not ((player.mo.eflags & MFE_JUSTHITFLOOR) or P_IsObjectOnGround(player.mo)) and player.mo.state != S_PLAY_FREEMCROUCH
-			if (player.mo.eflags & MFE_VERTICALFLIP)
-				player.mo.z = $ - abs(P_GetPlayerHeight(player) - P_GetPlayerSpinHeight(player))
-			else
-				player.mo.z = $ + abs(P_GetPlayerHeight(player) - P_GetPlayerSpinHeight(player))
+	if not player.mo then return end
+	if player.mo.skin ~= skin then return end
+
+	-- Check how much vertical space is available
+	local ceilingz = P_CeilingzAtPos(player.mo.x, player.mo.y, player.mo.z, player.mo.height)
+	local floorz = P_FloorzAtPos(player.mo.x, player.mo.y, player.mo.z, player.mo.height)
+	local availableSpace = ceilingz - floorz
+
+	local spinHeight = P_GetPlayerSpinHeight(player)
+	local normalHeight = P_GetPlayerHeight(player)
+
+	-- If SPIN is held OR there's not enough space, enter crouch mode
+	if (player.cmd.buttons & BT_SPIN) or availableSpace < normalHeight then
+		-- Only change if not already in crouch mode
+		if player.realmo.state != S_PLAY_FREEMCROUCH then
+			-- Adjust vertical position if needed
+			if not ((player.mo.eflags & MFE_JUSTHITFLOOR) or P_IsObjectOnGround(player.mo)) then
+				if player.mo.eflags & MFE_VERTICALFLIP then
+					player.mo.z = $ - abs(normalHeight - spinHeight)
+				else
+					player.mo.z = $ + abs(normalHeight - spinHeight)
+				end
 			end
+			player.realmo.state = S_PLAY_FREEMCROUCH
+			player.normalspeed = skins[player.realmo.skin].normalspeed / 4
 		end
-		player.realmo.state = S_PLAY_FREEMCROUCH
-		player.normalspeed = skins[player.realmo.skin].normalspeed/4
-	elseif player.realmo.state == S_PLAY_FREEMCROUCH
-		if not ((player.mo.eflags & MFE_JUSTHITFLOOR) or P_IsObjectOnGround(player.mo))
-			if (player.mo.eflags & MFE_VERTICALFLIP)
-				player.mo.z = $ + abs(P_GetPlayerHeight(player) - P_GetPlayerSpinHeight(player))
+	-- If there's room and SPIN isn't held, return to normal standing
+	elseif player.realmo.state == S_PLAY_FREEMCROUCH and availableSpace >= normalHeight then
+		if not ((player.mo.eflags & MFE_JUSTHITFLOOR) or P_IsObjectOnGround(player.mo)) then
+			if player.mo.eflags & MFE_VERTICALFLIP then
+				player.mo.z = $ + abs(normalHeight - spinHeight)
 			else
-				player.mo.z = $ - abs(P_GetPlayerHeight(player) - P_GetPlayerSpinHeight(player))
+				player.mo.z = $ - abs(normalHeight - spinHeight)
 			end
 		end
 		player.realmo.state = S_PLAY_STND
 		player.normalspeed = skins[player.realmo.skin].normalspeed
 	end
-	if player.realmo.state == S_PLAY_FREEMCROUCH
-		player.viewheight = srb2defviewheight/2
-	else
-		player.viewheight = srb2defviewheight
-	end
+
+	-- Adjust view height
+	player.viewheight = (player.realmo.state == S_PLAY_FREEMCROUCH) and (srb2defviewheight / 2) or srb2defviewheight
 end)
 
 addHook("PlayerThink", function(player)
