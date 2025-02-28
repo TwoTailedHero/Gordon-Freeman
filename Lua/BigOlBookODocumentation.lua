@@ -209,8 +209,9 @@ HL_AmmoStats
 	shootmobj: Default projectile or entity spawned when firing.
 	safetycatch: If true, prevents firing after a weapon autoswitch while the trigger is held, requiring you to release the attack key before firing.
 	explosionradius: Explosion radius for applicable ammo types.
-	rechargerate: Time until the ammo starts recharging.
+	rechargerate: Time between each recharge cycle.
 	rechargeamount: Amount of ammo gained per recharge cycle.
+	silentrecharge: If true, does not allow recharging to appear in the pick-up history.
 
 	Note that for any property, besides max and icon, weapon-defined properties take priority over ammo-defined properties.
 */
