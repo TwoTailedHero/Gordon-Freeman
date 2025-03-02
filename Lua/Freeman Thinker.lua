@@ -52,7 +52,7 @@ addHook("PlayerThink", function(player)
 	-- If SPIN is held or there's not enough space, enter crouch mode
 	if (player.cmd.buttons & BT_SPIN) or not P_TryMove(player.mo, player.mo.x, player.mo.y, true) then
 		if player.realmo.state ~= S_PLAY_FREEMCROUCH then
-			-- Adjust vertical position when entering crouch mode
+			-- Adjust vertical position when entering crouch mode in the air
 			if not ((player.mo.eflags & MFE_JUSTHITFLOOR) or P_IsObjectOnGround(player.mo)) then
 				if player.mo.eflags & MFE_VERTICALFLIP then
 					player.mo.z = $ - abs(normalHeight - spinHeight)
@@ -63,9 +63,9 @@ addHook("PlayerThink", function(player)
 			player.realmo.state = S_PLAY_FREEMCROUCH
 			player.normalspeed = skins[player.realmo.skin].normalspeed / 4
 		end
-	-- If SPIN isn't held and there's enough space for standing, return to normal state
+	-- If SPIN isn't held and there's enough space for standing, stand back up
 	elseif player.realmo.state == S_PLAY_FREEMCROUCH then
-		-- Adjust vertical position when standing up
+		-- Adjust vertical position when standing up in the air
 		if not ((player.mo.eflags & MFE_JUSTHITFLOOR) or P_IsObjectOnGround(player.mo)) then
 			if player.mo.eflags & MFE_VERTICALFLIP then
 				player.mo.z = $ + abs(normalHeight - spinHeight)
