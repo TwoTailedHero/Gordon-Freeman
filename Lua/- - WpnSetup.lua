@@ -535,10 +535,10 @@ rawset(_G, "HL_WpnStats", {
 		selectgraphic = "HL1HUDMP5",
 		autoswitchweight = 15,
 		weaponslot = 3,
+		priority = 1,
 		primary = {
 			pickupgift = 25,
 			ammo = "9mm",
-			priority = 1,
 			clipsize = 50,
 			shotcost = 1,
 			damage = 5,
