@@ -197,9 +197,9 @@ addHook("PlayerThink", function(player)
             local idle_count = #animation_list["idle"]
             if idle_count > 1 then
                 local random_idle = P_RandomRange(1, idle_count)
-                ChangeViewmodelState(player, "idle " .. random_idle, "idle 1")
+                HL_ChangeViewmodelState(player, "idle " .. random_idle, "idle 1")
             else
-                ChangeViewmodelState(player, "idle", "idle")
+                HL_ChangeViewmodelState(player, "idle", "idle")
             end
         end
     end
@@ -230,7 +230,7 @@ addHook("PlayerThink", function(player)
 
 		player.kombireloading = 1
 		player.hl1weapondelay = weapon_stats["globalfiredelay"]["reloadstart"] or weapon_stats["globalfiredelay"]["reload"]
-		ChangeViewmodelState(player, "reload start", "idle 1")
+		HL_ChangeViewmodelState(player, "reload start", "idle 1")
 	end
 
 	-- Now do the reloading
@@ -247,11 +247,11 @@ addHook("PlayerThink", function(player)
 				end
 				
 				if weapon_clips.primary >= weapon_stats.primary.clipsize or player.hl1ammo[ammo_type] <= 0
-					ChangeViewmodelState(player, "reload stop", "idle 1")
+					HL_ChangeViewmodelState(player, "reload stop", "idle 1")
 					player.kombireloading = 0 -- Stop reloading if full or out of ammo
 					player.hl1doreload = nil -- de-init this variable.
 				else
-					ChangeViewmodelState(player, "reload loop", "idle 1")
+					HL_ChangeViewmodelState(player, "reload loop", "idle 1")
 					player.hl1weapondelay = weapon_stats.globalfiredelay.reloadloop or weapon_stats.globalfiredelay.reload -- Continue reloading incrementally
 					player.hl1doreload = true -- allow reloading to start
 				end
@@ -275,7 +275,7 @@ local function FireWeapon(player, mode)
 		-- Determine the viewmodel based on the current weapon
 		local viewmodel = kombihl1viewmodels[HL_WpnStats[player.selectionlist["weapons"][player.kombihl1wpn]["name"]].viewmodel or "PISTOL"]
 		if player.hl1weapon ~= player.selectionlist["weapons"][player.kombihl1wpn]["name"]
-			ChangeViewmodelState(player, "ready", "idle 1")
+			HL_ChangeViewmodelState(player, "ready", "idle 1")
 			player.kombireloading = 0
 
 			-- Switch weapon and set delays
@@ -587,7 +587,7 @@ addHook("PlayerSpawn",function(player)
 	player.pickuphistory = {}
 	player.hl1deadtimer = 0
 	player.hl1weapon = startweapon or "crowbar"
-	ChangeViewmodelState(player, "ready", "idle1")
+	HL_ChangeViewmodelState(player, "ready", "idle1")
 end)
 -- DOOM Raise speed ~6 pixels
 addHook("SeenPlayer", function(player,splayer)
