@@ -5,11 +5,11 @@ local function SafeFreeSlot(...)
 end
 
 local function warn(str)
-	print("\131WARNING: \128"..str);
+	print("\130WARNING: \128"..str);
 end
 
 local function notice(str)
-	print("\x83NOTICE: \x80"..str);
+	print("\x82NOTICE: \x80"..str);
 end
 
 local pickupnotifytime = TICRATE*3 -- how long does each weapon notification last?
@@ -116,19 +116,142 @@ rawset(_G, "HL1_DMGStats", {
 [MT_CANNONBALL] = {damage = 40}
 })
 
+rawset(_G, "HL_SetMTStats", function(mt, wishhealth, wishdamage) -- sets an MT_'s damage and health stats; if it exists.
+	local mobj = rawget(_G, mt)
+	if not mobj return end
+	HL1_DMGStats[mobj] = {health = wishhealth, damage = wishdamage}
+end)
+
+HL_SetMTStats("MT_BLUECRAWLA", {health = 30}, {dmg = 15})
+HL_SetMTStats("MT_REDCRAWLA", {health = 60}, {dmg = 20})
+HL_SetMTStats("MT_GFZFISH", {health = 20}, {dmg = 10})
+HL_SetMTStats("MT_GOLDBUZZ", {health = 30}, {dmg = 20})
+HL_SetMTStats("MT_REDBUZZ", {health = 30}, {dmg = 15})
+HL_SetMTStats("MT_DETON", {health = 10}, {dmg = 60})
+HL_SetMTStats("MT_POPUPTURRET", {health = 80}, {dmg = 10})
+HL_SetMTStats("MT_CRAWLACOMMANDER", {health = 70}, {dmg = 30})
+HL_SetMTStats("MT_SPRINGSHELL", {health = 80}, {dmg = 30})
+HL_SetMTStats("MT_YELLOWSHELL", {health = 80}, {dmg = 30})
+HL_SetMTStats("MT_SKIM", {health = 80}, {dmg = 10})
+HL_SetMTStats("MT_CRUSHSTACEAN", {health = 80}, {dmg = 20})
+HL_SetMTStats("MT_JETJAW", {health = 50}, {dmg = 20})
+HL_SetMTStats("MT_BIGMINE", {health = 40}, {dmg = 40})
+HL_SetMTStats("MT_BANPYURA", {health = 80}, {dmg = 20})
+HL_SetMTStats("MT_FACESTABBER", {health = 175}, {dmg = 30})
+HL_SetMTStats("MT_FACESTABBERSPEAR", nil, {dmg = 40})
+HL_SetMTStats("MT_ROBOHOOD", {health = 80}, {dmg = 30})
+HL_SetMTStats("MT_EGGGUARD", {health = 40}, {dmg = 20})
+HL_SetMTStats("MT_GSNAPPER", {health = 60}, {dmg = 30})
+HL_SetMTStats("MT_VULTURE", {health = 80}, {dmg = 30})
+HL_SetMTStats("MT_POINTY", {health = 80}, {dmg = 20})
+HL_SetMTStats("MT_MINUS", {health = 40}, {dmg = 15})
+HL_SetMTStats("MT_CANARIVORE", {health = 50}, {dmg = 80})
+HL_SetMTStats("MT_UNIDUS", {health = 80}, {dmg = 15})
+HL_SetMTStats("MT_PYREFLY", {health = 80}, {dmg = 30})
+HL_SetMTStats("MT_PTERABYTE", {health = 60}, {dmg = 20})
+HL_SetMTStats("MT_DRAGONBOMBER", {health = 70}, {dmg = 20})
+HL_SetMTStats("MT_JETTBOMBER", {health = 70}, {dmg = 30})
+HL_SetMTStats("MT_JETTGUNNER", {health = 70}, {dmg = 30})
+HL_SetMTStats("MT_SNAILER", {health = 80}, {dmg = 30})
+HL_SetMTStats("MT_SPINCUSHION", {health = 80}, {dmg = 40})
+HL_SetMTStats("MT_PENGUINATOR", {health = 80}, {dmg = 25})
+HL_SetMTStats("MT_POPHAT", {health = 70}, {dmg = 20})
+HL_SetMTStats("MT_CACOLANTERN", {health = 70}, {dmg = 40})
+HL_SetMTStats("MT_HIVEELEMENTAL", {health = 70}, {dmg = 20})
+HL_SetMTStats("MT_BUMBLEBORE", {health = 30}, {dmg = 5})
+HL_SetMTStats("MT_SPINBOBERT", {health = 40}, {dmg = 30})
+HL_SetMTStats("MT_HANGSTER", {health = 40}, {dmg = 20})
+HL_SetMTStats("MT_BUGGLE", {health = 30}, {dmg = 5})
+HL_SetMTStats("MT_GOOMBA", {health = 40}, {dmg = 15})
+HL_SetMTStats("MT_BLUEGOOMBA", {health = 40}, {dmg = 15})
+HL_SetMTStats("MT_FANG", {health = 200}, {dmg = 40})
+HL_SetMTStats("MT_EGGMOBILE", {health = 360}, {dmg = 1})
+HL_SetMTStats("MT_EGGMOBILE2", {health = 800}, {dmg = 1})
+HL_SetMTStats("MT_EGGMOBILE3", {health = 1240}, {dmg = 1})
+HL_SetMTStats("MT_EGGMOBILE4", {health = 1680}, {dmg = 1})
+HL_SetMTStats("MT_METALSONIC_BATTLE", {health = 1200}, {dmg = 40})
+HL_SetMTStats("MT_CYBRAKDEMON", {health = 2240}, {dmg = 25})
+HL_SetMTStats("MT_CYBRAKDEMON_ELECTRIC_BARRIER", nil, {dmg = 1000})
+HL_SetMTStats("MT_ROSY", {health = 30})
+HL_SetMTStats("MT_PLAYER", {health = 100})
+--projectiles
+HL_SetMTStats("MT_REDRING", nil, {dmg = 6})
+HL_SetMTStats("MT_THROWNBOUNCE", nil, {dmg = 3})
+HL_SetMTStats("MT_THROWNAUTOMATIC", nil, {dmg = 9})
+HL_SetMTStats("MT_THROWNSCATTER", nil, {dmg = 15})
+HL_SetMTStats("MT_THROWNGRENADE", nil, {dmg = 15})
+HL_SetMTStats("MT_THROWNEXPLOSION", nil, {dmg = 15})
+HL_SetMTStats("MT_CORK", nil, {dmg = 10})
+HL_SetMTStats("MT_ROCKET", nil, {dmg = 15})
+HL_SetMTStats("MT_LASER", nil, {dmg = 30})
+HL_SetMTStats("MT_TORPEDO", nil, {dmg = 35})
+HL_SetMTStats("MT_TORPEDO2", nil, {dmg = 5})
+HL_SetMTStats("MT_ENERGYBALL", nil, {dmg = 40})
+HL_SetMTStats("MT_MINE", nil, {dmg = 15})
+HL_SetMTStats("MT_JETTBULLET", nil, {dmg = 15})
+HL_SetMTStats("MT_TURRETLASER", nil, {dmg = 3})
+HL_SetMTStats("MT_ARROW", nil, {dmg = 15})
+HL_SetMTStats("MT_DEMONFIRE", nil, {dmg = 25})
+HL_SetMTStats("MT_CANNONBALL", nil, {dmg = 40})
+
+rawset(_G, "HL_ChangeViewmodelState", function(player, action, backup) -- changes player viewmodel state; backup is used if the initial animation doesn't exist at all
+    local viewmodel = kombihl1viewmodels[HL_WpnStats[player.hl1weapon].viewmodel or "PISTOL"]
+
+    local function getFrameData(state)
+        local keys = {}
+        for key in state:gmatch("%S+") do
+            table.insert(keys, key)
+        end
+
+        local node = viewmodel.animations
+        local lastValidNode = node
+
+        for _, key in ipairs(keys) do
+            if node and node[key] then
+                lastValidNode = node[key]
+                node = node[key]
+            else
+                break  -- Move back up the tree
+            end
+        end
+
+        return lastValidNode ~= viewmodel.animations and lastValidNode or nil
+    end
+
+    local frameData = getFrameData(action) or getFrameData(backup)
+    if not frameData then return end
+
+    player.hl1viewmdaction = action
+    player.hl1frameindex = 1
+    player.hl1frame = frameData[1].frame
+    player.hl1frameclock = frameData[1].duration
+	print(action)
+end)
+
 rawset(_G, "HL_GetWeapons", function(items, targetSlot, player) -- gets all available weapons.
 	local filtered = {}
 	local filteredweps = {0,0,0,0,0,0,0}
-	if not player
+	if not player then
 		local errortype = type(player) == "userdata" and userdataType(player) or type(player)
-		error("Bad argument #3 to 'HL_GetWeapons' (PLAYER_T* expected, got \$errortype\)", 2)
+		error("Bad argument #3 to 'HL_GetWeapons' (PLAYER_T* expected, got "..errortype..")", 2)
 		return
 	end
 	for name, data in pairs(items) do
-		if player.hl1inventory and player.hl1inventory[name]
-			filteredweps[data.weaponslot] = ($ or 0)+1
-			if data.weaponslot == targetSlot
-				table.insert(filtered, {name = name, priority = data.priority, id = #filtered+1})
+		if player.hl1inventory and player.hl1inventory[name] then
+			-- Check if 'weaponslot' or 'priority' is missing
+			if not data.weaponslot or data.priority == nil then
+				if not data.weaponslot then
+					warn('Warning: Weapon "' .. data.realname .. '" missing weapon slot!')
+					data.weaponslot = 1
+				end
+				if data.priority == nil then
+					warn('Warning: Weapon "' .. data.realname .. '" missing slot priority!')
+					data.priority = INT32_MIN
+				end
+			end
+			filteredweps[data.weaponslot] = (filteredweps[data.weaponslot] or 0) + 1
+			if data.weaponslot == targetSlot then
+				table.insert(filtered, {name = name, priority = data.priority, id = #filtered + 1})
 			end
 		end
 	end
@@ -137,6 +260,7 @@ rawset(_G, "HL_GetWeapons", function(items, targetSlot, player) -- gets all avai
 	end)
 	return {["weapons"] = filtered, ["weaponcount"] = #filtered, ["wepslotamounts"] = filteredweps}
 end)
+
 
 rawset(_G, "HL_AddAmmo", function(freeman, ammotype, ammo) -- give player some munitions
 	if not ammotype
@@ -291,23 +415,23 @@ rawset(_G, "HL_TakeClip", function(player, weapon, amount, alt) -- remove some a
 		for weapName, clips in pairs(player.hl1clips) do
 			if alt == nil -- search for SPECIFICALLY nil.
 				if amount
-					player.hl1clips[weapName][1] = max(player.hl1clips[weapName][1] - amount, 0)
-					player.hl1clips[weapName][2] = max(player.hl1clips[weapName][2] - amount, 0)
+					player.hl1clips[weapName].primary = max(player.hl1clips[weapName].primary - amount, 0)
+					player.hl1clips[weapName].secondary = max(player.hl1clips[weapName].secondary - amount, 0)
 				else
-					player.hl1clips[weapName][1] = 0
-					player.hl1clips[weapName][2] = 0
+					player.hl1clips[weapName].primary = 0
+					player.hl1clips[weapName].secondary = 0
 				end
 			elseif alt
 				if amount
-					player.hl1clips[weapName][2] = max(player.hl1clips[weapName][2] - amount, 0)
+					player.hl1clips[weapName].secondary = max(player.hl1clips[weapName].secondary - amount, 0)
 				else
-					player.hl1clips[weapName][2] = 0
+					player.hl1clips[weapName].secondary = 0
 				end
 			else
 				if amount
-					player.hl1clips[weapName][1] = max(player.hl1clips[weapName][1] - amount, 0)
+					player.hl1clips[weapName].primary = max(player.hl1clips[weapName].primary - amount, 0)
 				else
-					player.hl1clips[weapName][1] = 0
+					player.hl1clips[weapName].primary = 0
 				end
 			end
 		end
@@ -315,23 +439,23 @@ rawset(_G, "HL_TakeClip", function(player, weapon, amount, alt) -- remove some a
 		if player.hl1clips[weapon]
 			if alt == nil
 				if amount
-					player.hl1clips[weapon][1] = max(player.hl1clips[weapon][1] - amount, 0)
-					player.hl1clips[weapon][2] = max(player.hl1clips[weapon][2] - amount, 0)
+					player.hl1clips[weapon].primary = max(player.hl1clips[weapon].primary - amount, 0)
+					player.hl1clips[weapon].secondary = max(player.hl1clips[weapon].secondary - amount, 0)
 				else
-					player.hl1clips[weapon][1] = 0
-					player.hl1clips[weapon][2] = 0
+					player.hl1clips[weapon].primary = 0
+					player.hl1clips[weapon].secondary = 0
 				end
 			elseif alt
 				if amount
-					player.hl1clips[weapon][2] = max(player.hl1clips[weapon][2] - amount, 0)
+					player.hl1clips[weapon].secondary = max(player.hl1clips[weapon].secondary - amount, 0)
 				else
-					player.hl1clips[weapon][2] = 0
+					player.hl1clips[weapon].secondary = 0
 				end
 			else
 				if amount
-					player.hl1clips[weapon][1] = max(player.hl1clips[weapon][1] - amount, 0)
+					player.hl1clips[weapon].primary = max(player.hl1clips[weapon].primary - amount, 0)
 				else
-					player.hl1clips[weapon][1] = 0
+					player.hl1clips[weapon].primary = 0
 				end
 			end
 		else

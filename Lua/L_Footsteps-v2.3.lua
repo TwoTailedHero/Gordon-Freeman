@@ -2206,6 +2206,22 @@ local flatsounds = {
 	["GRIDORAN"] = "concrete",
 	["MGGRASS"] = "grass",
 	["SPFLOOR1"] = "concrete",
+	["DMGF1"] = "grass",
+	["DMGF2"] = "grass",
+	["DIMFLRA"] = "glass",
+	["ICEFLR9S"] = "concrete",
+	["PRZTIL24"] = "concrete",
+	["SNDWALLD"] = "concrete",
+	["DSDAWAL1"] = "concrete",
+	["PRZTIL22"] = "concrete",
+	["PRZTIL26"] = "concrete",
+	["PRZTIL23"] = "concrete",
+	["PRZTIL25"] = "concrete",
+	["PRZTIL01"] = "concrete",
+	["PRZTIL27"] = "concrete",
+	["CECRPTP"] = "cloth",
+	["SCZRINGP"] = "metal_light",
+	["ICEWALLA"] = "glass",
 }
 
 local playeraniminfo = {

@@ -17,6 +17,17 @@ states[S_PLAY_FREEMCROUCH] = {
 	nextstate = S_PLAY_FREEMCROUCH
 }
 
+local freemanMaxAngle = ANGLE_45 -- how wide of a horizontal angle we can search
+local freemanMaxDist = 64*FRACUNIT -- How far the check can go before it's too far
+COM_AddCommand("+use", function(player, arg1)
+	if not player.mo
+		CONS_Printf(player,"I don't think you can use this command at the current moment...")
+		return
+	end
+	-- TODO: this.
+	HL.RunHook("HLObjectUsed", victimmobj, victimline, freeman)
+end)
+
 addHook("PlayerHeight", function(player)
 	if not player.mo then return end
 	if player.realmo.state == S_PLAY_FREEMCROUCH then return player.spinheight end
@@ -38,11 +49,10 @@ addHook("PlayerThink", function(player)
 	local oldHeight = player.mo.height -- get our current height for this tic
 	
 	player.mo.height = normalHeight
-	-- If SPIN is held or there's not enough space, force ourselves to stay in crouch mode
+	-- If SPIN is held or there's not enough space, enter crouch mode
 	if (player.cmd.buttons & BT_SPIN) or not P_TryMove(player.mo, player.mo.x, player.mo.y, true) then
 		if player.realmo.state ~= S_PLAY_FREEMCROUCH then
-			-- Adjust vertical position when entering crouch mode in the air
-			-- TODO: How can I modify player.viewheight to emulate the way the camera moves up and down when crouch jumping?
+			-- Adjust vertical position when entering crouch mode
 			if not ((player.mo.eflags & MFE_JUSTHITFLOOR) or P_IsObjectOnGround(player.mo)) then
 				if player.mo.eflags & MFE_VERTICALFLIP then
 					player.mo.z = $ - abs(normalHeight - spinHeight)
@@ -53,9 +63,9 @@ addHook("PlayerThink", function(player)
 			player.realmo.state = S_PLAY_FREEMCROUCH
 			player.normalspeed = skins[player.realmo.skin].normalspeed / 4
 		end
-	-- If SPIN isn't held and there's enough space for standing, allow returning to standing up
+	-- If SPIN isn't held and there's enough space for standing, return to normal state
 	elseif player.realmo.state == S_PLAY_FREEMCROUCH then
-		-- Adjust vertical position when standing up in the air
+		-- Adjust vertical position when standing up
 		if not ((player.mo.eflags & MFE_JUSTHITFLOOR) or P_IsObjectOnGround(player.mo)) then
 			if player.mo.eflags & MFE_VERTICALFLIP then
 				player.mo.z = $ + abs(normalHeight - spinHeight)
@@ -93,22 +103,42 @@ addHook("PlayerThink", function(player)
 	elseif player.kombipressingwpnkeys
 		player.kombipressingwpnkeys = false
 	end
+	if player.powers[pw_shield] then
+		if (player.mo.hl1armor < (player.mo.hl1maxarmor * 2)) then
+			local amount = 15
+			if (player.powers[pw_shield] == SH_PINK) then
+				amount = 5
+			elseif (player.powers[pw_shield] == SH_PITY) then
+				amount = 10
+			elseif (player.powers[pw_shield] == SH_WHIRLWIND) then
+				amount = 20
+			elseif (player.powers[pw_shield] == SH_ARMAGEDDON) then
+				amount = 50
+			end
+			
+			if (player.powers[pw_shield] & SH_FORCE) then
+				amount = $ + (30 * ((player.powers[pw_shield] & SH_FORCEHP) + 1))
+			end
+			
+			if (player.powers[pw_shield] & SH_FIREFLOWER) then
+				amount = $ + 25
+			end
+			player.mo.hl1armor = min($ + (amount * FU), player.mo.hl1maxarmor * 2)
+		end
+		player.powers[pw_shield] = 0
+	end
 end)
 
 local function HL_GetDamage(inf)
-	if not HL1_DMGStats[inf.type] return end
-	if type(HL1_DMGStats[inf.type].damage) == "number"
-		return HL1_DMGStats[inf.type].damage
-	elseif type(HL1_DMGStats[inf.type].damage) == "table"
-		local objdamage = HL1_DMGStats[inf.type].damage
-		if objdamage.min and objdamage.max
-			local max = objdamage.max
-			local min = objdamage.min
-			local increment = objdamage.increments
-			return (P_RandomByte()%(increment and max/increment or max/min) + 1)*(increment or min)
-		else
-			return objdamage.dmg
-		end
+	if not HL1_DMGStats[inf.type] print("Aggressor has no associated stats!") return end
+	local objdamage = HL1_DMGStats[inf.type].damage
+	if objdamage.min and objdamage.max
+		local max = objdamage.max
+		local min = objdamage.min
+		local increment = objdamage.increments
+		return (P_RandomByte()%(increment and max/increment or max/min) + 1)*(increment or min)
+	else
+		return objdamage.dmg
 	end
 end
 
