@@ -130,7 +130,7 @@ addHook("PlayerThink", function(player)
 end)
 
 local function HL_GetDamage(inf)
-	if not HL1_DMGStats[inf.type] print("Aggressor has no associated stats!") return end
+	if not HL1_DMGStats[inf.type] return end
 	local objdamage = HL1_DMGStats[inf.type].damage
 	if objdamage.min and objdamage.max
 		local max = objdamage.max
