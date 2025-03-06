@@ -143,10 +143,19 @@ addHook("PlayerThink", function(player)
 	end
 end)
 
+-- Switches the current animation to idle
+local function switchToIdle(player)
+    local viewmodel = kombihl1viewmodels[HL_WpnStats[player.hl1weapon].viewmodel or "PISTOL"]
+    local idle_list = viewmodel.animations["idle"]
+    if idle_list then
+        local idle_state = (#idle_list > 1) and ("idle " .. P_RandomRange(1, #idle_list)) or "idle"
+        HL_ChangeViewmodelState(player, idle_state, "primaryfire normal")
+    end
+end
+
 addHook("PlayerThink", function(player)
-    if not player.mo then return end
-    if player.mo.skin ~= skin then return end
-    
+    if not player.mo or player.mo.skin ~= skin then return end
+
     -- Handle kickback decay
     if player.hl1kickback > 0 then
         player.hl1kickback = player.hl1kickback - ((ANG1 / 4) >> 16)
@@ -155,52 +164,47 @@ addHook("PlayerThink", function(player)
         player.hl1kickback = player.hl1kickback + ((ANG1 / 4) >> 16)
         if player.hl1kickback > 0 then player.hl1kickback = 0 end
     end
-    
+
     if not player.hl1weapon then player.hl1weapon = "crowbar" end
-    
-    -- Handle weapon and animation delays
-    if player.hl1frameclock then
+
+    local currentAnimation = player.hl1currentAnimation
+    if not currentAnimation then
+        switchToIdle(player)
+        return
+    end
+
+    if player.hl1frameclock and player.hl1frameclock > 0 then
         player.hl1frameclock = player.hl1frameclock - 1
     else
-        local viewmodel = kombihl1viewmodels[HL_WpnStats[player.hl1weapon].viewmodel or "PISTOL"]
-        local animation_list = viewmodel.animations
-        local current_action = animation_list[player.hl1viewmdaction] or animation_list.idle[1]
+        local frame = currentAnimation[player.hl1frameindex]
+        if frame then
+            -- Play sound, if this frame has it
+            if player.hl1frame == frame.frame and frame.sound then
+                local soundToPlay = frame.sound
+                if frame.sounds then
+                    soundToPlay = $ + P_RandomRange(0, frame.sounds-1)
+                end
+				print(soundToPlay)
+                S_StartSound(player.mo, soundToPlay)
+            end
 
-        if current_action[player.hl1frameindex] then
-            local frame = current_action[player.hl1frameindex]
-            local rlelength = frame['rlelength']
-            player.hl1frame = player.hl1frame or frame["frame"] or 1
-            
-            if rlelength and player.hl1frame <= frame['frame'] + rlelength - 1 then
-                if player.hl1frame == frame['frame'] and frame["sound"] then
-                    S_StartSound(player.mo, frame["sound"])
-                end
-                if player.hl1frame < frame['frame'] then
-                    player.hl1frame = frame['frame']
-                    player.hl1frameclock = frame["duration"]
-                else
-                    player.hl1frame = player.hl1frame + 1
-                    player.hl1frameclock = frame["duration"]
-                end
+            -- Use rlelength to Run-Length encode how many more frames we have
+            if frame.rlelength and player.hl1frame < frame.frame + frame.rlelength - 1 then
+                player.hl1frame = player.hl1frame + 1
+                player.hl1frameclock = frame.duration
             else
-                player.hl1frameindex = (player.hl1frameindex or 0) + 1
-                if not rlelength then
-                    player.hl1frameclock = frame["duration"]
-                    player.hl1frame = frame["frame"]
-                    if frame["sound"] then
-                        S_StartSound(player.mo, frame["sound"])
-                    end
+                -- Move to the next frame in the sequence
+                player.hl1frameindex = player.hl1frameindex + 1
+                local nextFrame = currentAnimation[player.hl1frameindex]
+                if nextFrame then
+                    player.hl1frame = nextFrame.frame
+                    player.hl1frameclock = nextFrame.duration
+                else
+                    switchToIdle(player)
                 end
             end
         else
-            -- If we're out of a state, pick an idle animation and play it
-            local idle_count = #animation_list["idle"]
-            if idle_count > 1 then
-                local random_idle = P_RandomRange(1, idle_count)
-                HL_ChangeViewmodelState(player, "idle " .. random_idle, "idle 1")
-            else
-                HL_ChangeViewmodelState(player, "idle", "idle")
-            end
+            switchToIdle(player)
         end
     end
 end)
@@ -219,11 +223,12 @@ addHook("PlayerThink", function(player)
 	-- Set-up reloading
 	local weapon_stats = HL_WpnStats[player.hl1weapon]
 	local weapon_clips = player.hl1clips[player.hl1weapon]
-	local ammo_type = weapon_stats.primary.ammo
-	local reload_increment = weapon_stats.primary.reloadincrement
+	local primary = weapon_stats.primary or HL_WpnStats["9mmhandgun"].primary
+	local ammo_type = primary.ammo
+	local reload_increment = primary.reloadincrement
 
 	if (not weapon_clips.primary
-		or ((player.cmd.buttons & BT_CUSTOM1) and weapon_clips.primary < weapon_stats.primary.clipsize))
+		or ((player.cmd.buttons & BT_CUSTOM1) and weapon_clips.primary < primary.clipsize))
 		and not player.kombireloading
 		and player.hl1weapondelay == 0
 		and (player.hl1ammo[ammo_type] or 0) > 0
@@ -235,8 +240,9 @@ addHook("PlayerThink", function(player)
 
 	-- Now do the reloading
 	if player.kombireloading == 1 and player.hl1weapondelay == 0
-		if weapon_stats.primary.clipsize and ammo_type
-			local max_reload = weapon_stats.primary.clipsize - weapon_clips.primary
+		if primary.clipsize and ammo_type
+			if not weapon_clips.primary weapon_clips.primary = 0 end
+			local max_reload = primary.clipsize - weapon_clips.primary
 			local available_ammo = player.hl1ammo[ammo_type]
 			
 			if reload_increment
@@ -268,13 +274,13 @@ addHook("PlayerThink", function(player)
 end)
 
 local function FireWeapon(player, mode)
-	mode = $ or "primary" -- Default to primary if not specified
-	
+	mode = mode or "primary" -- Default to primary if not specified
+
 	-- Handle weapon selection and preparation
-	if player.selectionlist and player.selectionlist["weapons"] and player.kombihl1wpn
+	if player.selectionlist and player.selectionlist["weapons"] and player.kombihl1wpn then
 		-- Determine the viewmodel based on the current weapon
 		local viewmodel = kombihl1viewmodels[HL_WpnStats[player.selectionlist["weapons"][player.kombihl1wpn]["name"]].viewmodel or "PISTOL"]
-		if player.hl1weapon ~= player.selectionlist["weapons"][player.kombihl1wpn]["name"]
+		if player.hl1weapon ~= player.selectionlist["weapons"][player.kombihl1wpn]["name"] then
 			HL_ChangeViewmodelState(player, "ready", "idle 1")
 			player.kombireloading = 0
 
@@ -284,34 +290,43 @@ local function FireWeapon(player, mode)
 			player.kombihl1wpn = 0
 
 			-- Set clips if necessary
-			if not player.hl1clips[player.hl1weapon]
-				local clipsize = HL_WpnStats[player.hl1weapon].primary.clipsize or -1
-				local clipsize2 = HL_WpnStats[player.hl1weapon].secondary.clipsize or -1
+			if not player.hl1clips[player.hl1weapon] then
+				local clipsize = HL_WpnStats[player.hl1weapon].primary and HL_WpnStats[player.hl1weapon].primary.clipsize or -1
+				local clipsize2 = HL_WpnStats[player.hl1weapon].secondary and HL_WpnStats[player.hl1weapon].secondary.clipsize or -1
 				player.hl1clips[player.hl1weapon] = {primary = clipsize, secondary = clipsize2}
 			end
 		end
 		return
 	end
 	
-	local mystats = HL_WpnStats[player.hl1weapon][mode] -- Define this.
+	-- Use the current weapon's stats if available; otherwise, fall back to our trusty 9mm.
+	local weaponID = player.hl1weapon
+	local mystats = HL_WpnStats[weaponID] and HL_WpnStats[weaponID][mode]
+	if not mystats then
+		weaponID = "9mmhandgun"
+		mystats = HL_WpnStats[weaponID] and HL_WpnStats[weaponID][mode]
+	end
 	
-	-- Break early if we don't have the necessary stats
-	if not mystats return end
+	-- Exit early if we still don't have valid stats
+	if not mystats then return end
 	
-	-- Ensure the player has a weapon and enough ammo
-	if not player.hl1inventory[player.hl1weapon] or not player.hl1clips[player.hl1weapon][mode] and not mystats.neverdenyuse return end
+	-- Check if the weapon is available in inventory and has clips
+	if not player.hl1inventory[weaponID]
+	or (not (player.hl1clips[weaponID] and player.hl1clips[weaponID][mode]) and not mystats.neverdenyuse) then
+		return
+	end
 	
-	-- Break if we're in the selection menu
-	if player.kombipressingwpnkeys return end
+	-- Break if we're in the weapon selection menu
+	if player.kombipressingwpnkeys then return end
 	
 	player.kombireloading = 0 -- Reset reload state
 	
-	-- Determine the viewmodel based on the current weapon
-	local viewmodel = kombihl1viewmodels[HL_WpnStats[player.hl1weapon].viewmodel or "PISTOL"]
+	-- Use the viewmodel from the weapon whose stats we are using
+	local viewmodel = kombihl1viewmodels[HL_WpnStats[weaponID].viewmodel or "PISTOL"]
 	
 	-- Prevent firing if there is an active weapon delay
-	if mode == "primary" and player.hl1weapondelay return end
-	if mode == "secondary" and player.weaponaltdelay return end
+	if mode == "primary" and player.hl1weapondelay then return end
+	if mode == "secondary" and player.weaponaltdelay then return end
 	
 	-- Run firing function, if available
 	local firefunc = mystats.firefunc
@@ -320,17 +335,19 @@ local function FireWeapon(player, mode)
 	end
 	
 	-- Initialize volley count if not already set
-	if not player.currentvolley
+	if not player.currentvolley then
 		player.currentvolley = mystats.volley
 	end
 	
 	-- Set-up necessary variables
 	local ammotype = mystats.ammo
-	if not HL_AmmoStats[ammotype]
-		warn("Ammo type \$ammotype\ has no stats associated with it!")
-		HL_AmmoStats[ammotype] = {}
+	if not HL_AmmoStats[tostring(ammotype)] then
+		warn("Ammo type " .. tostring(ammotype) .. " has no stats associated with it!")
+		HL_AmmoStats[tostring(ammotype)] = {}
 	end
-	local projectile = mystats.shootmobj or HL_AmmoStats[ammotype].shootmobj or MT_HL1_BULLET
+	local projectile = mystats.shootmobj
+	or (HL_AmmoStats[ammotype] and HL_AmmoStats[ammotype].shootmobj)
+	or MT_HL1_BULLET
 	kombilocalplayer = player
 	kombilocalplayer.mode = mode
 	
@@ -339,10 +356,10 @@ local function FireWeapon(player, mode)
 		local theproj
 		
 		-- Apply spread if refire does not negate it
-		if not mystats.refireusesspread or player.refire
+		if not mystats.refireusesspread or player.refire then
 			local ogangle, ogaiming = player.mo.angle, player.cmd.aiming << 16
-			player.mo.angle = $ + FixedAngle(FixedMul(P_RandomRange(-32768, 32768), (mystats.horizspread or 0) * 2))
-			player.aiming = $ + FixedAngle(FixedMul(P_RandomRange(-32768, 32768), (mystats.vertspread or 0) * 2))
+			player.mo.angle = player.mo.angle + FixedAngle(FixedMul(P_RandomRange(-32768, 32768), (mystats.horizspread or 0) * 2))
+			player.aiming = player.aiming + FixedAngle(FixedMul(P_RandomRange(-32768, 32768), (mystats.vertspread or 0) * 2))
 			theproj = P_SpawnPlayerMissile(player.mo, projectile)
 			player.mo.angle, player.aiming = ogangle, ogaiming
 		else
@@ -350,11 +367,12 @@ local function FireWeapon(player, mode)
 		end
 	end
 	
-	-- Handle firing sounds and ammo consumption
-	if theproj and theproj.valid or not mystats.firehitsound
+	-- Handle firing and ammo consumption
+	if (theproj and theproj.valid) or (not mystats.firehitsound) then
+		HL_ChangeViewmodelState(player, "primaryfire normal", "primaryfire normal")
 		local firesound = mystats.firesound
-		if firesound
-			local sound_offset = mystats.firesounds and mystats.firesounds > 1 and P_RandomRange(1, mystats.firesounds) - 1 or 0
+		if firesound then
+			local sound_offset = (mystats.firesounds and mystats.firesounds > 1) and (P_RandomRange(1, mystats.firesounds) - 1) or 0
 			S_StartSound(player.mo, firesound + sound_offset)
 		end
 		
@@ -366,7 +384,7 @@ end
 
 addHook("PlayerThink", function(player)
 	if not player.mo or player.mo.skin ~= skin return end
-	
+
 	-- Decrease weapon delay timers
 	if player.weaponaltdelay player.weaponaltdelay = $ - 1 end
 	if player.hl1weapondelay player.hl1weapondelay = $ - 1 end

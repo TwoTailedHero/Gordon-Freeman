@@ -294,42 +294,49 @@ rawset(_G, "kombihl1viewmodels", {
 		ready = {
 			{frame = 0, duration = 3, rlelength = 4},
 		},
-		primaryfire = {
-			{frame = 5, duration = 3},
-			{frame = 43, duration = 3, rlelength = 4},
-			{frame = 48, duration = 3, sound = sfx_hl1sgc, rlelength = 6},
-		},
-		reload = {
-			start = {
+		animations = {
+			ready = {
+				{frame = 0, duration = 3, rlelength = 4},
+			},
+			primaryfire = {
 				{frame = 5, duration = 3},
-				{frame = 75, duration = 3, rlelength = 5},
+				{frame = 43, duration = 3, rlelength = 4},
+				{frame = 48, duration = 3, sound = sfx_hl1sgc, rlelength = 6},
 			},
-			loop = {
-				{frame = 81, duration = 4, rlelength = 2},
-				{frame = 83, duration = 4, sound = sfx_hl1sr1, sounds = 3},
-				{frame = 84, duration = 4, rlelength = 2},
+			reload = {
+				start = {
+					{frame = 5, duration = 3},
+					{frame = 75, duration = 3, rlelength = 5},
+				},
+				loop = {
+					{frame = 81, duration = 4, rlelength = 2},
+					{frame = 83, duration = 4, sound = sfx_hl1sr1, sounds = 3},
+					{frame = 84, duration = 4, rlelength = 2},
+				},
+				stop = {
+					{frame = 80, duration = 4},
+					{frame = 86, duration = 4, rlelength = 2},
+					{frame = 88, duration = 4, sound = sfx_hl1sgc},
+					{frame = 89, duration = 4, rlelength = 4},
+				},
 			},
-			stop = {
-				{frame = 80, duration = 4},
-				{frame = 86, duration = 4, rlelength = 2},
-				{frame = 88, duration = 4, sound = sfx_hl1sgc},
-				{frame = 89, duration = 4, rlelength = 4},
+			idle = {
+				{
+					{frame = 5, duration = 8, rlelength = 7},
+					{frame = 12, duration = 8},
+				},
+				{
+					{frame = 5, duration = 8},
+					{frame = 32, duration = 8, rlelength = 10},
+					{frame = 42, duration = 5},
+				},
+				{
+					{frame = 5, duration = 8},
+					{frame = 15, duration = 10, rlelength = 15},
+					{frame = 31, duration = 16},
+				},
 			},
-		},
-		idle1 = {
-			{frame = 5, duration = 8, rlelength = 7},
-			{frame = 12, duration = 8},
-		},
-		idle2 = {
-			{frame = 5, duration = 8},
-			{frame = 32, duration = 8, rlelength = 10},
-			{frame = 42, duration = 5},
-		},
-		idle3 = {
-			{frame = 5, duration = 8},
-			{frame = 15, duration = 10, rlelength=15},
-			{frame = 31, duration = 16},
-		},
+		}
 	},
 	["DOOMWP2-"] = {
 		idleanims = 1,
@@ -356,7 +363,7 @@ rawset(_G, "kombihl1viewmodels", {
 		bobtype = VBOB_DOOM,
 			animations = {
 			ready = {
-				{1,3},
+				{frame = 1, duration = 3},
 			},
 			fire = {
 				{frame = 1, duration = 4, overlay = 5},
@@ -474,13 +481,13 @@ rawset(_G, "HL_WpnStats", {
 		},
 		autoreload = true,
 		secondary = {
-			ammo2 = "none",
-			clipsize2 = WEAPON_NONE,
-			shotcost2 = 1,
-			horizspread2 = 5,
-			vertspread2 = 5,
-			kickback2 = 5*FRACUNIT/2,
-			firesound2 = sfx_hl1g17,
+			ammo = "none",
+			clipsize = WEAPON_NONE,
+			shotcost = 1,
+			horizspread = 5,
+			vertspread = 5,
+			kickback = 5*FRACUNIT/2,
+			firesound = sfx_hl1g17,
 			firedelay = 6,
 		},
 		altfire = true,

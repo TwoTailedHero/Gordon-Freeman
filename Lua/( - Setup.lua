@@ -42,79 +42,7 @@ rawset(_G, "DMG", { -- TYPEOFDAMAGE
 	BUCKSHOT = 8388608,
 })
 
-rawset(_G, "HL1_DMGStats", {
-[MT_BLUECRAWLA] = {health = 30, damage = 15},
-[MT_REDCRAWLA] = {health = 60, damage = 20},
-[MT_GFZFISH] = {health = 20, damage = 10},
-[MT_GOLDBUZZ] = {health = 30, damage = 20},
-[MT_REDBUZZ] = {health = 30, damage = 15},
-[MT_DETON] = {health = 10, damage = 60},
-[MT_POPUPTURRET] = {health = 80, damage = 10},
-[MT_CRAWLACOMMANDER] = {health = 70, damage = 30},
-[MT_SPRINGSHELL] = {health = 80, damage = 30},
-[MT_YELLOWSHELL] = {health = 80, damage = 30},
-[MT_SKIM] = {health = 80, damage = 10},
-[MT_CRUSHSTACEAN] = {health = 80, damage = 20},
-[MT_JETJAW] = {health = 50, damage = 20},
-[MT_BIGMINE] = {health = 40, damage = 40},
-[MT_BANPYURA] = {health = 80, damage = 20},
-[MT_FACESTABBER] = {health = 175, damage = 30},
-[MT_FACESTABBERSPEAR] = {damage = 40},
-[MT_ROBOHOOD] = {health = 80, damage = 30},
-[MT_EGGGUARD] = {health = 40, damage = 20},
-[MT_GSNAPPER] = {health = 60, damage = 30},
-[MT_VULTURE] = {health = 80, damage = 30},
-[MT_POINTY] = {health = 80, damage = 20},
-[MT_MINUS] = {health = 40, damage = 15},
-[MT_CANARIVORE] = {health = 50, damage = 80},
-[MT_UNIDUS] = {health = 80, damage = 15},
-[MT_PYREFLY] = {health = 80, damage = 30},
-[MT_PTERABYTE] = {health = 60, damage = 20},
-[MT_DRAGONBOMBER] = {health = 70, damage = 20},
-[MT_JETTBOMBER] = {health = 70, damage = 30},
-[MT_JETTGUNNER] = {health = 70, damage = 30},
-[MT_SNAILER] = {health = 80, damage = 30},
-[MT_SPINCUSHION] = {health = 80, damage = 40},
-[MT_PENGUINATOR] = {health = 80, damage = 25},
-[MT_POPHAT] = {health = 70, damage = 20},
-[MT_CACOLANTERN] = {health = 70, damage = 40},
-[MT_HIVEELEMENTAL] = {health = 70, damage = 20},
-[MT_BUMBLEBORE] = {health = 30, damage = 5},
-[MT_SPINBOBERT] = {health = 40, damage = 30},
-[MT_HANGSTER] = {health = 40, damage = 20},
-[MT_BUGGLE] = {health = 30, damage = 5},
-[MT_GOOMBA] = {health = 40, damage = 15},
-[MT_BLUEGOOMBA] = {health = 40, damage = 15},
-[MT_FANG] = {health = 200, damage = 40},
-[MT_EGGMOBILE] = {health = 360, damage = 1},
-[MT_EGGMOBILE2] = {health = 800, damage = 1},
-[MT_EGGMOBILE3] = {health = 1240, damage = 1},
-[MT_EGGMOBILE4] = {health = 1680, damage = 1},
-[MT_METALSONIC_BATTLE] = {health = 1200, damage = 40},
-[MT_CYBRAKDEMON] = {health = 2240, damage = 25},
-[MT_CYBRAKDEMON_ELECTRIC_BARRIER] = {damage = 1000},
-[MT_ROSY] = {health = 30},
-[MT_PLAYER] = {health = 100},
---projectiles
-[MT_REDRING] = {damage = 6, noinvuln = true},
-[MT_THROWNBOUNCE] = {damage = 3, noinvuln = true},
-[MT_THROWNAUTOMATIC] = {damage = 9, noinvuln = true},
-[MT_THROWNSCATTER] = {damage = 15, noinvuln = true},
-[MT_THROWNGRENADE] = {damage = 15},
-[MT_THROWNEXPLOSION] = {damage = 15},
-[MT_CORK] = {damage = 10},
-[MT_ROCKET] = {damage = 15},
-[MT_LASER] = {damage = 30},
-[MT_TORPEDO] = {damage = 35},
-[MT_TORPEDO2] = {damage = 5},
-[MT_ENERGYBALL] = {damage = 40},
-[MT_MINE] = {damage = 15},
-[MT_JETTBULLET] = {damage = 15},
-[MT_TURRETLASER] = {damage = 3},
-[MT_ARROW] = {damage = 15},
-[MT_DEMONFIRE] = {damage = 25},
-[MT_CANNONBALL] = {damage = 40}
-})
+if not HL1_DMGStats rawset(_G, "HL1_DMGStats", {}) end
 
 rawset(_G, "HL_SetMTStats", function(mt, wishhealth, wishdamage) -- sets an MT_'s damage and health stats; if it exists.
 	local mobj = rawget(_G, mt)
@@ -194,7 +122,65 @@ HL_SetMTStats("MT_ARROW", nil, {dmg = 15})
 HL_SetMTStats("MT_DEMONFIRE", nil, {dmg = 25})
 HL_SetMTStats("MT_CANNONBALL", nil, {dmg = 40})
 
-rawset(_G, "HL_ChangeViewmodelState", function(player, action, backup) -- changes player viewmodel state; backup is used if the initial animation doesn't exist at all
+local function weightedRandom(chances) -- returns one random entry based on the weighted chances
+    local total = 0
+    for _, entry in ipairs(chances) do
+        total = total + tonumber(entry.chance)
+    end
+    local r = P_RandomFixed() * total
+    local highestChanceEntry
+    for _, entry in ipairs(chances) do
+        if not highestChanceEntry or entry.chance > highestChanceEntry.chance then
+            highestChanceEntry = entry
+        end
+        r = r - tonumber(entry.chance)
+        if r <= 0 then
+            return entry
+        end
+    end
+    return highestChanceEntry -- Ensures a valid return value
+end
+
+local function removeFromChanceList(chances, toremove) -- get a new weighted chance, without some specific item
+    local newList = {}
+    local dudChance = 0
+    local otherItems = 0
+
+    -- separate the dud and count the non-dud entries
+    for _, entry in ipairs(chances) do
+        if entry.name == toremove then
+            dudChance = tonumber(entry.chance)
+        else
+            otherItems = otherItems + 1
+            -- copy the entry to avoid mutating the original list
+            table.insert(newList, { name = entry.name, chance = tonumber(entry.chance) })
+        end
+    end
+
+    -- add an equal share of the dud's chance to every remaining weapon
+    local bonus = dudChance / otherItems
+    for _, entry in ipairs(newList) do
+        entry.chance = entry.chance + bonus
+    end
+
+    return newList
+end
+
+
+rawset(_G, "HL_GetMonitorPickUps", function(chanceList, amount) -- get an amount-length list of weapons, chances determined by chanceList. Main purpose is to get pick-ups dropped by Monitors.
+    local results = {}
+    for i = 1, amount do
+        local selected = weightedRandom(chanceList)
+        if selected.name == "crowbar" then -- we got a dud!! make sure we don't rip people off by getting another weapon
+            local reweightedList = removeFromChanceList(chanceList, "crowbar")
+            selected = weightedRandom(reweightedList)
+        end
+        table.insert(results, selected)
+    end
+    return results
+end)
+
+rawset(_G, "HL_ChangeViewmodelState", function(player, action, backup)
     local viewmodel = kombihl1viewmodels[HL_WpnStats[player.hl1weapon].viewmodel or "PISTOL"]
 
     local function getFrameData(state)
@@ -207,11 +193,13 @@ rawset(_G, "HL_ChangeViewmodelState", function(player, action, backup) -- change
         local lastValidNode = node
 
         for _, key in ipairs(keys) do
-            if node and node[key] then
-                lastValidNode = node[key]
-                node = node[key]
+            -- Do this if someone has multiple lists within a list they wanna use
+            local index = tonumber(key) or key
+            if node and node[index] then
+                lastValidNode = node[index]
+                node = node[index]
             else
-                break  -- Move back up the tree
+                break  -- exit if the state path isn't found
             end
         end
 
@@ -219,13 +207,16 @@ rawset(_G, "HL_ChangeViewmodelState", function(player, action, backup) -- change
     end
 
     local frameData = getFrameData(action) or getFrameData(backup)
-    if not frameData then return end
+    if not frameData then
+        warn("States " .. action .. " and " .. backup .. " don't exist!")
+        return
+    end
 
-    player.hl1viewmdaction = action
+    player.hl1viewmdaction = action  -- retain the state string for debugging/logging
+    player.hl1currentAnimation = frameData  -- store the animation table directly
     player.hl1frameindex = 1
     player.hl1frame = frameData[1].frame
     player.hl1frameclock = frameData[1].duration
-	print(action)
 end)
 
 rawset(_G, "HL_GetWeapons", function(items, targetSlot, player) -- gets all available weapons.
@@ -264,7 +255,7 @@ end)
 
 rawset(_G, "HL_AddAmmo", function(freeman, ammotype, ammo) -- give player some munitions
 	if not ammotype
-		error("Bad argument #2 to 'HL_AddAmmo' (AMMO_T* expected, got " .. type(ammotype) .. ")", 2)
+		error("Bad argument #2 to 'HL_AddAmmo' (AMMO_T* expected, got '" .. tostring(ammotype) .. "')", 2)
 	end
 
 	if not freeman.hl1ammo
@@ -356,17 +347,32 @@ rawset(_G, "HL_AddWeapon", function(freeman, weapon, silent, autoswitch) -- give
 				end
 			end
 		end
-
-		handleClipGift(1, HL_WpnStats[weapon].pickupgift, HL_WpnStats[weapon].clipsize or -1, HL_WpnStats[weapon].ammo)
-		handleClipGift(2, HL_WpnStats[weapon].pickupgiftalt, HL_WpnStats[weapon].clipsizealt or -1, HL_WpnStats[weapon].ammoalt)
+		if HL_WpnStats[weapon].primary
+			if not HL_WpnStats[weapon].primary.ammo
+				warn("Weapon " .. weapon .. " missing primary.ammo property!")
+			else
+				handleClipGift(1, HL_WpnStats[weapon].pickupgift, HL_WpnStats[weapon].clipsize or -1, HL_WpnStats[weapon].primary.ammo)
+			end
+		end
+		if HL_WpnStats[weapon].secondary
+			if not HL_WpnStats[weapon].secondary.ammo
+				warn("Weapon " .. weapon .. " missing secondary.ammo property!")
+			else
+				handleClipGift(2, HL_WpnStats[weapon].pickupgiftalt, HL_WpnStats[weapon].clipsizealt or -1, HL_WpnStats[weapon].secondary.ammo)
+			end
+		end
 
 		didsomething = true -- We gave the player a gun, so we did something there.
 	else
-		if HL_WpnStats[weapon].pickupgift and HL_WpnStats[weapon].ammo
-			didsomething = HL_AddAmmo(freeman, HL_WpnStats[weapon].ammo, HL_WpnStats[weapon].pickupgift) or $
+		if HL_WpnStats[weapon].primary
+			if HL_WpnStats[weapon].pickupgift and HL_WpnStats[weapon].ammo
+				didsomething = HL_AddAmmo(freeman, HL_WpnStats[weapon].ammo, HL_WpnStats[weapon].pickupgift) or $
+			end
 		end
-		if HL_WpnStats[weapon].pickupgiftalt and HL_WpnStats[weapon].ammoalt
-			didsomething = HL_AddAmmo(freeman, HL_WpnStats[weapon].ammoalt, HL_WpnStats[weapon].pickupgiftalt) or $
+		if HL_WpnStats[weapon].secondary
+			if HL_WpnStats[weapon].pickupgiftalt and HL_WpnStats[weapon].ammoalt
+				didsomething = HL_AddAmmo(freeman, HL_WpnStats[weapon].ammoalt, HL_WpnStats[weapon].pickupgiftalt) or $
+			end
 		end
 	end
 

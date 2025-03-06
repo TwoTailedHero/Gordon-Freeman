@@ -93,8 +93,8 @@ hud.add(function(v, player)
 	if not player.mo return end
 	if player.mo.skin != "kombifreeman" return end
 	local weaponStats = HL_WpnStats[player.hl1weapon]
-	if not weaponStats.primary.noreserveammo then
-		K_DrawHL1Number(v, player.hl1ammo[weaponStats.primary.ammo], 315 * FRACUNIT, 196 * FRACUNIT, V_ADD | V_PERPLAYER, v.getColormap(nil, player.skincolor))
+	if not (weaponStats.primary and weaponStats.primary.noreserveammo) then
+		K_DrawHL1Number(v, player.hl1ammo[weaponStats.primary and weaponStats.primary.ammo or "9mm"], 315 * FRACUNIT, 196 * FRACUNIT, V_ADD | V_PERPLAYER, v.getColormap(nil, player.skincolor))
 	end
 	if player.hl1clips[player.hl1weapon] and (player.hl1clips[player.hl1weapon].primary or 0) >= 0 then
 		v.drawScaled(283 * FRACUNIT, 184 * FRACUNIT, FRACUNIT / 2, v.cachePatch("HL1HUDDIVIDE"), V_PERPLAYER | V_ADD, v.getColormap(nil, player.skincolor))
@@ -200,7 +200,7 @@ hud.add(function(v, player)
 		local currentweapon = weaponlist[i].name
 		local wepproperties = HL_WpnStats[currentweapon]
 		local selectgraphic = wepproperties.selectgraphic or "HL1HUD9MM"
-		local ammostats = HL_AmmoStats[wepproperties.ammo] or { max = 0 }
+		local ammostats = HL_AmmoStats[wepproperties.primary and wepproperties.primary.ammo or "9mm"] or { max = 0 }
 
 		-- Highlight Selected Weapon
 		if i == player.kombihl1wpn then
@@ -208,7 +208,10 @@ hud.add(function(v, player)
 		end
 
 		-- Determine Ammo Availability
-		if (player.hl1clips[currentweapon] and (player.hl1clips[player.hl1weapon].primary or 0) <= 0) and player.hl1ammo[wepproperties.primary.ammo] and player.hl1ammo[wepproperties.primary.ammo] <= 0 and not (wepproperties.primary.neverdenyuse or wepproperties.secondary.neverdenyuse) then
+		if (player.hl1clips[currentweapon] and (player.hl1clips[player.hl1weapon].primary or 0) <= 0)
+		and player.hl1ammo[player.hl1clips[player.hl1weapon].primary and wepproperties.primary.ammo or "9mm"]
+		and player.hl1ammo[wepproperties.primary and wepproperties.primary.ammo or "9mm"] <= 0
+		and not ((wepproperties.primary and wepproperties.primary.neverdenyuse) or (wepproperties.secondary and wepproperties.secondary.neverdenyuse)) then
 			colormap = v.getColormap(nil, SKINCOLOR_RED)
 		else
 			colormap = v.getColormap(nil, player.skincolor)
@@ -218,7 +221,7 @@ hud.add(function(v, player)
 		v.drawScaled(-10 * FRACUNIT + (player.kombihl1category * 12 * FRACUNIT), (14 * FRACUNIT) + ((49 * (i - 1)) * FRACUNIT / 2), FRACUNIT / 2, v.cachePatch(selectgraphic), V_PERPLAYER | V_ADD, colormap)
 
 		-- Draw Ammo Bar
-		if player.hl1ammo[wepproperties.ammo] then
+		if player.hl1ammo[wepproperties.primary and wepproperties.primary.ammo or "9mm"] then
 			local effectiveMaxAmmo = player.hl1doubleammo and (ammostats.backpackmax or ammostats.max * 2) or ammostats.max
 
 			v.drawStretched(-9 * FRACUNIT + (player.kombihl1category * 12 * FRACUNIT), (15 * FRACUNIT) + ((49 * (i - 1)) * FRACUNIT / 2), FRACUNIT * 10, 5 * FRACUNIT / 2, v.cachePatch("HL1HUDSELGRAY"), V_PERPLAYER | V_50TRANS)

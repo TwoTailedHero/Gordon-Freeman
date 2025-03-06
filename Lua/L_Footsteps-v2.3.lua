@@ -2354,7 +2354,8 @@ addHook("PlayerThink", function(player)
 			end
 
 			if player.playsound
-				local mat = flatsounds["\$gamemap\ \$string.lower(G_BuildMapTitle(gamemap))\ \$player.groundtexture\"] or flatsounds[player.groundtexture]
+				local backupmap = "A"
+				local mat = flatsounds["\$gamemap\ \$string.lower((G_BuildMapTitle(gamemap) or backupmap))\ \$player.groundtexture\"] or flatsounds[player.groundtexture]
 				if not (player.mo.eflags & MFE_GOOWATER)
 					if player.groundtexture and mat
 						material = mat
