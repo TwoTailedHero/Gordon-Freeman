@@ -94,7 +94,7 @@ local theproj = MT_NULL
 local function HL1DecrementAmmo(player,secondary)
 	if secondary
 		if HL_WpnStats[player.hl1weapon].altusesprimaryclip
-			if HL_WpnStats[player.hl1weapon].shotcost
+			if HL_WpnStats[player.hl1weapon].primary.shotcost
 				if HL_WpnStats[player.hl1weapon].primary.clipsize > 0
 					player.hl1clips[player.hl1weapon].primary = $-HL_WpnStats[player.hl1weapon].primary.shotcost
 				else
@@ -111,7 +111,7 @@ local function HL1DecrementAmmo(player,secondary)
 			end
 		end
 	else
-		if HL_WpnStats[player.hl1weapon].primary.shotcost
+		if HL_WpnStats[player.hl1weapon].primary and HL_WpnStats[player.hl1weapon].primary.shotcost
 			if HL_WpnStats[player.hl1weapon].primary.clipsize > 0
 				player.hl1clips[player.hl1weapon].primary = $-HL_WpnStats[player.hl1weapon].primary.shotcost
 			else
@@ -358,8 +358,8 @@ local function FireWeapon(player, mode)
 		-- Apply spread if refire does not negate it
 		if not mystats.refireusesspread or player.refire then
 			local ogangle, ogaiming = player.mo.angle, player.cmd.aiming << 16
-			player.mo.angle = player.mo.angle + FixedAngle(FixedMul(P_RandomRange(-32768, 32768), (mystats.horizspread or 0) * 2))
-			player.aiming = player.aiming + FixedAngle(FixedMul(P_RandomRange(-32768, 32768), (mystats.vertspread or 0) * 2))
+			player.mo.angle = player.mo.angle + FixedAngle(FixedMul(P_RandomFixed() - (FRACUNIT / 2), (mystats.horizspread or 0) * 2))
+			player.aiming = player.aiming + FixedAngle(FixedMul(P_RandomFixed() - (FRACUNIT / 2), (mystats.vertspread or 0) * 2))
 			theproj = P_SpawnPlayerMissile(player.mo, projectile)
 			player.mo.angle, player.aiming = ogangle, ogaiming
 		else
@@ -410,7 +410,7 @@ local function HL_InitBullet(mobj) -- Does the setting up for our HL1 Projctiles
 		local mode = kombilocalplayer.mode
 		mobj.target = kombilocalplayer.mo
 		mobj.stats = HL_WpnStats[kombilocalplayer.hl1weapon][mode]
-		mobj.hl1damage = mobj.stats.damage or 0
+		mobj.hl1damage = mobj.stats and mobj.stats.damage or 0
 		mobj.z = $+(kombilocalplayer.viewheight/2)
 		if mobj.stats.ismelee and kombilocalplayer.doom and kombilocalplayer.doom.powers[POWERS_BERSERK]
 			mobj.hl1damage = $*10
@@ -555,7 +555,7 @@ addHook("MobjThinker", function(mobj)
 		if not mobj and not mobj.valid break end
 		if P_RailThinker(mobj) didathing = true break end
 	end
-	if not didathing and mobj.stats.israycaster
+	if not didathing and mobj.stats and mobj.stats.israycaster
 		P_KillMobj(mobj, nil, nil, DMG_INSTAKILL)
 	end
 	shooter.flags = $&~MF_NOCLIP
