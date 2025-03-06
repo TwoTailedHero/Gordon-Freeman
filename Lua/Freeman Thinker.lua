@@ -144,7 +144,7 @@ end
 
 addHook("MobjDamage", function(target, hurter, src, dmg, dmgType)
 	if target.skin == "kombifreeman"
-		local inf = (not HL1_DMGStats[src.type].damage.preferaggressor and src) or hurter
+		local inf = (not (HL1_DMGStats[src.type] and HL1_DMGStats[src.type].damage and HL1_DMGStats[src.type].damage.preferaggressor) and src) or hurter
 		HL.valuemodes["HLFreemanHurt"] = HL_LASTFUNC
 		local hookeddamage, hookeddamagetype = HL.RunHook("HLFreemanHurt", target, inf, src, dmg, dmgType)
 		if not (dmgType & DMG_DEATHMASK) and inf and not (inf.type and inf.type == MT_EGGMAN_ICON)
