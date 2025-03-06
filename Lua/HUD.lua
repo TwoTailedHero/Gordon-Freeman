@@ -16,6 +16,13 @@ local function K_DrawHL1Number(v,num,x,y,flags,colormap,redtintingmin)
 	end
 end
 
+local function IsAboveVersion(major, sub)
+    return (VERSION > major) or (VERSION == major and SUBVERSION >= sub)
+end
+
+local function dummy()
+end
+
 hud.add(function(v, player)
 	if not player.mo then return end
 	if kombilastseen and kombilastseen.valid and kombilastseen.mo.skin == "kombifreeman" then
@@ -24,8 +31,8 @@ hud.add(function(v, player)
 		local sweapon = splayer.hl1weapon
 		local swepstats = HL_WpnStats[sweapon]
 		local swepname = swepstats.realname or sweapon
-		v.drawString(160, 124, "Wielding " .. swepname, V_GREENMAP | V_ALLOWLOWERCASE | V_HUDTRANSHALF, "thin-center")
-		v.drawString(160, 132, tostring(splayer.mo.hl1health) .. "%", V_GREENMAP | V_ALLOWLOWERCASE | V_HUDTRANSHALF, "thin-center")
+		v.drawString(160, 124, "Wielding " .. swepname, V_GREENMAP|V_ALLOWLOWERCASE|V_HUDTRANSHALF, "thin-center")
+		v.drawString(160, 132, tostring(splayer.mo.hl1health) .. "%", V_GREENMAP|V_ALLOWLOWERCASE|V_HUDTRANSHALF, "thin-center")
 	end
 
 	if player.mo.skin ~= "kombifreeman" then return end
@@ -45,12 +52,13 @@ hud.add(function(v, player)
 		local vmdl = vmdl_frames and vmdl_frames[player.hl1frameindex]
 		local curframe = player.hl1frame or 1
 		local vmdlflags = V_PERPLAYER
+		local colormapfunc = IsAboveVersion(202, 13) and v.getSectorColormap or dummy
 
 		if curvmdl.flags and (curvmdl.flags & VMDL_FLIP) then
-			vmdlflags = vmdlflags | V_FLIP
+			vmdlflags = vmdlflags|V_FLIP
 		end
 
-		if HL_WpnStats[player.hl1weapon].doombob then
+		if curvmdl.bobtype == VBOB_DOOM then
 			local angle = ((128 * leveltime) & 8191) << 19
 			local bobx = FixedMul((player.hl1wepbob or 0), cos(angle))
 			angle = ((128 * leveltime) & 4095) << 19
@@ -61,8 +69,8 @@ hud.add(function(v, player)
 				(106 * FRACUNIT) + boby,
 				FRACUNIT,
 				v.cachePatch("VMDL" .. kmbivmdl .. curframe),
-				vmdlflags,
-				v.getSectorColormap(player.mo.subsector.sector, player.mo.x, player.mo.y, player.mo.z, player.mo.subsector.sector.lightlevel)
+				vmdlflags|V_SNAPTOBOTTOM,
+				colormapfunc(player.mo.subsector.sector, player.mo.x, player.mo.y, player.mo.z, player.mo.subsector.sector.lightlevel)
 			)
 
 			if vmdl and vmdl.overlay then
@@ -71,8 +79,8 @@ hud.add(function(v, player)
 					(106 * FRACUNIT) + boby,
 					FRACUNIT,
 					v.cachePatch("VMDL" .. kmbivmdl .. vmdl.overlay),
-					vmdlflags,
-					v.getSectorColormap(player.mo.subsector.sector, player.mo.x, player.mo.y, player.mo.z, player.mo.subsector.sector.lightlevel)
+					vmdlflags|V_SNAPTOBOTTOM,
+					colormapfunc(player.mo.subsector.sector, player.mo.x, player.mo.y, player.mo.z, player.mo.subsector.sector.lightlevel)
 				)
 			end
 		else
@@ -81,8 +89,8 @@ hud.add(function(v, player)
 				106 * FRACUNIT,
 				FRACUNIT + FixedMul(FRACUNIT, FixedMul((player.hl1wepbob or 0) / 256, sin(angle))),
 				v.cachePatch("VMDL" .. kmbivmdl .. curframe),
-				vmdlflags,
-				v.getSectorColormap(player.mo.subsector.sector, player.mo.x, player.mo.y, player.mo.z, player.mo.subsector.sector.lightlevel)
+				vmdlflags|V_SNAPTOBOTTOM,
+				colormapfunc(player.mo.subsector.sector, player.mo.x, player.mo.y, player.mo.z, player.mo.subsector.sector.lightlevel)
 			)
 		end
 	end
@@ -94,19 +102,19 @@ hud.add(function(v, player)
 	if player.mo.skin != "kombifreeman" return end
 	local weaponStats = HL_WpnStats[player.hl1weapon]
 	if not (weaponStats.primary and weaponStats.primary.noreserveammo) then
-		K_DrawHL1Number(v, player.hl1ammo[weaponStats.primary and weaponStats.primary.ammo or "9mm"], 315 * FRACUNIT, 196 * FRACUNIT, V_ADD | V_PERPLAYER, v.getColormap(nil, player.skincolor))
+		K_DrawHL1Number(v, player.hl1ammo[weaponStats.primary and weaponStats.primary.ammo or "9mm"], 315 * FRACUNIT, 196 * FRACUNIT, V_ADD|V_PERPLAYER|V_SNAPTOBOTTOM|V_SNAPTORIGHT, v.getColormap(nil, player.skincolor))
 	end
 	if player.hl1clips[player.hl1weapon] and (player.hl1clips[player.hl1weapon].primary or 0) >= 0 then
-		v.drawScaled(283 * FRACUNIT, 184 * FRACUNIT, FRACUNIT / 2, v.cachePatch("HL1HUDDIVIDE"), V_PERPLAYER | V_ADD, v.getColormap(nil, player.skincolor))
-		K_DrawHL1Number(v, player.hl1clips[player.hl1weapon].primary, 280 * FRACUNIT, 196 * FRACUNIT, V_ADD | V_PERPLAYER, v.getColormap(nil, player.skincolor))
+		v.drawScaled(283 * FRACUNIT, 184 * FRACUNIT, FRACUNIT / 2, v.cachePatch("HL1HUDDIVIDE"), V_PERPLAYER|V_ADD|V_SNAPTOBOTTOM|V_SNAPTORIGHT, v.getColormap(nil, player.skincolor))
+		K_DrawHL1Number(v, player.hl1clips[player.hl1weapon].primary, 280 * FRACUNIT, 196 * FRACUNIT, V_ADD|V_PERPLAYER|V_SNAPTOBOTTOM|V_SNAPTORIGHT, v.getColormap(nil, player.skincolor))
 	end
 	if weaponStats.altusesprimaryclip or weaponStats.secondary == nil return end
 	if not weaponStats.secondary.noreserveammo then
-		K_DrawHL1Number(v, player.hl1ammo[weaponStats.secondary.ammo], 315 * FRACUNIT, 176 * FRACUNIT, V_ADD | V_PERPLAYER, v.getColormap(nil, player.skincolor))
+		K_DrawHL1Number(v, player.hl1ammo[weaponStats.secondary.ammo], 315 * FRACUNIT, 176 * FRACUNIT, V_ADD|V_PERPLAYER|V_SNAPTOBOTTOM|V_SNAPTORIGHT, v.getColormap(nil, player.skincolor))
 	end
 	if player.hl1clips[player.hl1weapon] and (player.hl1clips[player.hl1weapon].secondary or 0) >= 0 then
-		v.drawScaled(283 * FRACUNIT, 164 * FRACUNIT, FRACUNIT / 2, v.cachePatch("HL1HUDDIVIDE"), V_PERPLAYER | V_ADD, v.getColormap(nil, player.skincolor))
-		K_DrawHL1Number(v, player.hl1clips[player.hl1weapon].secondary, 280 * FRACUNIT, 176 * FRACUNIT, V_ADD | V_PERPLAYER, v.getColormap(nil, player.skincolor))
+		v.drawScaled(283 * FRACUNIT, 164 * FRACUNIT, FRACUNIT / 2, v.cachePatch("HL1HUDDIVIDE"), V_PERPLAYER|V_ADD|V_SNAPTOBOTTOM|V_SNAPTORIGHT, v.getColormap(nil, player.skincolor))
+		K_DrawHL1Number(v, player.hl1clips[player.hl1weapon].secondary, 280 * FRACUNIT, 176 * FRACUNIT, V_ADD|V_PERPLAYER|V_SNAPTOBOTTOM|V_SNAPTORIGHT, v.getColormap(nil, player.skincolor))
 	end
 end, "game")
 
@@ -116,7 +124,7 @@ hud.add(function(v, player)
 	if player.mo.skin != "kombifreeman" return end
 	local weaponStats = HL_WpnStats[player.hl1weapon]
 	if weaponStats.crosshair then
-		v.drawScaled(160 * FRACUNIT, 100 * FRACUNIT, FRACUNIT / 2, v.cachePatch(weaponStats.crosshair), V_PERPLAYER | V_ADD, v.getColormap(nil, player.skincolor))
+		v.drawScaled(160 * FRACUNIT, 100 * FRACUNIT, FRACUNIT / 2, v.cachePatch(weaponStats.crosshair), V_PERPLAYER|V_ADD, v.getColormap(nil, player.skincolor))
 	end
 end, "game")
 
@@ -125,9 +133,9 @@ hud.add(function(v, player)
 	if not player.mo return end
 	if player.mo.skin != "kombifreeman" return end
 	local healthColor = (player.mo.hl1health > 25) and player.skincolor or SKINCOLOR_RED
-	v.drawScaled(5 * FRACUNIT, 182 * FRACUNIT, FRACUNIT / 2, v.cachePatch("HL1HUDCROSS"), V_PERPLAYER | V_ADD, v.getColormap(nil, healthColor))
-	K_DrawHL1Number(v, player.mo.hl1health, 50 * FRACUNIT, 196 * FRACUNIT, V_ADD | V_PERPLAYER, v.getColormap(nil, player.skincolor), 25)
-	v.drawScaled(50 * FRACUNIT, 184 * FRACUNIT, FRACUNIT / 2, v.cachePatch("HL1HUDDIVIDE"), V_PERPLAYER | V_ADD, v.getColormap(nil, player.skincolor))
+	v.drawScaled(5 * FRACUNIT, 182 * FRACUNIT, FRACUNIT / 2, v.cachePatch("HL1HUDCROSS"), V_PERPLAYER|V_ADD|V_SNAPTOBOTTOM|V_SNAPTOLEFT, v.getColormap(nil, healthColor))
+	K_DrawHL1Number(v, player.mo.hl1health, 50 * FRACUNIT, 196 * FRACUNIT, V_ADD|V_PERPLAYER|V_SNAPTOBOTTOM|V_SNAPTOLEFT, v.getColormap(nil, player.skincolor), 25)
+	v.drawScaled(50 * FRACUNIT, 184 * FRACUNIT, FRACUNIT / 2, v.cachePatch("HL1HUDDIVIDE"), V_PERPLAYER|V_ADD|V_SNAPTOBOTTOM|V_SNAPTOLEFT, v.getColormap(nil, player.skincolor))
 end, "game")
 
 -- Flashlight
@@ -135,7 +143,7 @@ hud.add(function(v, player)
 	if not player.mo return end
 	if player.mo.skin != "kombifreeman" return end
 	if player.hl1flashlightuse then
-		v.drawScaled(306 * FRACUNIT, 7 * FRACUNIT, FRACUNIT / 2, v.cachePatch("HL1HUDFLASHB"), V_PERPLAYER | V_ADD, v.getColormap(nil, player.skincolor))
+		v.drawScaled(306 * FRACUNIT, 7 * FRACUNIT, FRACUNIT / 2, v.cachePatch("HL1HUDFLASHB"), V_PERPLAYER|V_ADD|V_SNAPTOTOP|V_SNAPTORIGHT, v.getColormap(nil, player.skincolor))
 	end
 end, "game")
 
@@ -145,9 +153,9 @@ hud.add(function(v, player)
 	if player.mo.skin != "kombifreeman" return end
 	local armor = min(player.mo.hl1armor, 100 * FRACUNIT)
 	local crop = FixedDiv((100 * FRACUNIT - armor) * 40, 100 * FRACUNIT)
-	v.drawCropped(52 * FRACUNIT, 178 * FRACUNIT, FRACUNIT / 2, FRACUNIT / 2, v.cachePatch("HL1SUITE"), V_PERPLAYER | V_ADD, v.getColormap(nil, player.skincolor), 0, 0, 40 * FRACUNIT, crop)
-	v.drawCropped(52 * FRACUNIT, 178 * FRACUNIT + crop / 2, FRACUNIT / 2, FRACUNIT / 2, v.cachePatch("HL1SUITF"), V_PERPLAYER | V_ADD, v.getColormap(nil, player.skincolor), 0, crop, 40 * FRACUNIT, 40 * FRACUNIT - crop)
-	K_DrawHL1Number(v, player.mo.hl1armor / FRACUNIT, 99 * FRACUNIT, 196 * FRACUNIT, V_ADD | V_PERPLAYER, v.getColormap(nil, player.skincolor))
+	v.drawCropped(52 * FRACUNIT, 178 * FRACUNIT, FRACUNIT / 2, FRACUNIT / 2, v.cachePatch("HL1SUITE"), V_PERPLAYER|V_ADD|V_SNAPTOBOTTOM|V_SNAPTOLEFT, v.getColormap(nil, player.skincolor), 0, 0, 40 * FRACUNIT, crop)
+	v.drawCropped(52 * FRACUNIT, 178 * FRACUNIT + crop / 2, FRACUNIT / 2, FRACUNIT / 2, v.cachePatch("HL1SUITF"), V_PERPLAYER|V_ADD|V_SNAPTOBOTTOM|V_SNAPTOLEFT, v.getColormap(nil, player.skincolor), 0, crop, 40 * FRACUNIT, 40 * FRACUNIT - crop)
+	K_DrawHL1Number(v, player.mo.hl1armor / FRACUNIT, 99 * FRACUNIT, 196 * FRACUNIT, V_ADD|V_PERPLAYER|V_SNAPTOBOTTOM|V_SNAPTOLEFT, v.getColormap(nil, player.skincolor))
 end, "game")
 
 -- Damage Direction Indicator (Currently Empty)
@@ -188,10 +196,10 @@ hud.add(function(v, player)
 	-- Weapon Category Buckets
 	for i = 1, 7 do
 		local drawx = ((i > player.kombihl1category) and weaponlist and 65 or -10) * FRACUNIT + (i * 12 * FRACUNIT)
-		v.drawScaled(drawx, 2 * FRACUNIT, FRACUNIT / 2, v.cachePatch("HUDSELBUCKET" .. i), V_PERPLAYER | V_ADD, colormap)
+		v.drawScaled(drawx, 2 * FRACUNIT, FRACUNIT / 2, v.cachePatch("HUDSELBUCKET" .. i), V_PERPLAYER|V_ADD|V_SNAPTOTOP|V_SNAPTOLEFT, colormap)
 		for d = 1, weaponslots[i] do
 			if i == player.kombihl1category then break end
-			v.drawScaled(drawx, 2 * FRACUNIT + (d * 12 * FRACUNIT), FRACUNIT / 2, v.cachePatch("HUDSELBUCKETITEM"), V_PERPLAYER | V_ADD, colormap)
+			v.drawScaled(drawx, 2 * FRACUNIT + (d * 12 * FRACUNIT), FRACUNIT / 2, v.cachePatch("HUDSELBUCKETITEM"), V_PERPLAYER|V_ADD|V_SNAPTOTOP|V_SNAPTOLEFT, colormap)
 		end
 	end
 
@@ -218,14 +226,20 @@ hud.add(function(v, player)
 		end
 
 		-- Draw Weapon Icon
-		v.drawScaled(-10 * FRACUNIT + (player.kombihl1category * 12 * FRACUNIT), (14 * FRACUNIT) + ((49 * (i - 1)) * FRACUNIT / 2), FRACUNIT / 2, v.cachePatch(selectgraphic), V_PERPLAYER | V_ADD, colormap)
+		v.drawScaled(-10 * FRACUNIT + (player.kombihl1category * 12 * FRACUNIT), (14 * FRACUNIT) + ((49 * (i - 1)) * FRACUNIT / 2), FRACUNIT / 2, v.cachePatch(selectgraphic), V_PERPLAYER|V_ADD|V_SNAPTOTOP|V_SNAPTOLEFT, colormap)
 
 		-- Draw Ammo Bar
 		if player.hl1ammo[wepproperties.primary and wepproperties.primary.ammo or "9mm"] then
 			local effectiveMaxAmmo = player.hl1doubleammo and (ammostats.backpackmax or ammostats.max * 2) or ammostats.max
 
-			v.drawStretched(-9 * FRACUNIT + (player.kombihl1category * 12 * FRACUNIT), (15 * FRACUNIT) + ((49 * (i - 1)) * FRACUNIT / 2), FRACUNIT * 10, 5 * FRACUNIT / 2, v.cachePatch("HL1HUDSELGRAY"), V_PERPLAYER | V_50TRANS)
-			v.drawStretched(-9 * FRACUNIT + (player.kombihl1category * 12 * FRACUNIT), (15 * FRACUNIT) + ((49 * (i - 1)) * FRACUNIT / 2), FixedDiv((player.hl1ammo[wepproperties.ammo] or 0) * 10, effectiveMaxAmmo or 10), 5 * FRACUNIT / 2, v.cachePatch("HL1HUDSELGREEN"), V_PERPLAYER)
+			v.drawStretched(-9 * FRACUNIT + (player.kombihl1category * 12 * FRACUNIT), (15 * FRACUNIT) + ((49 * (i - 1)) * FRACUNIT / 2), FRACUNIT * 10, 5 * FRACUNIT / 2, v.cachePatch("HL1HUDSELGRAY"), V_PERPLAYER|V_50TRANS|V_SNAPTOTOP|V_SNAPTOLEFT)
+			v.drawStretched(-9 * FRACUNIT + (player.kombihl1category * 12 * FRACUNIT),
+				(15 * FRACUNIT) + ((49 * (i - 1)) * FRACUNIT / 2),
+				FixedDiv((player.hl1ammo[wepproperties.ammo] or 0) * 10,
+				effectiveMaxAmmo or 10),
+				5 * FRACUNIT / 2,
+				v.cachePatch("HL1HUDSELGREEN"),
+				V_PERPLAYER|V_SNAPTOTOP|V_SNAPTOLEFT)
 		end
 	end
 end, "game")
