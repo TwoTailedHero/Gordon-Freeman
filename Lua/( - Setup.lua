@@ -44,179 +44,185 @@ rawset(_G, "DMG", { -- TYPEOFDAMAGE
 
 if not HL1_DMGStats rawset(_G, "HL1_DMGStats", {}) end
 
-rawset(_G, "HL_SetMTStats", function(mt, wishhealth, wishdamage) -- sets an MT_'s damage and health stats; if it exists.
-	local mobj = rawget(_G, mt)
-	if not mobj return end
-	HL1_DMGStats[mobj] = {health = wishhealth, damage = wishdamage}
+local function safeGetMT(mt)
+	local success, value = pcall(function() return mt end)
+	return success and value or nil
+end
+
+rawset(_G, "HL_SetMTStats", function(mt, wishhealth, wishdamage)
+	local mobjType = type(mt) == "string" and _G[mt] or mt
+	if not mobjType return end
+	HL1_DMGStats[mobjType] = {health = wishhealth, damage = wishdamage}
 end)
 
-HL_SetMTStats("MT_BLUECRAWLA", {health = 30}, {dmg = 15})
-HL_SetMTStats("MT_REDCRAWLA", {health = 60}, {dmg = 20})
-HL_SetMTStats("MT_GFZFISH", {health = 20}, {dmg = 10})
-HL_SetMTStats("MT_GOLDBUZZ", {health = 30}, {dmg = 20})
-HL_SetMTStats("MT_REDBUZZ", {health = 30}, {dmg = 15})
-HL_SetMTStats("MT_DETON", {health = 10}, {dmg = 60})
-HL_SetMTStats("MT_POPUPTURRET", {health = 80}, {dmg = 10})
-HL_SetMTStats("MT_CRAWLACOMMANDER", {health = 70}, {dmg = 30})
-HL_SetMTStats("MT_SPRINGSHELL", {health = 80}, {dmg = 30})
-HL_SetMTStats("MT_YELLOWSHELL", {health = 80}, {dmg = 30})
-HL_SetMTStats("MT_SKIM", {health = 80}, {dmg = 10})
-HL_SetMTStats("MT_CRUSHSTACEAN", {health = 80}, {dmg = 20})
-HL_SetMTStats("MT_JETJAW", {health = 50}, {dmg = 20})
-HL_SetMTStats("MT_BIGMINE", {health = 40}, {dmg = 40})
-HL_SetMTStats("MT_BANPYURA", {health = 80}, {dmg = 20})
-HL_SetMTStats("MT_FACESTABBER", {health = 175}, {dmg = 30})
-HL_SetMTStats("MT_FACESTABBERSPEAR", nil, {dmg = 40})
-HL_SetMTStats("MT_ROBOHOOD", {health = 80}, {dmg = 30})
-HL_SetMTStats("MT_EGGGUARD", {health = 40}, {dmg = 20})
-HL_SetMTStats("MT_GSNAPPER", {health = 60}, {dmg = 30})
-HL_SetMTStats("MT_VULTURE", {health = 80}, {dmg = 30})
-HL_SetMTStats("MT_POINTY", {health = 80}, {dmg = 20})
-HL_SetMTStats("MT_MINUS", {health = 40}, {dmg = 15})
-HL_SetMTStats("MT_CANARIVORE", {health = 50}, {dmg = 80})
-HL_SetMTStats("MT_UNIDUS", {health = 80}, {dmg = 15})
-HL_SetMTStats("MT_PYREFLY", {health = 80}, {dmg = 30})
-HL_SetMTStats("MT_PTERABYTE", {health = 60}, {dmg = 20})
-HL_SetMTStats("MT_DRAGONBOMBER", {health = 70}, {dmg = 20})
-HL_SetMTStats("MT_JETTBOMBER", {health = 70}, {dmg = 30})
-HL_SetMTStats("MT_JETTGUNNER", {health = 70}, {dmg = 30})
-HL_SetMTStats("MT_SNAILER", {health = 80}, {dmg = 30})
-HL_SetMTStats("MT_SPINCUSHION", {health = 80}, {dmg = 40})
-HL_SetMTStats("MT_PENGUINATOR", {health = 80}, {dmg = 25})
-HL_SetMTStats("MT_POPHAT", {health = 70}, {dmg = 20})
-HL_SetMTStats("MT_CACOLANTERN", {health = 70}, {dmg = 40})
-HL_SetMTStats("MT_HIVEELEMENTAL", {health = 70}, {dmg = 20})
-HL_SetMTStats("MT_BUMBLEBORE", {health = 30}, {dmg = 5})
-HL_SetMTStats("MT_SPINBOBERT", {health = 40}, {dmg = 30})
-HL_SetMTStats("MT_HANGSTER", {health = 40}, {dmg = 20})
-HL_SetMTStats("MT_BUGGLE", {health = 30}, {dmg = 5})
-HL_SetMTStats("MT_GOOMBA", {health = 40}, {dmg = 15})
-HL_SetMTStats("MT_BLUEGOOMBA", {health = 40}, {dmg = 15})
-HL_SetMTStats("MT_FANG", {health = 200}, {dmg = 40})
-HL_SetMTStats("MT_EGGMOBILE", {health = 360}, {dmg = 1})
-HL_SetMTStats("MT_EGGMOBILE2", {health = 800}, {dmg = 1})
-HL_SetMTStats("MT_EGGMOBILE3", {health = 1240}, {dmg = 1})
-HL_SetMTStats("MT_EGGMOBILE4", {health = 1680}, {dmg = 1})
-HL_SetMTStats("MT_METALSONIC_BATTLE", {health = 1200}, {dmg = 40})
-HL_SetMTStats("MT_CYBRAKDEMON", {health = 2240}, {dmg = 25})
-HL_SetMTStats("MT_CYBRAKDEMON_ELECTRIC_BARRIER", nil, {dmg = 1000})
-HL_SetMTStats("MT_ROSY", {health = 30})
-HL_SetMTStats("MT_PLAYER", {health = 100})
+HL_SetMTStats(safeGetMT(MT_BLUECRAWLA), {health = 30}, {dmg = 15})
+HL_SetMTStats(safeGetMT(MT_REDCRAWLA), {health = 60}, {dmg = 20})
+HL_SetMTStats(safeGetMT(MT_GFZFISH), {health = 20}, {dmg = 10})
+HL_SetMTStats(safeGetMT(MT_GOLDBUZZ), {health = 30}, {dmg = 20})
+HL_SetMTStats(safeGetMT(MT_REDBUZZ), {health = 30}, {dmg = 15})
+HL_SetMTStats(safeGetMT(MT_DETON), {health = 10}, {dmg = 60})
+HL_SetMTStats(safeGetMT(MT_POPUPTURRET), {health = 80}, {dmg = 10})
+HL_SetMTStats(safeGetMT(MT_CRAWLACOMMANDER), {health = 70}, {dmg = 30})
+HL_SetMTStats(safeGetMT(MT_SPRINGSHELL), {health = 80}, {dmg = 30})
+HL_SetMTStats(safeGetMT(MT_YELLOWSHELL), {health = 80}, {dmg = 30})
+HL_SetMTStats(safeGetMT(MT_SKIM), {health = 80}, {dmg = 10})
+HL_SetMTStats(safeGetMT(MT_CRUSHSTACEAN), {health = 80}, {dmg = 20})
+HL_SetMTStats(safeGetMT(MT_JETJAW), {health = 50}, {dmg = 20})
+HL_SetMTStats(safeGetMT(MT_BIGMINE), {health = 40}, {dmg = 40})
+HL_SetMTStats(safeGetMT(MT_BANPYURA), {health = 80}, {dmg = 20})
+HL_SetMTStats(safeGetMT(MT_FACESTABBER), {health = 175}, {dmg = 30})
+HL_SetMTStats(safeGetMT(MT_FACESTABBERSPEAR), nil, {dmg = 40})
+HL_SetMTStats(safeGetMT(MT_ROBOHOOD), {health = 80}, {dmg = 30})
+HL_SetMTStats(safeGetMT(MT_EGGGUARD), {health = 40}, {dmg = 20})
+HL_SetMTStats(safeGetMT(MT_GSNAPPER), {health = 60}, {dmg = 30})
+HL_SetMTStats(safeGetMT(MT_VULTURE), {health = 80}, {dmg = 30})
+HL_SetMTStats(safeGetMT(MT_POINTY), {health = 80}, {dmg = 20})
+HL_SetMTStats(safeGetMT(MT_MINUS), {health = 40}, {dmg = 15})
+HL_SetMTStats(safeGetMT(MT_CANARIVORE), {health = 50}, {dmg = 80})
+HL_SetMTStats(safeGetMT(MT_UNIDUS), {health = 80}, {dmg = 15})
+HL_SetMTStats(safeGetMT(MT_PYREFLY), {health = 80}, {dmg = 30})
+HL_SetMTStats(safeGetMT(MT_PTERABYTE), {health = 60}, {dmg = 20})
+HL_SetMTStats(safeGetMT(MT_DRAGONBOMBER), {health = 70}, {dmg = 20})
+HL_SetMTStats(safeGetMT(MT_JETTBOMBER), {health = 70}, {dmg = 30})
+HL_SetMTStats(safeGetMT(MT_JETTGUNNER), {health = 70}, {dmg = 30})
+HL_SetMTStats(safeGetMT(MT_SNAILER), {health = 80}, {dmg = 30})
+HL_SetMTStats(safeGetMT(MT_SPINCUSHION), {health = 80}, {dmg = 40})
+HL_SetMTStats(safeGetMT(MT_PENGUINATOR), {health = 80}, {dmg = 25})
+HL_SetMTStats(safeGetMT(MT_POPHAT), {health = 70}, {dmg = 20})
+HL_SetMTStats(safeGetMT(MT_CACOLANTERN), {health = 70}, {dmg = 40})
+HL_SetMTStats(safeGetMT(MT_HIVEELEMENTAL), {health = 70}, {dmg = 20})
+HL_SetMTStats(safeGetMT(MT_BUMBLEBORE), {health = 30}, {dmg = 5})
+HL_SetMTStats(safeGetMT(MT_SPINBOBERT), {health = 40}, {dmg = 30})
+HL_SetMTStats(safeGetMT(MT_HANGSTER), {health = 40}, {dmg = 20})
+HL_SetMTStats(safeGetMT(MT_BUGGLE), {health = 30}, {dmg = 5})
+HL_SetMTStats(safeGetMT(MT_GOOMBA), {health = 40}, {dmg = 15})
+HL_SetMTStats(safeGetMT(MT_BLUEGOOMBA), {health = 40}, {dmg = 15})
+HL_SetMTStats(safeGetMT(MT_FANG), {health = 200}, {dmg = 40})
+HL_SetMTStats(safeGetMT(MT_EGGMOBILE), {health = 360}, {dmg = 1})
+HL_SetMTStats(safeGetMT(MT_EGGMOBILE2), {health = 800}, {dmg = 1})
+HL_SetMTStats(safeGetMT(MT_EGGMOBILE3), {health = 1240}, {dmg = 1})
+HL_SetMTStats(safeGetMT(MT_EGGMOBILE4), {health = 1680}, {dmg = 1})
+HL_SetMTStats(safeGetMT(MT_METALSONIC_BATTLE), {health = 1200}, {dmg = 40})
+HL_SetMTStats(safeGetMT(MT_CYBRAKDEMON), {health = 2240}, {dmg = 25})
+HL_SetMTStats(safeGetMT(MT_CYBRAKDEMON_ELECTRIC_BARRIER), nil, {dmg = 1000})
+HL_SetMTStats(safeGetMT(MT_ROSY), {health = 30})
+HL_SetMTStats(safeGetMT(MT_PLAYER), {health = 100})
 --projectiles
-HL_SetMTStats("MT_REDRING", nil, {dmg = 6})
-HL_SetMTStats("MT_THROWNBOUNCE", nil, {dmg = 3})
-HL_SetMTStats("MT_THROWNAUTOMATIC", nil, {dmg = 9})
-HL_SetMTStats("MT_THROWNSCATTER", nil, {dmg = 15})
-HL_SetMTStats("MT_THROWNGRENADE", nil, {dmg = 15})
-HL_SetMTStats("MT_THROWNEXPLOSION", nil, {dmg = 15})
-HL_SetMTStats("MT_CORK", nil, {dmg = 10})
-HL_SetMTStats("MT_ROCKET", nil, {dmg = 15})
-HL_SetMTStats("MT_LASER", nil, {dmg = 30})
-HL_SetMTStats("MT_TORPEDO", nil, {dmg = 35})
-HL_SetMTStats("MT_TORPEDO2", nil, {dmg = 5})
-HL_SetMTStats("MT_ENERGYBALL", nil, {dmg = 40})
-HL_SetMTStats("MT_MINE", nil, {dmg = 15})
-HL_SetMTStats("MT_JETTBULLET", nil, {dmg = 15})
-HL_SetMTStats("MT_TURRETLASER", nil, {dmg = 3})
-HL_SetMTStats("MT_ARROW", nil, {dmg = 15})
-HL_SetMTStats("MT_DEMONFIRE", nil, {dmg = 25})
-HL_SetMTStats("MT_CANNONBALL", nil, {dmg = 40})
+HL_SetMTStats(safeGetMT(MT_REDRING), nil, {dmg = 6})
+HL_SetMTStats(safeGetMT(MT_THROWNBOUNCE), nil, {dmg = 3})
+HL_SetMTStats(safeGetMT(MT_THROWNAUTOMATIC), nil, {dmg = 9})
+HL_SetMTStats(safeGetMT(MT_THROWNSCATTER), nil, {dmg = 15})
+HL_SetMTStats(safeGetMT(MT_THROWNGRENADE), nil, {dmg = 15})
+HL_SetMTStats(safeGetMT(MT_THROWNEXPLOSION), nil, {dmg = 15})
+HL_SetMTStats(safeGetMT(MT_CORK), nil, {dmg = 10})
+HL_SetMTStats(safeGetMT(MT_ROCKET), nil, {dmg = 15})
+HL_SetMTStats(safeGetMT(MT_LASER), nil, {dmg = 30})
+HL_SetMTStats(safeGetMT(MT_TORPEDO), nil, {dmg = 35})
+HL_SetMTStats(safeGetMT(MT_TORPEDO2), nil, {dmg = 5})
+HL_SetMTStats(safeGetMT(MT_ENERGYBALL), nil, {dmg = 40})
+HL_SetMTStats(safeGetMT(MT_MINE), nil, {dmg = 15})
+HL_SetMTStats(safeGetMT(MT_JETTBULLET), nil, {dmg = 15})
+HL_SetMTStats(safeGetMT(MT_TURRETLASER), nil, {dmg = 3})
+HL_SetMTStats(safeGetMT(MT_ARROW), nil, {dmg = 15})
+HL_SetMTStats(safeGetMT(MT_DEMONFIRE), nil, {dmg = 25})
+HL_SetMTStats(safeGetMT(MT_CANNONBALL), nil, {dmg = 40})
+HL_SetMTStats(safeGetMT(MT_RING), nil, {dmg = 40})
 
 local function weightedRandom(chances) -- returns one random entry based on the weighted chances
-    local total = 0
-    for _, entry in ipairs(chances) do
-        total = total + tonumber(entry.chance)
-    end
-    local r = P_RandomFixed() * total
-    local highestChanceEntry
-    for _, entry in ipairs(chances) do
-        if not highestChanceEntry or entry.chance > highestChanceEntry.chance then
-            highestChanceEntry = entry
-        end
-        r = r - tonumber(entry.chance)
-        if r <= 0 then
-            return entry
-        end
-    end
-    return highestChanceEntry -- Ensures a valid return value
+	local total = 0
+	for _, entry in ipairs(chances) do
+		total = total + tonumber(entry.chance)
+	end
+	local r = P_RandomFixed() * total
+	local highestChanceEntry
+	for _, entry in ipairs(chances) do
+		if not highestChanceEntry or entry.chance > highestChanceEntry.chance then
+			highestChanceEntry = entry
+		end
+		r = r - tonumber(entry.chance)
+		if r <= 0 then
+			return entry
+		end
+	end
+	return highestChanceEntry -- Ensures a valid return value
 end
 
 local function removeFromChanceList(chances, toremove) -- get a new weighted chance, without some specific item
-    local newList = {}
-    local dudChance = 0
-    local otherItems = 0
+	local newList = {}
+	local dudChance = 0
+	local otherItems = 0
 
-    -- separate the dud and count the non-dud entries
-    for _, entry in ipairs(chances) do
-        if entry.name == toremove then
-            dudChance = tonumber(entry.chance)
-        else
-            otherItems = otherItems + 1
-            -- copy the entry to avoid mutating the original list
-            table.insert(newList, { name = entry.name, chance = tonumber(entry.chance) })
-        end
-    end
+	-- separate the dud and count the non-dud entries
+	for _, entry in ipairs(chances) do
+		if entry.name == toremove then
+			dudChance = tonumber(entry.chance)
+		else
+			otherItems = otherItems + 1
+			-- copy the entry to avoid mutating the original list
+			table.insert(newList, { name = entry.name, chance = tonumber(entry.chance) })
+		end
+	end
 
-    -- add an equal share of the dud's chance to every remaining weapon
-    local bonus = dudChance / otherItems
-    for _, entry in ipairs(newList) do
-        entry.chance = entry.chance + bonus
-    end
+	-- add an equal share of the dud's chance to every remaining weapon
+	local bonus = dudChance / otherItems
+	for _, entry in ipairs(newList) do
+		entry.chance = entry.chance + bonus
+	end
 
-    return newList
+	return newList
 end
 
 
 rawset(_G, "HL_GetMonitorPickUps", function(chanceList, amount) -- get an amount-length list of weapons, chances determined by chanceList. Main purpose is to get pick-ups dropped by Monitors.
-    local results = {}
-    for i = 1, amount do
-        local selected = weightedRandom(chanceList)
-        if selected.name == "crowbar" then -- we got a dud!! make sure we don't rip people off by getting another weapon
-            local reweightedList = removeFromChanceList(chanceList, "crowbar")
-            selected = weightedRandom(reweightedList)
-        end
-        table.insert(results, selected)
-    end
-    return results
+	local results = {}
+	for i = 1, amount do
+		local selected = weightedRandom(chanceList)
+		if selected.name == "crowbar" then -- we got a dud!! make sure we don't rip people off by getting another weapon
+			local reweightedList = removeFromChanceList(chanceList, "crowbar")
+			selected = weightedRandom(reweightedList)
+		end
+		table.insert(results, selected)
+	end
+	return results
 end)
 
 rawset(_G, "HL_ChangeViewmodelState", function(player, action, backup)
-    local viewmodel = kombihl1viewmodels[HL_WpnStats[player.hl1weapon].viewmodel or "PISTOL"]
+	local viewmodel = kombihl1viewmodels[HL_WpnStats[player.hl1weapon].viewmodel or "PISTOL"]
 
-    local function getFrameData(state)
-        local keys = {}
-        for key in state:gmatch("%S+") do
-            table.insert(keys, key)
-        end
+	local function getFrameData(state)
+		local keys = {}
+		for key in state:gmatch("%S+") do
+			table.insert(keys, key)
+		end
 
-        local node = viewmodel.animations
-        local lastValidNode = node
+		local node = viewmodel.animations
+		local lastValidNode = node
 
-        for _, key in ipairs(keys) do
-            -- Do this if someone has multiple lists within a list they wanna use
-            local index = tonumber(key) or key
-            if node and node[index] then
-                lastValidNode = node[index]
-                node = node[index]
-            else
-                break  -- exit if the state path isn't found
-            end
-        end
+		for _, key in ipairs(keys) do
+			-- Do this if someone has multiple lists within a list they wanna use
+			local index = tonumber(key) or key
+			if node and node[index] then
+				lastValidNode = node[index]
+				node = node[index]
+			else
+				break  -- exit if the state path isn't found
+			end
+		end
 
-        return lastValidNode ~= viewmodel.animations and lastValidNode or nil
-    end
+		return lastValidNode ~= viewmodel.animations and lastValidNode or nil
+	end
 
-    local frameData = getFrameData(action) or getFrameData(backup)
-    if not frameData then
-        warn("States " .. action .. " and " .. backup .. " don't exist!")
-        return
-    end
+	local frameData = getFrameData(action) or getFrameData(backup)
+	if not frameData then
+		warn("States " .. action .. " and " .. backup .. " don't exist!")
+		return
+	end
 
-    player.hl1viewmdaction = action  -- retain the state string for debugging/logging
-    player.hl1currentAnimation = frameData  -- store the animation table directly
-    player.hl1frameindex = 1
-    player.hl1frame = frameData[1].frame
-    player.hl1frameclock = frameData[1].duration
+	player.hl1viewmdaction = action  -- retain the state string for debugging/logging
+	player.hl1currentAnimation = frameData  -- store the animation table directly
+	player.hl1frameindex = 1
+	player.hl1frame = frameData[1].frame
+	player.hl1frameclock = frameData[1].duration
 end)
 
 rawset(_G, "HL_GetWeapons", function(items, targetSlot, player) -- gets all available weapons.

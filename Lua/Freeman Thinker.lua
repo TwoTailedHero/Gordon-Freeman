@@ -154,7 +154,7 @@ addHook("MobjDamage", function(target, hurter, src, dmg, dmgType)
 		end
 		if not inf return end
 		local damage = hookeddamage or HL_GetDamage(inf)
-		if not HL1_DMGStats[inf.type] print("No DMGStats found for aggressor!") HL1_DMGStats[inf.type] = {damage = 0} end
+		if not HL1_DMGStats[inf.type] print("No DMGStats found for aggressor!") HL1_DMGStats[inf.type] = {damage = {dmg = 0}} end
 		local damagetype = hookeddamagetype or HL1_DMGStats[inf.type] and HL1_DMGStats[inf.type].damagetype
 		target.player.powers[pw_flashing] = 18
 		target.player.timeshit = $+1

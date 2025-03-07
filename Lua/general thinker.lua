@@ -457,7 +457,7 @@ if not duke_roboinfo
 	rawset(_G, "duke_roboinfo", {})
 end
 
-duke_roboinfo[MT_HL1_BULLET] = {unshrinkable = true, damage = 100, ringslingerdamage = true} -- pre-define our properties
+duke_roboinfo[MT_HL1_BULLET] = {unshrinkable = true, damage = 9001, ringslingerdamage = true} -- pre-define our properties
 -- ^ for some reason the property to disable hurt invulnerability is labelled "ringslingerdamage"??
 
 rawset(_G, "kombiHL1SpecialHandlers", { -- rawset to _G to open up modding environment. Ya wanna add your own entry? Go on right ahead! Anybody who doesn't follow this logic are lame asf and they should be shamed for it
