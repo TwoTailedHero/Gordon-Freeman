@@ -221,8 +221,8 @@ rawset(_G, "HL_ChangeViewmodelState", function(player, action, backup)
 	player.hl1viewmdaction = action  -- retain the state string for debugging/logging
 	player.hl1currentAnimation = frameData  -- store the animation table directly
 	player.hl1frameindex = 1
-	player.hl1frame = frameData[1].frame
-	player.hl1frameclock = frameData[1].duration
+	player.hl1frame = frameData[1].baseFrameIndex
+	player.hl1frameclock = frameData[1].frameDuration
 end)
 
 rawset(_G, "HL_GetWeapons", function(items, targetSlot, player) -- gets all available weapons.

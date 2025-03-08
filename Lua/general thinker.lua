@@ -179,26 +179,26 @@ addHook("PlayerThink", function(player)
         local frame = currentAnimation[player.hl1frameindex]
         if frame then
             -- Play sound, if this frame has it
-            if player.hl1frame == frame.frame and frame.sound then
-                local soundToPlay = frame.sound
-                if frame.sounds then
-                    soundToPlay = $ + P_RandomRange(0, frame.sounds-1)
+            if player.hl1frame == frame.baseFrameIndex and frame.frameSound then
+                local soundToPlay = frame.frameSound
+                if frame.frameSounds then
+                    soundToPlay = $ + P_RandomRange(0, frame.frameSounds-1)
                 end
 				print(soundToPlay)
                 S_StartSound(player.mo, soundToPlay)
             end
 
-            -- Use rlelength to Run-Length encode how many more frames we have
-            if frame.rlelength and player.hl1frame < frame.frame + frame.rlelength - 1 then
+            -- Use frameStepCount to Run-Length encode how many more frames we have
+            if frame.frameStepCount and player.hl1frame < frame.baseFrameIndex + frame.frameStepCount - 1 then
                 player.hl1frame = player.hl1frame + 1
-                player.hl1frameclock = frame.duration
+                player.hl1frameclock = frame.frameDuration
             else
                 -- Move to the next frame in the sequence
                 player.hl1frameindex = player.hl1frameindex + 1
                 local nextFrame = currentAnimation[player.hl1frameindex]
                 if nextFrame then
-                    player.hl1frame = nextFrame.frame
-                    player.hl1frameclock = nextFrame.duration
+                    player.hl1frame = nextFrame.baseFrameIndex
+                    player.hl1frameclock = nextFrame.frameDuration
                 else
                     switchToIdle(player)
                 end

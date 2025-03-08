@@ -143,7 +143,7 @@ states[S_HL1_HIT] = {
 local skin = "kombifreeman"
 local fire = BT_ATTACK
 local altfire = BT_FIRENORMAL
-local sound = sfx_hl1g17
+local frameSound = sfx_hl1g17
 
 rawset(_G, "VMDL_FLIP", 1)
 rawset(_G, "VBOB_NONE", 1)
@@ -155,50 +155,50 @@ rawset(_G, "kombihl1viewmodels", {
 		flags = VMDL_FLIP,
 		animations = {
 			ready = {
-				{frame = 0, duration = 3, rlelength = 3},
+				{baseFrameIndex = 0, frameDuration = 3, frameStepCount = 3},
 			},
 			primaryfire = {
 				normal = {
 					{
-						{frame = 4, duration = 2},
-						{frame = 55, duration = 4},
-						{frame = 56, duration = 3},
-						{frame = 57, duration = 4},
-						{frame = 58, duration = 3},
-						{frame = 59, duration = 2},
+						{baseFrameIndex = 4, frameDuration = 2},
+						{baseFrameIndex = 55, frameDuration = 4},
+						{baseFrameIndex = 56, frameDuration = 3},
+						{baseFrameIndex = 57, frameDuration = 4},
+						{baseFrameIndex = 58, frameDuration = 3},
+						{baseFrameIndex = 59, frameDuration = 2},
 					},
 					{
-						{frame = 59, duration = 3, rlelength = 5},
+						{baseFrameIndex = 59, frameDuration = 3, frameStepCount = 5},
 					},
 					{
-						{frame = 65, duration = 3, rlelength = 5},
+						{baseFrameIndex = 65, frameDuration = 3, frameStepCount = 5},
 					},
 				},
 				hit = {
 					{
-						{frame = 71, duration = 3, rlelength = 4},
+						{baseFrameIndex = 71, frameDuration = 3, frameStepCount = 4},
 					},
 					{
-						{frame = 59, duration = 1},
-						{frame = 60, duration = 2},
-						{frame = 61, duration = 3, rlelength = 4},
+						{baseFrameIndex = 59, frameDuration = 1},
+						{baseFrameIndex = 60, frameDuration = 2},
+						{baseFrameIndex = 61, frameDuration = 3, frameStepCount = 4},
 					},
 					{
-						{frame = 82, duration = 1},
-						{frame = 83, duration = 2},
-						{frame = 84, duration = 3, rlelength = 4},
+						{baseFrameIndex = 82, frameDuration = 1},
+						{baseFrameIndex = 83, frameDuration = 2},
+						{baseFrameIndex = 84, frameDuration = 3, frameStepCount = 4},
 					},
 				},
 			},
 			idle = {
 				{
-					{frame = 4, duration = 10, rlelength = 9},
+					{baseFrameIndex = 4, frameDuration = 10, frameStepCount = 9},
 				},
 				{
-					{frame = 15, duration = 8, rlelength = 19},
+					{baseFrameIndex = 15, frameDuration = 8, frameStepCount = 19},
 				},
 				{
-					{frame = 35, duration = 8, rlelength = 19},
+					{baseFrameIndex = 35, frameDuration = 8, frameStepCount = 19},
 				},
 			},
 		},
@@ -207,46 +207,46 @@ rawset(_G, "kombihl1viewmodels", {
 		flags = VMDL_FLIP,
 		animations = {
 			ready = {
-				{frame = 1, duration = 3, rlelength = 6},
+				{baseFrameIndex = 1, frameDuration = 3, frameStepCount = 6},
 			},
 			primaryfire = {
 				normal = {
-					{frame = 53, duration = 2, rlelength = 8},
+					{baseFrameIndex = 53, frameDuration = 2, frameStepCount = 8},
 				},
 				empty = {
-					{frame = 2, duration = 2},
-					{frame = 62, duration = 2, rlelength = 8},
+					{baseFrameIndex = 2, frameDuration = 2},
+					{baseFrameIndex = 62, frameDuration = 2, frameStepCount = 8},
 				}
 			},
 			secondaryfire = {
 				normal = {
-					{frame = 59, duration = 1},
-					{frame = 52, duration = 2, rlelength = 8},
+					{baseFrameIndex = 59, frameDuration = 1},
+					{baseFrameIndex = 52, frameDuration = 2, frameStepCount = 8},
 				},
 				empty = {
-					{frame = 59, duration = 1},
-					{frame = 52, duration = 2, rlelength = 9},
+					{baseFrameIndex = 59, frameDuration = 1},
+					{baseFrameIndex = 52, frameDuration = 2, frameStepCount = 9},
 				}
 			},
 			reload = {
-				{frame = 27, duration = 6},
-				{frame = 84, duration = 6, rlelength = 1},
-				{frame = 86, duration = 6, sound = sfx_hl1pr1, rlelength = 5},
-				{frame = 92, duration = 6, sound = sfx_hl1pr2, rlelength = 4},
+				{baseFrameIndex = 27, frameDuration = 6},
+				{baseFrameIndex = 84, frameDuration = 6, frameStepCount = 1},
+				{baseFrameIndex = 86, frameDuration = 6, frameSound = sfx_hl1pr1, frameStepCount = 5},
+				{baseFrameIndex = 92, frameDuration = 6, frameSound = sfx_hl1pr2, frameStepCount = 4},
 			},
 			idle = {
 				{
-					{frame = 27, duration = 8},
-					{frame = 8, duration = 8, rlelength = 19},
-					{frame = 27, duration = 8},
+					{baseFrameIndex = 27, frameDuration = 8},
+					{baseFrameIndex = 8, frameDuration = 8, frameStepCount = 19},
+					{baseFrameIndex = 27, frameDuration = 8},
 				},
 				{
-					{frame = 27, duration = 8},
-					{frame = 28, duration = 12, rlelength = 9},
+					{baseFrameIndex = 27, frameDuration = 8},
+					{baseFrameIndex = 28, frameDuration = 12, frameStepCount = 9},
 				},
 				{
-					{frame = 27, duration = 8},
-					{frame = 37, duration = 10, rlelength = 14},
+					{baseFrameIndex = 27, frameDuration = 8},
+					{baseFrameIndex = 37, frameDuration = 10, frameStepCount = 14},
 				},
 			},
 		},
@@ -255,35 +255,35 @@ rawset(_G, "kombihl1viewmodels", {
 		flags = VMDL_FLIP,
 		animations = {
 			ready = {
-				{frame = 0, duration = 3, rlelength = 6},
+				{baseFrameIndex = 0, frameDuration = 3, frameStepCount = 6},
 			},
 			primaryfire = {
-				{frame = 6, duration = 2},
-				{frame = 120, duration = 3, rlelength = 8},
+				{baseFrameIndex = 6, frameDuration = 2},
+				{baseFrameIndex = 120, frameDuration = 3, frameStepCount = 8},
 			},
 			reload = {
-				{frame = 6, duration = 6},
-				{frame = 130, duration = 4, rlelength = 2},
-				{frame = 133, duration = 3, rlelength = 18},
-				{frame = 152, duration = 3, sound = sfx_hl357r, rlelength = 3},
-				{frame = 156, duration = 8},
+				{baseFrameIndex = 6, frameDuration = 6},
+				{baseFrameIndex = 130, frameDuration = 4, frameStepCount = 2},
+				{baseFrameIndex = 133, frameDuration = 3, frameStepCount = 18},
+				{baseFrameIndex = 152, frameDuration = 3, frameSound = sfx_hl357r, frameStepCount = 3},
+				{baseFrameIndex = 156, frameDuration = 8},
 			},
 			idle = {
 				{
-					{frame = 6, duration = 6, rlelength = 18},
-					{frame = 25, duration = 5},
+					{baseFrameIndex = 6, frameDuration = 6, frameStepCount = 18},
+					{baseFrameIndex = 25, frameDuration = 5},
 				},
 				{
-					{frame = 26, duration = 6, rlelength = 18},
-					{frame = 45, duration = 5},
+					{baseFrameIndex = 26, frameDuration = 6, frameStepCount = 18},
+					{baseFrameIndex = 45, frameDuration = 5},
 				},
 				{
-					{frame = 46, duration = 6, rlelength = 24},
-					{frame = 71, duration = 15},
+					{baseFrameIndex = 46, frameDuration = 6, frameStepCount = 24},
+					{baseFrameIndex = 71, frameDuration = 15},
 				},
 				{
-					{frame = 72, duration = 6, rlelength=46},
-					{frame = 119, duration = 10},
+					{baseFrameIndex = 72, frameDuration = 6, frameStepCount=46},
+					{baseFrameIndex = 119, frameDuration = 10},
 				},
 			},
 		},
@@ -292,48 +292,48 @@ rawset(_G, "kombihl1viewmodels", {
 		idleanims = 3,
 		flags = VMDL_FLIP,
 		ready = {
-			{frame = 0, duration = 3, rlelength = 4},
+			{baseFrameIndex = 0, frameDuration = 3, frameStepCount = 4},
 		},
 		animations = {
 			ready = {
-				{frame = 0, duration = 3, rlelength = 4},
+				{baseFrameIndex = 0, frameDuration = 3, frameStepCount = 4},
 			},
 			primaryfire = {
-				{frame = 5, duration = 3},
-				{frame = 43, duration = 3, rlelength = 4},
-				{frame = 48, duration = 3, sound = sfx_hl1sgc, rlelength = 6},
+				{baseFrameIndex = 5, frameDuration = 3},
+				{baseFrameIndex = 43, frameDuration = 3, frameStepCount = 4},
+				{baseFrameIndex = 48, frameDuration = 3, frameSound = sfx_hl1sgc, frameStepCount = 6},
 			},
 			reload = {
 				start = {
-					{frame = 5, duration = 3},
-					{frame = 75, duration = 3, rlelength = 5},
+					{baseFrameIndex = 5, frameDuration = 3},
+					{baseFrameIndex = 75, frameDuration = 3, frameStepCount = 5},
 				},
 				loop = {
-					{frame = 81, duration = 4, rlelength = 2},
-					{frame = 83, duration = 4, sound = sfx_hl1sr1, sounds = 3},
-					{frame = 84, duration = 4, rlelength = 2},
+					{baseFrameIndex = 81, frameDuration = 4, frameStepCount = 2},
+					{baseFrameIndex = 83, frameDuration = 4, frameSound = sfx_hl1sr1, frameSounds = 3},
+					{baseFrameIndex = 84, frameDuration = 4, frameStepCount = 2},
 				},
 				stop = {
-					{frame = 80, duration = 4},
-					{frame = 86, duration = 4, rlelength = 2},
-					{frame = 88, duration = 4, sound = sfx_hl1sgc},
-					{frame = 89, duration = 4, rlelength = 4},
+					{baseFrameIndex = 80, frameDuration = 4},
+					{baseFrameIndex = 86, frameDuration = 4, frameStepCount = 2},
+					{baseFrameIndex = 88, frameDuration = 4, frameSound = sfx_hl1sgc},
+					{baseFrameIndex = 89, frameDuration = 4, frameStepCount = 4},
 				},
 			},
 			idle = {
 				{
-					{frame = 5, duration = 8, rlelength = 7},
-					{frame = 12, duration = 8},
+					{baseFrameIndex = 5, frameDuration = 8, frameStepCount = 7},
+					{baseFrameIndex = 12, frameDuration = 8},
 				},
 				{
-					{frame = 5, duration = 8},
-					{frame = 32, duration = 8, rlelength = 10},
-					{frame = 42, duration = 5},
+					{baseFrameIndex = 5, frameDuration = 8},
+					{baseFrameIndex = 32, frameDuration = 8, frameStepCount = 10},
+					{baseFrameIndex = 42, frameDuration = 5},
 				},
 				{
-					{frame = 5, duration = 8},
-					{frame = 15, duration = 10, rlelength = 15},
-					{frame = 31, duration = 16},
+					{baseFrameIndex = 5, frameDuration = 8},
+					{baseFrameIndex = 15, frameDuration = 10, frameStepCount = 15},
+					{baseFrameIndex = 31, frameDuration = 16},
 				},
 			},
 		}
@@ -343,18 +343,18 @@ rawset(_G, "kombihl1viewmodels", {
 		bobtype = VBOB_DOOM,
 		animations = {
 			ready = {
-				{frame = 1, duration = 3},
+				{baseFrameIndex = 1, frameDuration = 3},
 			},
 			fire = {
-				{frame = 4, duration = 6},
-				{frame = 3, duration = 4},
-				{frame = 2, duration = 5},
+				{baseFrameIndex = 4, frameDuration = 6},
+				{baseFrameIndex = 3, frameDuration = 4},
+				{baseFrameIndex = 2, frameDuration = 5},
 			},
 			reload = { -- compatibility layer
-				{frame = 2, duration = 6},
+				{baseFrameIndex = 2, frameDuration = 6},
 			},
 			idle = {
-				{frame = 1, duration = INT32_MAX},
+				{baseFrameIndex = 1, frameDuration = INT32_MAX},
 			},
 		},
 	},
@@ -363,23 +363,23 @@ rawset(_G, "kombihl1viewmodels", {
 		bobtype = VBOB_DOOM,
 			animations = {
 			ready = {
-				{frame = 1, duration = 3},
+				{baseFrameIndex = 1, frameDuration = 3},
 			},
 			fire = {
-				{frame = 1, duration = 4, overlay = 5},
-				{frame = 1, duration = 3, overlay = 6},
-				{frame = 2, duration = 5, rlelength = 1},
-				{frame = 4, duration = 4},
-				{frame = 3, duration = 5},
-				{frame = 2, duration = 5},
-				{frame = 1, duration = 3},
-				{frame = 1, duration = 7},
+				{baseFrameIndex = 1, frameDuration = 4, frameOverlayIndex = 5},
+				{baseFrameIndex = 1, frameDuration = 3, frameOverlayIndex = 6},
+				{baseFrameIndex = 2, frameDuration = 5, frameStepCount = 1},
+				{baseFrameIndex = 4, frameDuration = 4},
+				{baseFrameIndex = 3, frameDuration = 5},
+				{baseFrameIndex = 2, frameDuration = 5},
+				{baseFrameIndex = 1, frameDuration = 3},
+				{baseFrameIndex = 1, frameDuration = 7},
 			},
 			reload = {
-				{frame = 2, duration = 6},
+				{baseFrameIndex = 2, frameDuration = 6},
 			},
 			idle1 = {
-				{frame = 1, duration = INT32_MAX},
+				{baseFrameIndex = 1, frameDuration = INT32_MAX},
 			},
 		},
 	},
@@ -388,22 +388,22 @@ rawset(_G, "kombihl1viewmodels", {
 		bobtype = VBOB_DOOM,
 		animations = {
 			ready = {
-				{frame = 1,3},
+				{baseFrameIndex = 1,3},
 			},
 			fire = {
-				{frame = 1, duration = 3, overlay = 9},
-				{frame = 1, duration = 4, overlay = 10},
-				{frame = 2, duration = 7, rlelength = 1},
-				{frame = 4, duration = 7, sound = sfx_dbopn,rlelength = 1},
-				{frame = 6, duration = 7, sound = sfx_dbload},
-				{frame = 7, duration = 6},
-				{frame = 8, duration = 6, sound = sfx_dbcls},
+				{baseFrameIndex = 1, frameDuration = 3, frameOverlayIndex = 9},
+				{baseFrameIndex = 1, frameDuration = 4, frameOverlayIndex = 10},
+				{baseFrameIndex = 2, frameDuration = 7, frameStepCount = 1},
+				{baseFrameIndex = 4, frameDuration = 7, frameSound = sfx_dbopn, frameStepCount = 1},
+				{baseFrameIndex = 6, frameDuration = 7, frameSound = sfx_dbload},
+				{baseFrameIndex = 7, frameDuration = 6},
+				{baseFrameIndex = 8, frameDuration = 6, frameSound = sfx_dbcls},
 			},
 			reload = {
-				{frame = 2, duration = 6},
+				{baseFrameIndex = 2, frameDuration = 6},
 			},
 			idle1 = {
-				{frame = 1, duration = INT32_MAX},
+				{baseFrameIndex = 1, frameDuration = INT32_MAX},
 			},
 		},
 	},
@@ -412,17 +412,17 @@ rawset(_G, "kombihl1viewmodels", {
 		bobtype = VBOB_DOOM,
 		animations = {
 			ready = {
-				{frame = 1, duration = 4},
+				{baseFrameIndex = 1, frameDuration = 4},
 			},
 			fire = {
-				{frame = 1, duration = 4,overlay = 3},
-				{frame = 2, duration = 4,overlay = 4},
+				{baseFrameIndex = 1, frameDuration = 4, frameOverlayIndex = 3},
+				{baseFrameIndex = 2, frameDuration = 4, frameOverlayIndex = 4},
 			},
 			reload = {
-				{frame = 2, duration = 6},
+				{baseFrameIndex = 2, frameDuration = 6},
 			},
 			idle1 = {
-				{frame = 1, duration = INT32_MAX},
+				{baseFrameIndex = 1, frameDuration = INT32_MAX},
 			},
 		},
 	},
@@ -432,7 +432,7 @@ rawset(_G, "HL_WpnStats", {
 	["crowbar"] =
 	{
 		israycaster = true, -- the rest probably don't need this property. determines if the bullet object kills itself if it doesn't hit anything.
-		viewmodel = "CROWBAR", -- the graphic we'll use for the weapon. Graphic format is VMDL[vmdlkey][frame]!!
+		viewmodel = "CROWBAR", -- the graphic we'll use for the weapon. Graphic format is VMDL[vmdlkey][baseFrameIndex]!!
 		vmdlflip = true,
 		selectgraphic = "HL1HUDCROWBAR",
 		neverdenyuse = true,
@@ -445,9 +445,9 @@ rawset(_G, "HL_WpnStats", {
 			clipsize = WEAPON_NONE,
 			shotcost = 0,
 			damage = 5,
-			firesound = sfx_hlcbar,
-			firehitsound = sfx_hlcbh1,
-			firehitsounds = 2,
+			fireframeSound = sfx_hlcbar,
+			firehitframeSound = sfx_hlcbh1,
+			firehitframeSounds = 2,
 			maxdistance = 32,
 			firedelay = 18,
 			hitdelay = 9,
@@ -476,7 +476,7 @@ rawset(_G, "HL_WpnStats", {
 			horizspread = 5*FRACUNIT,
 			vertspread = 5*FRACUNIT,
 			kickback = 5*FRACUNIT/2,
-			firesound = sfx_hl1g17,
+			fireframeSound = sfx_hl1g17,
 			firedelay = 12,
 		},
 		autoreload = true,
@@ -487,7 +487,7 @@ rawset(_G, "HL_WpnStats", {
 			horizspread = 5,
 			vertspread = 5,
 			kickback = 5*FRACUNIT/2,
-			firesound = sfx_hl1g17,
+			fireframeSound = sfx_hl1g17,
 			firedelay = 6,
 		},
 		altfire = true,
@@ -516,8 +516,8 @@ rawset(_G, "HL_WpnStats", {
 			horizspread = 0,
 			vertspread = 0,
 			kickback = 7*FRACUNIT,
-			firesound = sfx_hl3571,
-			["firesounds"] = 2,
+			fireframeSound = sfx_hl3571,
+			["fireframeSounds"] = 2,
 			firedelay = 26,
 		},
 		autoreload = true,
@@ -553,8 +553,8 @@ rawset(_G, "HL_WpnStats", {
 			vertspread = 4*FRACUNIT,
 			kickback = 1*FRACUNIT,
 			kickbackcanflip = true,
-			firesound = sfx_hl1ar1,
-			firesounds = 3,
+			fireframeSound = sfx_hl1ar1,
+			fireframeSounds = 3,
 			firedelay = 4,
 		},
 		secondary = {
@@ -563,8 +563,8 @@ rawset(_G, "HL_WpnStats", {
 			clipsize = WEAPON_NONE,
 			shotcost = 1,
 			kickback = 10*FRACUNIT,
-			firesound = sfx_hlarg1,
-			firesounds = 2,
+			fireframeSound = sfx_hlarg1,
+			fireframeSounds = 2,
 			firedelay = 20,
 			firedeny = 30,
 		},
@@ -593,7 +593,7 @@ rawset(_G, "HL_WpnStats", {
 			horizspread = 7*FRACUNIT,
 			vertspread = 5*FRACUNIT,
 			kickback = 5*FRACUNIT/2,
-			firesound = sfx_hl1sg1,
+			fireframeSound = sfx_hl1sg1,
 			firedelay = 12,
 		},
 		autoreload = true,
@@ -605,7 +605,7 @@ rawset(_G, "HL_WpnStats", {
 			horizspread = 56*FRACUNIT/5,
 			vertspread = 71*FRACUNIT/10,
 			kickback = 5*FRACUNIT/2,
-			firesound = sfx_hl1sg1,
+			fireframeSound = sfx_hl1sg1,
 			firedelay = 6,
 		},
 		altfire = true,
@@ -634,7 +634,7 @@ rawset(_G, "HL_WpnStats", {
 		shotcost = 1,
 		damage = 50,
 		kickback = 3*FRACUNIT,
-		firesound = sfx_hl1g17,
+		fireframeSound = sfx_hl1g17,
 		autoreload = true,
 		altfire = false,
 		globalfiredelay = {
@@ -658,7 +658,7 @@ rawset(_G, "HL_WpnStats", {
 		clipsize = 5,
 		shotcost = 1,
 		kickback = 5*FRACUNIT/2,
-		firesound = sfx_hl1g17,
+		fireframeSound = sfx_hl1g17,
 		autoreload = true,
 		altfire = false,
 		globalfiredelay = {
@@ -682,7 +682,7 @@ rawset(_G, "HL_WpnStats", {
 		clipsize = WEAPON_NONE,
 		shotcost = 1,
 		kickback = 5*FRACUNIT/2,
-		firesound = sfx_hl1g17,
+		fireframeSound = sfx_hl1g17,
 		autoreload = true,
 		altfire = false,
 		altusesprimaryclip = true,
@@ -707,7 +707,7 @@ rawset(_G, "HL_WpnStats", {
 		clipsize = WEAPON_NONE,
 		shotcost = 1,
 		kickback = 5*FRACUNIT/2,
-		firesound = sfx_hl1g17,
+		fireframeSound = sfx_hl1g17,
 		autoreload = true,
 		altfire = false,
 		altusesprimaryclip = true,
@@ -731,7 +731,7 @@ rawset(_G, "HL_WpnStats", {
 		clipsize = WEAPON_NONE,
 		shotcost = 1,
 		kickback = 5*FRACUNIT/2,
-		firesound = sfx_hl1g17,
+		fireframeSound = sfx_hl1g17,
 		autoreload = true,
 		altfire = false,
 		altusesprimaryclip = true,
@@ -758,7 +758,7 @@ rawset(_G, "HL_WpnStats", {
 		shotcost = 1,
 		damage = 1,
 		["explosionradius"] = 100,
-		firesound = sfx_none,
+		fireframeSound = sfx_none,
 		autoreload = true,
 		altfire = false,
 		globalfiredelay = {
@@ -780,7 +780,7 @@ rawset(_G, "HL_WpnStats", {
 		ammo = "satchel",
 		clipsize = WEAPON_NONE,
 		shotcost = 1,
-		firesound = sfx_none,
+		fireframeSound = sfx_none,
 		autoreload = true,
 		altfire = false,
 		globalfiredelay = {
@@ -802,7 +802,7 @@ rawset(_G, "HL_WpnStats", {
 		ammo = "tripmine",
 		clipsize = WEAPON_NONE,
 		shotcost = 1,
-		firesound = sfx_none,
+		fireframeSound = sfx_none,
 		autoreload = true,
 		altfire = false,
 		globalfiredelay = {
@@ -824,8 +824,8 @@ rawset(_G, "HL_WpnStats", {
 		ammo = "snark",
 		clipsize = WEAPON_NONE,
 		shotcost = 1,
-		["equipsound"] = sfx_none,
-		firesound = sfx_none,
+		["equipframeSound"] = sfx_none,
+		fireframeSound = sfx_none,
 		autoreload = true,
 		altfire = false,
 		globalfiredelay = {

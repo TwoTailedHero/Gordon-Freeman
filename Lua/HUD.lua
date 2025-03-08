@@ -78,7 +78,7 @@ hud.add(function(v, player)
 					(160 * FRACUNIT) + bobx,
 					(106 * FRACUNIT) + boby,
 					FRACUNIT,
-					v.cachePatch("VMDL" .. kmbivmdl .. vmdl.overlay),
+					v.cachePatch("VMDL" .. kmbivmdl .. vmdl.frameOverlayIndex),
 					vmdlflags|V_SNAPTOBOTTOM,
 					colormapfunc(player.mo.subsector.sector, player.mo.x, player.mo.y, player.mo.z, player.mo.subsector.sector.lightlevel)
 				)
