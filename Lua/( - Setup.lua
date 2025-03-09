@@ -186,43 +186,77 @@ rawset(_G, "HL_GetMonitorPickUps", function(chanceList, amount) -- get an amount
 	return results
 end)
 
-rawset(_G, "HL_ChangeViewmodelState", function(player, action, backup)
-	local viewmodel = kombihl1viewmodels[HL_WpnStats[player.hl1weapon].viewmodel or "PISTOL"]
-
-	local function getFrameData(state)
-		local keys = {}
-		for key in state:gmatch("%S+") do
-			table.insert(keys, key)
-		end
-
-		local node = viewmodel.animations
-		local lastValidNode = node
-
-		for _, key in ipairs(keys) do
-			-- Do this if someone has multiple lists within a list they wanna use
-			local index = tonumber(key) or key
-			if node and node[index] then
-				lastValidNode = node[index]
-				node = node[index]
-			else
-				break  -- exit if the state path isn't found
-			end
-		end
-
-		return lastValidNode ~= viewmodel.animations and lastValidNode or nil
-	end
-
-	local frameData = getFrameData(action) or getFrameData(backup)
-	if not frameData then
-		warn("States " .. action .. " and " .. backup .. " don't exist!")
+local function printTable(data, prefix)
+    prefix = prefix or ""
+	if not data
+		print("No table!")
 		return
 	end
+    for k, v in pairs(data or {}) do
+        local key = prefix .. k
+        if type(v) == "table" then
+            print("key " .. key .. " = a table:")
+            printTable(v, key .. ".")
+        else
+            print("key " .. key .. " = " .. v)
+        end
+    end
+end
 
-	player.hl1viewmdaction = action  -- retain the state string for debugging/logging
-	player.hl1currentAnimation = frameData  -- store the animation table directly
-	player.hl1frameindex = 1
-	player.hl1frame = frameData[1].baseFrameIndex
-	player.hl1frameclock = frameData[1].frameDuration
+-- Helper to extract the numeric suffix from a sentinel string, e.g. "CROWBAR_SWING_1" => 1
+local function getSentinelNumber(s, player)
+	if not s warn("Invalid state '" .. player.hl1viewmdaction .."'!") printTable(player.hl1currentAnimation, "PRINTOUT: " .. player.hl1viewmdaction .. ".") return 1 end
+	local num = s:match("(%d+)$")
+	return tonumber(num) or 0
+end
+
+local function getFrameData(state, animations)
+    local keys = {}
+    for key in state:gmatch("%S+") do
+        table.insert(keys, tonumber(key) or key) -- Convert numeric keys if possible
+    end
+
+    local node = animations
+    local lastValidNode = nil
+    local lastValidKey = nil
+
+    for _, key in ipairs(keys) do
+        if node and node[key] then
+            lastValidNode = node
+            lastValidKey = key
+            node = node[key]
+        else
+            break  -- Stop at the first missing key and backtrack to the last valid node
+        end
+    end
+
+    -- If we failed to reach a valid node, revert to the last known valid node
+    if not node and lastValidNode and lastValidKey then
+        node = lastValidNode[lastValidKey]
+    end
+
+    -- Ensure the retrieved node follows the new animation format
+    if type(node) == "table" and node.sentinel and type(node.frameDurations) == "table" then
+        return node
+    else
+        warn("HL_ChangeViewmodelState: State '" .. state .. "' is not a valid animation definition!")
+        return nil
+    end
+end
+
+rawset(_G, "HL_ChangeViewmodelState", function(player, action, backup)
+    local weapon = player.hl1weapon
+    local viewmodel = kombihl1viewmodels[HL_WpnStats[weapon].viewmodel or "PISTOL"]
+    
+    local frameData = getFrameData(action, viewmodel.animations) or getFrameData(backup, viewmodel.animations)
+    if not frameData then
+        return
+    end
+
+    player.hl1viewmdaction = action
+    player.hl1currentAnimation = frameData -- Store animation table
+    player.hl1frame = 0 -- Reset frame index
+    player.hl1frameclock = frameData.frameDurations[1] or 1 -- Start with the first frame's duration
 end)
 
 rawset(_G, "HL_GetWeapons", function(items, targetSlot, player) -- gets all available weapons.
@@ -344,7 +378,6 @@ rawset(_G, "HL_AddWeapon", function(freeman, weapon, silent, autoswitch) -- give
 					local space_in_clip = clipsize - clip
 					local clip_to_add = min(remaining_gift, space_in_clip)
 					freeman.hl1clips[weapon][clipIndex] = clip + clip_to_add
-					print(ammotype, clip, space_in_clip, clip_to_add, freeman.hl1clips[weapon][clipIndex])
 					remaining_gift = remaining_gift - clip_to_add
 					-- Defer any excess to HL_AddAmmo
 					if remaining_gift > 0 and ammotype
@@ -357,27 +390,27 @@ rawset(_G, "HL_AddWeapon", function(freeman, weapon, silent, autoswitch) -- give
 			if not HL_WpnStats[weapon].primary.ammo
 				warn("Weapon " .. weapon .. " missing primary.ammo property!")
 			else
-				handleClipGift(1, HL_WpnStats[weapon].pickupgift, HL_WpnStats[weapon].clipsize or -1, HL_WpnStats[weapon].primary.ammo)
+				handleClipGift(1, HL_WpnStats[weapon].primary.pickupgift, HL_WpnStats[weapon].primary.clipsize or -1, HL_WpnStats[weapon].primary.ammo)
 			end
 		end
 		if HL_WpnStats[weapon].secondary
 			if not HL_WpnStats[weapon].secondary.ammo
 				warn("Weapon " .. weapon .. " missing secondary.ammo property!")
 			else
-				handleClipGift(2, HL_WpnStats[weapon].pickupgiftalt, HL_WpnStats[weapon].clipsizealt or -1, HL_WpnStats[weapon].secondary.ammo)
+				handleClipGift(2, HL_WpnStats[weapon].secondary.pickupgift, HL_WpnStats[weapon].secondary.clipsize or -1, HL_WpnStats[weapon].secondary.ammo)
 			end
 		end
 
 		didsomething = true -- We gave the player a gun, so we did something there.
 	else
 		if HL_WpnStats[weapon].primary
-			if HL_WpnStats[weapon].pickupgift and HL_WpnStats[weapon].ammo
-				didsomething = HL_AddAmmo(freeman, HL_WpnStats[weapon].ammo, HL_WpnStats[weapon].pickupgift) or $
+			if HL_WpnStats[weapon].primary.pickupgift and HL_WpnStats[weapon]/primary.ammo
+				didsomething = HL_AddAmmo(freeman, HL_WpnStats[weapon].primary.ammo, HL_WpnStats[weapon].primary.pickupgift) or $
 			end
 		end
 		if HL_WpnStats[weapon].secondary
-			if HL_WpnStats[weapon].pickupgiftalt and HL_WpnStats[weapon].ammoalt
-				didsomething = HL_AddAmmo(freeman, HL_WpnStats[weapon].ammoalt, HL_WpnStats[weapon].pickupgiftalt) or $
+			if HL_WpnStats[weapon].secondary.pickupgift and HL_WpnStats[weapon].secondary.ammo
+				didsomething = HL_AddAmmo(freeman, HL_WpnStats[weapon].secondary.ammo, HL_WpnStats[weapon].secondary.pickupgift) or $
 			end
 		end
 	end

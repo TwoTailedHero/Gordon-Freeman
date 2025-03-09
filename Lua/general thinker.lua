@@ -143,14 +143,10 @@ addHook("PlayerThink", function(player)
 	end
 end)
 
--- Switches the current animation to idle
-local function switchToIdle(player)
-    local viewmodel = kombihl1viewmodels[HL_WpnStats[player.hl1weapon].viewmodel or "PISTOL"]
-    local idle_list = viewmodel.animations["idle"]
-    if idle_list then
-        local idle_state = (#idle_list > 1) and ("idle " .. P_RandomRange(1, #idle_list)) or "idle"
-        HL_ChangeViewmodelState(player, idle_state, "primaryfire normal")
-    end
+-- Helper to extract the numeric suffix from a sentinel string, e.g. "CROWBAR_SWING_1" => 1
+local function getSentinelNumber(s)
+    local num = s:match("(%d+)$")
+    return tonumber(num) or 0
 end
 
 addHook("PlayerThink", function(player)
@@ -165,46 +161,56 @@ addHook("PlayerThink", function(player)
         if player.hl1kickback > 0 then player.hl1kickback = 0 end
     end
 
-    if not player.hl1weapon then player.hl1weapon = "crowbar" end
+	if not player.hl1weapon then player.hl1weapon = "crowbar" end
+end)
 
-    local currentAnimation = player.hl1currentAnimation
-    if not currentAnimation then
+addHook("PlayerThink", function(player)
+    if not player.mo or player.mo.skin ~= skin then return end
+    local currentAnim = player.hl1currentAnimation
+    if not currentAnim then
         switchToIdle(player)
         return
     end
 
-    if player.hl1frameclock and player.hl1frameclock > 0 then
+    if player.hl1frameclock > 0 then
         player.hl1frameclock = player.hl1frameclock - 1
     else
-        local frame = currentAnimation[player.hl1frameindex]
-        if frame then
-            -- Play sound, if this frame has it
-            if player.hl1frame == frame.baseFrameIndex and frame.frameSound then
-                local soundToPlay = frame.frameSound
-                if frame.frameSounds then
-                    soundToPlay = $ + P_RandomRange(0, frame.frameSounds-1)
-                end
-				print(soundToPlay)
-                S_StartSound(player.mo, soundToPlay)
-            end
+        -- Increment frame counter
+        player.hl1frame = $ + 1
 
-            -- Use frameStepCount to Run-Length encode how many more frames we have
-            if frame.frameStepCount and player.hl1frame < frame.baseFrameIndex + frame.frameStepCount - 1 then
-                player.hl1frame = player.hl1frame + 1
-                player.hl1frameclock = frame.frameDuration
+        -- Determine current frame duration based on the highest index less than or equal to player.hl1frame
+        local frameDuration = 1 -- Default duration
+        for index, duration in pairs(currentAnim.frameDurations) do
+            if index < player.hl1frame then
+                frameDuration = duration
             else
-                -- Move to the next frame in the sequence
-                player.hl1frameindex = player.hl1frameindex + 1
-                local nextFrame = currentAnimation[player.hl1frameindex]
-                if nextFrame then
-                    player.hl1frame = nextFrame.baseFrameIndex
-                    player.hl1frameclock = nextFrame.frameDuration
-                else
-                    switchToIdle(player)
-                end
+                break
             end
-        else
-            switchToIdle(player)
+        end
+        player.hl1frameclock = frameDuration
+        
+        -- Play frame sound if defined
+        local frameSound = currentAnim.frameSounds and currentAnim.frameSounds[player.hl1frame]
+        if frameSound then
+            if type(frameSound) == "table" then
+                -- Play a random sound from the range if multiple sounds are defined
+                S_StartSound(player.mo, frameSound.sound + P_RandomRange(0, frameSound.sounds - 1))
+            else
+                S_StartSound(player.mo, frameSound)
+            end
+        end
+
+        -- Check if animation has finished
+        local highestIndex = 0
+        for index in pairs(currentAnim.frameDurations) do
+            if index > highestIndex then
+                highestIndex = index
+            end
+        end
+        
+        if player.hl1frame >= highestIndex then
+            HL_ChangeViewmodelState(player, "idle 1", "idle 1")
+            return
         end
     end
 end)
@@ -281,13 +287,14 @@ local function FireWeapon(player, mode)
 		-- Determine the viewmodel based on the current weapon
 		local viewmodel = kombihl1viewmodels[HL_WpnStats[player.selectionlist["weapons"][player.kombihl1wpn]["name"]].viewmodel or "PISTOL"]
 		if player.hl1weapon ~= player.selectionlist["weapons"][player.kombihl1wpn]["name"] then
-			HL_ChangeViewmodelState(player, "ready", "idle 1")
-			player.kombireloading = 0
-
 			-- Switch weapon and set delays
 			player.hl1weapon = player.selectionlist["weapons"][player.kombihl1wpn]["name"]
 			player.hl1weapondelay = HL_WpnStats[player.hl1weapon].globalfiredelay.ready
 			player.kombihl1wpn = 0
+
+			-- Set animation
+			HL_ChangeViewmodelState(player, "ready", "idle 1")
+			player.kombireloading = 0
 
 			-- Set clips if necessary
 			if not player.hl1clips[player.hl1weapon] then
@@ -311,8 +318,17 @@ local function FireWeapon(player, mode)
 	if not mystats then return end
 	
 	-- Check if the weapon is available in inventory and has clips
+	local clip
+	if not player.hl1clips[weaponID] return end
+	
+	-- Make sure we're indexing the right clip!
+	if mode == "secondary" and not HL_WpnStats[weaponID].altusesprimaryclip
+		clip = player.hl1clips[weaponID].secondary
+	else
+		clip = player.hl1clips[weaponID].primary
+	end
 	if not player.hl1inventory[weaponID]
-	or (not (player.hl1clips[weaponID] and player.hl1clips[weaponID][mode]) and not mystats.neverdenyuse) then
+	or (not clip and not mystats.neverdenyuse) then
 		return
 	end
 	
@@ -377,7 +393,11 @@ local function FireWeapon(player, mode)
 		end
 		
 		-- Set weapon delay and decrement ammo
-		player.hl1weapondelay = mystats.firedelay
+		if mode == "primary"
+			player.hl1weapondelay = mystats.firedelay
+		else
+			player.weaponaltdelay = mystats.firedelay
+		end
 		HL1DecrementAmmo(player, mode == "secondary")
 	end
 end
@@ -432,9 +452,7 @@ local function HL_InitHealth(mobj) -- Sets up mobjs.
 		if type(mobj.hl1health) == "table"
 			mobj.hl1health = $.health
 		end
-		if mobj.type == MT_PLAYER
-			mobj.hl1armor = 100*FRACUNIT
-		end
+		mobj.hl1armor = 0
 	end
 	end
 	HL.valuemodes["HLGetObjectMaxStats"] = HL_LASTFUNC
@@ -605,7 +623,7 @@ addHook("PlayerSpawn",function(player)
 	player.pickuphistory = {}
 	player.hl1deadtimer = 0
 	player.hl1weapon = startweapon or "crowbar"
-	HL_ChangeViewmodelState(player, "ready", "idle1")
+	HL_ChangeViewmodelState(player, "ready", "idle")
 end)
 -- DOOM Raise speed ~6 pixels
 addHook("SeenPlayer", function(player,splayer)
