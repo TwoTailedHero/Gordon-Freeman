@@ -94,11 +94,11 @@ local theproj = MT_NULL
 local function HL1DecrementAmmo(player,secondary)
 	if secondary
 		if HL_WpnStats[player.hl1weapon].altusesprimaryclip
-			if HL_WpnStats[player.hl1weapon].primary.shotcost
+			if HL_WpnStats[player.hl1weapon].secondary.shotcost
 				if HL_WpnStats[player.hl1weapon].primary.clipsize > 0
-					player.hl1clips[player.hl1weapon].primary = $-HL_WpnStats[player.hl1weapon].primary.shotcost
+					player.hl1clips[player.hl1weapon].primary = $-HL_WpnStats[player.hl1weapon].secondary.shotcost
 				else
-					player.hl1ammo[HL_WpnStats[player.hl1weapon].primary.ammo] = $-HL_WpnStats[player.hl1weapon].primary.shotcost
+					player.hl1ammo[HL_WpnStats[player.hl1weapon].primary.ammo] = $-HL_WpnStats[player.hl1weapon].secondary.shotcost
 				end
 			end
 		else
@@ -164,6 +164,23 @@ addHook("PlayerThink", function(player)
 	if not player.hl1weapon then player.hl1weapon = "crowbar" end
 end)
 
+local function printTable(data, prefix)
+    prefix = prefix or ""
+	if type(data) == "table"
+		for k, v in pairs(data or {}) do
+			local key = prefix .. k
+			if type(v) == "table" then
+				print("key " .. key .. " = a table:")
+				printTable(v, key .. ".")
+			else
+				print("key " .. key .. " = " .. v)
+			end
+		end
+	else
+		print(data)
+	end
+end
+
 addHook("PlayerThink", function(player)
     if not player.mo or player.mo.skin ~= skin then return end
     local currentAnim = player.hl1currentAnimation
@@ -180,7 +197,7 @@ addHook("PlayerThink", function(player)
 
         -- Determine current frame duration based on the highest index less than or equal to player.hl1frame
         local frameDuration = 1 -- Default duration
-        for index, duration in pairs(currentAnim.frameDurations) do
+        for index, duration in ipairs(currentAnim.frameDurations) do
             if index < player.hl1frame then
                 frameDuration = duration
             else
@@ -215,6 +232,10 @@ addHook("PlayerThink", function(player)
     end
 end)
 
+local function contains(mainStr, subStr)
+  return string.find(mainStr, subStr) ~= nil
+end
+
 addHook("PlayerThink", function(player)
 	if not player.mo return end
 	if player.mo.skin != skin return end
@@ -233,14 +254,14 @@ addHook("PlayerThink", function(player)
 	local ammo_type = primary.ammo
 	local reload_increment = primary.reloadincrement
 
-	if (not weapon_clips.primary
-		or ((player.cmd.buttons & BT_CUSTOM1) and weapon_clips.primary < primary.clipsize))
+	if ((not weapon_clips.primary
+		or ((player.cmd.buttons & BT_CUSTOM1) and weapon_clips.primary < primary.clipsize))) and contains(player.hl1viewmdaction, "idle")
 		and not player.kombireloading
 		and player.hl1weapondelay == 0
 		and (player.hl1ammo[ammo_type] or 0) > 0
 
 		player.kombireloading = 1
-		player.hl1weapondelay = weapon_stats["globalfiredelay"]["reloadstart"] or weapon_stats["globalfiredelay"]["reload"]
+		player.hl1weapondelay = weapon_stats.globalfiredelay.reloadstart or weapon_stats.globalfiredelay.reload
 		HL_ChangeViewmodelState(player, "reload start", "idle 1")
 	end
 
@@ -285,7 +306,7 @@ local function FireWeapon(player, mode)
 	-- Handle weapon selection and preparation
 	if player.selectionlist and player.selectionlist["weapons"] and player.kombihl1wpn then
 		-- Determine the viewmodel based on the current weapon
-		local viewmodel = kombihl1viewmodels[HL_WpnStats[player.selectionlist["weapons"][player.kombihl1wpn]["name"]].viewmodel or "PISTOL"]
+		local viewmodel = kombihl1viewmodels[HL_WpnStats[player.selectionlist["weapons"][player.kombihl1wpn]["name"].viewmodel or "PISTOL"]]
 		if player.hl1weapon ~= player.selectionlist["weapons"][player.kombihl1wpn]["name"] then
 			-- Switch weapon and set delays
 			player.hl1weapon = player.selectionlist["weapons"][player.kombihl1wpn]["name"]
@@ -319,16 +340,15 @@ local function FireWeapon(player, mode)
 	
 	-- Check if the weapon is available in inventory and has clips
 	local clip
-	if not player.hl1clips[weaponID] return end
+	if not player.hl1clips[weaponID] then return end
 	
 	-- Make sure we're indexing the right clip!
-	if mode == "secondary" and not HL_WpnStats[weaponID].altusesprimaryclip
+	if mode == "secondary" and not HL_WpnStats[weaponID].altusesprimaryclip then
 		clip = player.hl1clips[weaponID].secondary
 	else
 		clip = player.hl1clips[weaponID].primary
 	end
-	if not player.hl1inventory[weaponID]
-	or (not clip and not mystats.neverdenyuse) then
+	if not player.hl1inventory[weaponID] or (not clip and not mystats.neverdenyuse) then
 		return
 	end
 	
@@ -361,9 +381,7 @@ local function FireWeapon(player, mode)
 		warn("Ammo type " .. tostring(ammotype) .. " has no stats associated with it!")
 		HL_AmmoStats[tostring(ammotype)] = {}
 	end
-	local projectile = mystats.shootmobj
-	or (HL_AmmoStats[ammotype] and HL_AmmoStats[ammotype].shootmobj)
-	or MT_HL1_BULLET
+	local projectile = mystats.shootmobj or (HL_AmmoStats[ammotype] and HL_AmmoStats[ammotype].shootmobj) or MT_HL1_BULLET
 	kombilocalplayer = player
 	kombilocalplayer.mode = mode
 	
@@ -385,7 +403,8 @@ local function FireWeapon(player, mode)
 	
 	-- Handle firing and ammo consumption
 	if (theproj and theproj.valid) or (not mystats.firehitsound) then
-		HL_ChangeViewmodelState(player, "primaryfire normal", "primaryfire normal")
+		local anim = (clip-mystats.shotcost == 0) and (mode .. "fire" .. " empty") or (mode .. "fire" .. " normal")
+		HL_ChangeViewmodelState(player, anim, anim)
 		local firesound = mystats.firesound
 		if firesound then
 			local sound_offset = (mystats.firesounds and mystats.firesounds > 1) and (P_RandomRange(1, mystats.firesounds) - 1) or 0
@@ -393,7 +412,7 @@ local function FireWeapon(player, mode)
 		end
 		
 		-- Set weapon delay and decrement ammo
-		if mode == "primary"
+		if mode == "primary" then
 			player.hl1weapondelay = mystats.firedelay
 		else
 			player.weaponaltdelay = mystats.firedelay

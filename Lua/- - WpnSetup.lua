@@ -105,8 +105,7 @@ SafeFreeSlot("sfx_hl1wpn",
 "sfx_hl3571","sfx_hl3572","sfx_hl357r",
 "sfx_hl1sr1","sfx_hl1sr2","sfx_hl1sr3",
 "sfx_hl1ar1","sfx_hl1ar2","sfx_hl1ar3","sfx_hlarr1","sfx_hlarr2","sfx_hlarg1","sfx_hlarg2",
-"sfx_hl1sg1","sfx_hl1sgc",
-"sfx_pistol","sfx_shotgn","sfx_dshtgn","sfx_dbopn","sfx_dbload","sfx_dbcls","sfx_dmbfg",
+"sfx_hl1sg1","sfx_hl1sgc","sfx_hldsht",
 "SPR_HLHITEFFECT","S_HL1_HIT")
 sfxinfo[sfx_hlcbar].caption = "Crowbar Swing"
 sfxinfo[sfx_hlcbh1].caption = "Crowbar Hit"
@@ -114,6 +113,8 @@ sfxinfo[sfx_hlcbh2].caption = "Crowbar Hit"
 sfxinfo[sfx_hlcbb1].caption = "Crowbar Hit (Body)"
 sfxinfo[sfx_hlcbb2].caption = "Crowbar Hit (Body)"
 sfxinfo[sfx_hlcbb3].caption = "Crowbar Hit (Body)"
+sfxinfo[sfx_hl1sg1].caption = "Shotgun Firing"
+sfxinfo[sfx_hldsht].caption = "Double Shotgun Action"
 sfxinfo[sfx_hl1sr1].caption = "Shotgun Loading"
 sfxinfo[sfx_hl1sr2].caption = "Shotgun Loading"
 sfxinfo[sfx_hl1sr3].caption = "Shotgun Loading"
@@ -274,7 +275,7 @@ rawset(_G, "kombihl1viewmodels", {
 					frameDurations = {
 						[1] = 1,
 						[2] = 2,
-						[9] = 2,
+						[8] = 2,
 					},
 				},
 				empty = {
@@ -282,7 +283,7 @@ rawset(_G, "kombihl1viewmodels", {
 					frameDurations = {
 						[1] = 1,
 						[2] = 2,
-						[9] = 2,
+						[10] = 2,
 					},
 				}
 			},
@@ -328,35 +329,66 @@ rawset(_G, "kombihl1viewmodels", {
 		flags = VMDL_FLIP,
 		animations = {
 			ready = {
-				{sentinel = "357READY1", frameDuration = 3, frameStepCount = 6},
+				sentinel = "357READY1",
+				frameDurations = {
+					[1] = 3,
+					[7] = 3,
+				},
 			},
 			primaryfire = {
-				{sentinel = "357FIRE1", frameDuration = 2},
-				{frameDuration = 3, frameStepCount = 8},
+				sentinel = "357FIRE1",
+				frameDurations = {
+					[1] = 2,
+					[2] = 3,
+					[8] = 3,
+				},
 			},
 			reload = {
-				{sentinel = "357RELOAD1", frameDuration = 6},
-				{frameDuration = 4, frameStepCount = 2},
-				{frameDuration = 3, frameStepCount = 18},
-				{frameDuration = 3, frameSound = sfx_hl357r, frameStepCount = 3},
-				{frameDuration = 8},
+				sentinel = "357RELOAD1",
+				frameDurations = {
+					[1] = 6,
+					[2] = 4,
+					[4] = 3,
+					[22] = 3,
+					[25] = 8,
+					[28] = 8,
+				},
+				frameSounds = {
+					[22] = sfx_hl357r,
+				}
 			},
 			idle = {
 				{
-					{sentinel = "357IDLE1-1", frameDuration = 6, frameStepCount = 18},
-					{frameDuration = 5},
+					sentinel = "357IDLE1-1",
+					frameDurations = {
+						[1] = 6,
+						[2] = 5,
+						[19] = 5,
+					},
 				},
 				{
-					{sentinel = "357IDLE2-1", frameDuration = 6, frameStepCount = 18},
-					{frameDuration = 5},
+					sentinel = "357IDLE2-1",
+					frameDurations = {
+						[1] = 6,
+						[2] = 5,
+						[20] = 5,
+					},
 				},
 				{
-					{sentinel = "357IDLE3-1", frameDuration = 6, frameStepCount = 24},
-					{frameDuration = 15},
+					sentinel = "357IDLE3-1",
+					frameDurations = {
+						[1] = 6,
+						[2] = 15,
+						[26] = 15,
+					},
 				},
 				{
-					{sentinel = "357IDLE4-1", frameDuration = 6, frameStepCount = 46},
-					{frameDuration = 10},
+					sentinel = "357IDLE4-1",
+					frameDurations = {
+						[1] = 6,
+						[2] = 10,
+						[48] = 10,
+					},
 				},
 			},
 		},
@@ -364,49 +396,103 @@ rawset(_G, "kombihl1viewmodels", {
 	["SHOTGUN"] = {
 		idleanims = 3,
 		flags = VMDL_FLIP,
-		ready = {
-			{baseFrameIndex = 0, frameDuration = 3, frameStepCount = 4},
-		},
 		animations = {
 			ready = {
-				{baseFrameIndex = 0, frameDuration = 3, frameStepCount = 4},
+				sentinel = "SHOTGUNREADY1",
+				frameDurations = {
+					[1] = 3,
+					[5] = 3,
+				},
 			},
 			primaryfire = {
-				{baseFrameIndex = 5, frameDuration = 3},
-				{baseFrameIndex = 43, frameDuration = 3, frameStepCount = 4},
-				{baseFrameIndex = 48, frameDuration = 3, frameSound = sfx_hl1sgc, frameStepCount = 6},
+				sentinel = "SHOTGUNFIRE1",
+				frameDurations = {
+					[1] = 3,
+					[12] = 3,
+				},
+				frameSounds = {
+					[6] = sfx_hl1sgc
+				}
+			},
+			secondaryfire = {
+				sentinel = "SHOTGUNAFIRE1",
+				frameDurations = {
+					[1] = 3,
+					[2] = 2,
+					[3] = 3,
+					[4] = 2,
+					[5] = 3,
+					[6] = 2,
+					[7] = 3,
+					[8] = 2,
+					[9] = 3,
+					[10] = 2,
+					[11] = 3,
+					[12] = 2,
+					[13] = 3,
+					[14] = 2,
+					[15] = 3,
+					[16] = 2,
+					[17] = 3,
+					[18] = 2,
+					[19] = 3,
+					[20] = 6,
+				},
+				frameSounds = {
+					[13] = sfx_hl1sgc,
+				}
 			},
 			reload = {
 				start = {
-					{baseFrameIndex = 5, frameDuration = 3},
-					{baseFrameIndex = 75, frameDuration = 3, frameStepCount = 5},
+					sentinel = "SHOTGUNRELOADS1",
+					frameDurations = {
+						[1] = 3,
+						[7] = 3,
+					},
 				},
 				loop = {
-					{baseFrameIndex = 81, frameDuration = 4, frameStepCount = 2},
-					{baseFrameIndex = 83, frameDuration = 4, frameSound = sfx_hl1sr1, frameSounds = 3},
-					{baseFrameIndex = 84, frameDuration = 4, frameStepCount = 2},
+					sentinel = "SHOTGUNRELOADL1",
+					frameDurations = {
+						[1] = 4,
+						[6] = 4,
+					},
+					frameSounds = {
+						[3] = {sound = sfx_hl1sr1, sounds = 3},
+					}
 				},
 				stop = {
-					{baseFrameIndex = 80, frameDuration = 4},
-					{baseFrameIndex = 86, frameDuration = 4, frameStepCount = 2},
-					{baseFrameIndex = 88, frameDuration = 4, frameSound = sfx_hl1sgc},
-					{baseFrameIndex = 89, frameDuration = 4, frameStepCount = 4},
+					sentinel = "SHOTGUNRELOADE1",
+					frameDurations = {
+						[1] = 4,
+						[8] = 4,
+					},
+					frameSounds = {
+						[4] = sfx_hl1sgc,
+					}
 				},
 			},
 			idle = {
 				{
-					{baseFrameIndex = 5, frameDuration = 8, frameStepCount = 7},
-					{baseFrameIndex = 12, frameDuration = 8},
+					sentinel = "SHOTGUNIDLE1-1",
+					frameDurations = {
+						[1] = 8,
+						[10] = 8,
+					},
 				},
 				{
-					{baseFrameIndex = 5, frameDuration = 8},
-					{baseFrameIndex = 32, frameDuration = 8, frameStepCount = 10},
-					{baseFrameIndex = 42, frameDuration = 5},
+					sentinel = "SHOTGUNIDLE2-1",
+					frameDurations = {
+						[1] = 8,
+						[12] = 5,
+					},
 				},
 				{
-					{baseFrameIndex = 5, frameDuration = 8},
-					{baseFrameIndex = 15, frameDuration = 10, frameStepCount = 15},
-					{baseFrameIndex = 31, frameDuration = 16},
+					sentinel = "SHOTGUNIDLE3-1",
+					frameDurations = {
+						[1] = 8,
+						[2] = 10,
+						[18] = 16,
+					},
 				},
 			},
 		}
@@ -678,7 +764,7 @@ rawset(_G, "HL_WpnStats", {
 			horizspread = 56*FRACUNIT/5,
 			vertspread = 71*FRACUNIT/10,
 			kickback = 5*FRACUNIT/2,
-			firesound = sfx_hl1sg1,
+			firesound = sfx_hldsht,
 			firedelay = 6,
 		},
 		altfire = true,
