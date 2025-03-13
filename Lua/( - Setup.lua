@@ -1,8 +1,11 @@
+-- HL_HurtMobj, HL_DamageGordon, and HL_GetDistance in WpnSetup due to SRB2 wanting to be "special."
 local function SafeFreeSlot(...)
 	for _,slot in ipairs({...})
 		if not rawget(_G, slot) freeslot(slot) end -- overlapping = wasting, how do we not waste (as many of) them? don't do it in the first place!
 	end
 end
+
+SafeFreeSlot("sfx_hlwpnu")
 
 local function warn(str)
 	print("\130WARNING: \128"..str);
@@ -38,7 +41,6 @@ rawset(_G, "DMG", { -- TYPEOFDAMAGE
 	SLOWBURN = 524288,
 	REMOVEONDEATH = 1048576,
 	PLASMA = 2097152,
-	EXPLOSION_WATER = 4194304,
 	BUCKSHOT = 8388608,
 })
 
@@ -126,7 +128,7 @@ HL_SetMTStats(safeGetMT(MT_TURRETLASER), nil, {dmg = 3})
 HL_SetMTStats(safeGetMT(MT_ARROW), nil, {dmg = 15})
 HL_SetMTStats(safeGetMT(MT_DEMONFIRE), nil, {dmg = 25})
 HL_SetMTStats(safeGetMT(MT_CANNONBALL), nil, {dmg = 40})
-HL_SetMTStats(safeGetMT(MT_RING), nil, {dmg = 40})
+HL_SetMTStats(safeGetMT(MT_RING), {healh = INT32_MAX}, {dmg = 40})
 
 local function weightedRandom(chances) -- returns one random entry based on the weighted chances
 	local total = 0
@@ -172,6 +174,25 @@ local function removeFromChanceList(chances, toremove) -- get a new weighted cha
 	return newList
 end
 
+rawset(_G, "HL_InitHealth", function(mobj) -- Sets up mobjs.
+	HL.valuemodes["HLGetObjectHealth"] = HL_LASTFUNC
+	local health = HL.RunHook("HLGetObjectHealth", mobj)
+	if health == nil
+	if (mobj.skin == "scieinstein" or mobj.skin == "scinerd" or mobj.skin == "sciluther" or mobj.skin == "scislick")
+		mobj.hl1health = 20 -- 20 HP for scientist users.
+	else
+		mobj.hl1health = $ or (HL1_DMGStats[mobj.type] and HL1_DMGStats[mobj.type].health) or max(1, FixedInt(FixedSqrt(max(1, FixedDiv(FixedMul(mobj.radius * 2, mobj.height),4*FRACUNIT/3)))))
+		if type(mobj.hl1health) == "table"
+			mobj.hl1health = $.health
+		end
+		mobj.hl1armor = 0
+	end
+	end
+	HL.valuemodes["HLGetObjectMaxStats"] = HL_LASTFUNC
+	local maxhealth, maxarmor = HL.RunHook("HLGetObjectMaxStats", mobj)
+	mobj.hl1maxhealth = maxhealth or 100
+	mobj.hl1maxarmor = (maxarmor or 100)*FRACUNIT
+end)
 
 rawset(_G, "HL_GetMonitorPickUps", function(chanceList, amount) -- get an amount-length list of weapons, chances determined by chanceList. Main purpose is to get pick-ups dropped by Monitors.
 	local results = {}
@@ -233,6 +254,20 @@ local function getFrameData(state, animations)
     -- If we failed to reach a valid node, revert to the last known valid node
     if not node and lastValidNode and lastValidKey then
         node = lastValidNode[lastValidKey]
+    end
+
+    -- If the node is a list of numbered sub-lists, pick one at random
+    if type(node) == "table" then
+        local numberedKeys = {}
+        for k, _ in pairs(node) do
+            if type(k) == "number" then
+                table.insert(numberedKeys, k)
+            end
+        end
+
+        if #numberedKeys > 0 then
+            node = node[numberedKeys[P_RandomRange(1, #numberedKeys)]] -- Pick a random numbered sub-list
+        end
     end
 
     -- Ensure the retrieved node follows the new animation format
@@ -404,7 +439,7 @@ rawset(_G, "HL_AddWeapon", function(freeman, weapon, silent, autoswitch) -- give
 		didsomething = true -- We gave the player a gun, so we did something there.
 	else
 		if HL_WpnStats[weapon].primary
-			if HL_WpnStats[weapon].primary.pickupgift and HL_WpnStats[weapon]/primary.ammo
+			if HL_WpnStats[weapon].primary.pickupgift and HL_WpnStats[weapon].primary.ammo
 				didsomething = HL_AddAmmo(freeman, HL_WpnStats[weapon].primary.ammo, HL_WpnStats[weapon].primary.pickupgift) or $
 			end
 		end
@@ -508,28 +543,6 @@ rawset(_G, "HL_TakeClip", function(player, weapon, amount, alt) -- remove some a
 		end
 	end
 end)
-
-rawset(_G, "HL_DamageGordon", function(thing, tmthing, dmg) -- damage something, respecting HL1's logic
-	local hldamage = tmthing and tmthing.hl1damage or dmg
-	if not thing.hl1health
-		HL_InitHealth(thing)
-	end
-	if hldamage
-		if thing.hl1armor
-			thing.hl1armor = $-(2*(hldamage*FRACUNIT)/5)
-			thing.hl1health = $-hldamage/5+min(thing.hl1armor/FRACUNIT,0)
-			thing.hl1health = max($,0)
-			thing.hl1armor = max($,0)
-		else
-			thing.hl1health = $-hldamage
-		end
-		if thing.hl1health <= 0 -- get killed idiot
-			P_KillMobj(thing, tmthing, tmthing and tmthing.target or tmthing, 0)
-		end
-	end
-end)
-
-SafeFreeSlot("sfx_hlwpnu")
 
 addHook("TouchSpecial", function(item, mobj)
 	local player = mobj.player

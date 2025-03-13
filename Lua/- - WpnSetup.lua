@@ -55,50 +55,6 @@ dispoffset = 4,
 flags = MF_NOGRAVITY|MF_MISSILE,
 }
 
-mobjinfo[MT_HL1_ARGRENADE] = {
-spawnstate = S_KOMBI_SHURIKEN,
-spawnhealth = 100,
-deathstate = S_NULL,
-speed = 0*mobjinfo[MT_CORK].speed/2,
-radius = mobjinfo[MT_CORK].radius,
-height = mobjinfo[MT_CORK].height,
-dispoffset = 4,
-flags = MF_MISSILE,
-}
-
-mobjinfo[MT_HL1_HANDGRENADE] = {
-spawnstate = S_KOMBI_SHURIKEN,
-spawnhealth = 100,
-deathstate = S_NULL,
-speed = 3*mobjinfo[MT_CORK].speed/4,
-radius = mobjinfo[MT_CORK].radius,
-height = mobjinfo[MT_CORK].height,
-dispoffset = 4,
-flags = MF_BOUNCE,
-}
-
-mobjinfo[MT_HL1_SATCHEL] = {
-spawnstate = S_KOMBI_SHURIKEN,
-spawnhealth = 100,
-deathstate = S_NULL,
-speed = 3*mobjinfo[MT_CORK].speed/4,
-radius = mobjinfo[MT_CORK].radius,
-height = mobjinfo[MT_CORK].height,
-dispoffset = 4,
-flags = MF_SLIDEME,
-}
-
-mobjinfo[MT_HL1_TRIPMINE] = {
-spawnstate = S_KOMBI_SHURIKEN,
-spawnhealth = 100,
-deathstate = S_KOMBI_SNARKDIE,
-speed = 3*mobjinfo[MT_CORK].speed/4,
-radius = mobjinfo[MT_CORK].radius,
-height = mobjinfo[MT_CORK].height,
-dispoffset = 4,
-flags = MF_NOGRAVITY,
-}
-
 SafeFreeSlot("sfx_hl1wpn",
 "sfx_hlcbar","sfx_hlcbb1","sfx_hlcbb2","sfx_hlcbb3","sfx_hlcbh1","sfx_hlcbh2",
 "sfx_hl1g17","sfx_hl1pr1","sfx_hl1pr2",
@@ -106,13 +62,18 @@ SafeFreeSlot("sfx_hl1wpn",
 "sfx_hl1sr1","sfx_hl1sr2","sfx_hl1sr3",
 "sfx_hl1ar1","sfx_hl1ar2","sfx_hl1ar3","sfx_hlarr1","sfx_hlarr2","sfx_hlarg1","sfx_hlarg2",
 "sfx_hl1sg1","sfx_hl1sgc","sfx_hldsht",
-"SPR_HLHITEFFECT","S_HL1_HIT")
+"sfx_hlrckt","sfx_hlexp1","sfx_hlexp2","sfx_hlexp3",
+"sfx_hltpdp","sfx_hltpch","sfx_hltpac",
+"SPR_HLHITEFFECT","S_HL1_HIT",
+"SPR_HL1EXPLOSION","S_HL1_EXPLODE","S_HL1_EXPLOSION",
+"S_HL1_ROCKET","S_HL1_ROCKETACTIVE",
+"S_HL1_TRIPMINETHROWN","S_HL1_INACTIVETRIPMINE","S_HL1_ACTIVETRIPMINE","MT_HL1_TRIPLASER")
 sfxinfo[sfx_hlcbar].caption = "Crowbar Swing"
-sfxinfo[sfx_hlcbh1].caption = "Crowbar Hit"
-sfxinfo[sfx_hlcbh2].caption = "Crowbar Hit"
-sfxinfo[sfx_hlcbb1].caption = "Crowbar Hit (Body)"
-sfxinfo[sfx_hlcbb2].caption = "Crowbar Hit (Body)"
-sfxinfo[sfx_hlcbb3].caption = "Crowbar Hit (Body)"
+sfxinfo[sfx_hlcbh1].caption = "Crowbar Impact"
+sfxinfo[sfx_hlcbh2].caption = "Crowbar Impact"
+sfxinfo[sfx_hlcbb1].caption = "Crowbar Impact (Body)"
+sfxinfo[sfx_hlcbb2].caption = "Crowbar Impact (Body)"
+sfxinfo[sfx_hlcbb3].caption = "Crowbar Impact (Body)"
 sfxinfo[sfx_hl1sg1].caption = "Shotgun Firing"
 sfxinfo[sfx_hldsht].caption = "Double Shotgun Action"
 sfxinfo[sfx_hl1sr1].caption = "Shotgun Loading"
@@ -131,6 +92,195 @@ sfxinfo[sfx_hlarr1].caption = "MP5 Clip Out"
 sfxinfo[sfx_hlarr2].caption = "MP5 Clip In"
 sfxinfo[sfx_hlarg1].caption = "MP5 Grenade Launched"
 sfxinfo[sfx_hlarg2].caption = "MP5 Grenade Launched"
+sfxinfo[sfx_hlrckt].caption = "Rocket Launched"
+sfxinfo[sfx_hlexp1].caption = "Royalty Free Explosion"
+sfxinfo[sfx_hlexp2].caption = "Royalty Cheap Explosion"
+sfxinfo[sfx_hlexp3].caption = "Royalty Expensive Explosion"
+
+-- for some DOG ASS REASON, I HAVE TO PUT THESE HERE. fuck this dumbass game vro
+if not duke_roboinfo
+	rawset(_G, "duke_roboinfo", {})
+end
+
+duke_roboinfo[MT_HL1_BULLET] = {unshrinkable = true, damage = 9001, ringslingerdamage = true} -- pre-define our properties
+-- ^ for some reason the property to disable hurt invulnerability is labelled "ringslingerdamage"??
+
+rawset(_G, "kombiHL1SpecialHandlers", { -- rawset to _G to open up modding environment. Ya wanna add your own entry? Go on right ahead! Anybody who doesn't follow this logic are lame asf and they should be shamed for it
+-- praying none of these people push an update that breaks our code
+	["doomguy"] = function(tmthing,thing)
+		P_DamageMobj(thing, tmthing, tmthing.target, tmthing.hl1damage, 0) -- Lugent forgot that projectiles lobbed by players take priority over the damage argument!! lmao
+	end,
+	["bj"] = function(tmthing,thing)
+		if not thing.player.wolfenstein return end
+		thing.player.wolfenstein.health = $-tmthing.hl1damage
+		P_DamageMobj(thing, tmthing, tmthing.target, 0, 0) -- THANK YOU, BJ, for not forcing me to find a way to manage your wack-ass damage system!!
+		if thing.player.wolfenstein.health < 0 -- 
+			P_KillMobj(thing, tmthing, tmthing.target, 0)
+		end
+	end,
+	["duke"] = function(tmthing,thing)
+		duke_roboinfo[MT_HL1_BULLET].damage = tmthing.hl1damage -- modify our damage variable just before we hurt Dick Kickem, WAY better than whatever shit i was doing before
+		P_DamageMobj(thing, tmthing, tmthing.target, 1, 0) -- this and the one below it don't utilize the last two arguments sadly
+	end,
+	["tailsguy"] = function(tmthing,thing)
+		local damage = tmthing.hl1damage or 1
+		thing.player.tgvars.health = $-tmthing.hl1damage+10
+		P_DamageMobj(thing, tmthing, tmthing.target, 100, 0)
+		if thing.player.tgvars.health < 0
+			P_KillMobj(thing, tmthing, tmthing.target, 0)
+		end
+		thing.player.powers[pw_flashing] = 0 -- please don't be invulnerable kthxbai
+	end,
+	["samus"] = function(tmthing,thing)
+		TakeSamusEnergy(thing.player,tmthing.hl1damage,true,tmthing,tmthing.target) -- Golden Shine being based as ever and allowing us easy and direct access to necessary damage functions
+	end,
+	["basesamus"] = function(tmthing,thing)
+		TakeSamusEnergy(thing.player,tmthing.hl1damage,true,tmthing,tmthing.target) -- Golden Shine being based as ever and allowing us easy and direct access to necessary damage functions
+	end,
+	["mcsteve"] = function(tmthing,thing)
+		if not stevehelper return end
+		stevehelper.damage(thing.player, inflictor, tmthing.hl1damage/5)
+	end,
+})
+
+rawset(_G, "HL_DamageGordon", function(thing, tmthing, dmg) -- damage something, respecting HL1's logic
+	local hldamage = dmg or tmthing and tmthing.hl1damage
+	if not thing.hl1health
+		HL_InitHealth(thing)
+	end
+	print(thing.hl1health)
+	if hldamage
+		if thing.hl1armor
+			thing.hl1armor = $-(2*(hldamage*FRACUNIT)/5)
+			thing.hl1health = $-hldamage/5+min(thing.hl1armor/FRACUNIT,0)
+			thing.hl1health = max($,0)
+			thing.hl1armor = max($,0)
+		else
+			thing.hl1health = ($ or 0)-hldamage
+		end
+		print(thing.hl1health)
+		if thing.hl1health <= 0 -- get killed idiot
+			P_KillMobj(thing, tmthing, tmthing and tmthing.target or tmthing, 0)
+		end
+	end
+end)
+
+rawset(_G, "HL_HurtMobj", function(tmthing, thing, customDamage, customDamageType) -- damage something depending on its health logic
+	-- Use the provided damage override if given, otherwise default to tmthing.hl1damage
+	local damage = customDamage or tmthing.hl1damage
+	if not (thing.flags & MF_SHOOTABLE) return end -- return early if we're not supposed to get shot.
+	print(damage)
+	if damage and not tmthing.hitenemy -- Don't double tap
+		if kombiHL1SpecialHandlers[thing.skin] -- already has its own health system?
+			kombiHL1SpecialHandlers[thing.skin](tmthing, thing)
+		elseif thing.skin == "kombifreeman"
+			P_DamageMobj(thing, tmthing, tmthing.target, damage, customDamageType or 0) -- custom damage type if provided
+		else
+			HL_DamageGordon(thing, tmthing, damage)
+		end
+	end
+end)
+
+rawset(_G, "HL_GetDistance", function(obj1, obj2) -- get distance between two objects; useful for things like explosion damage calculation
+	if not obj1 or not obj2 then return nil end -- Ensure both objects exist
+
+	local dx = obj1.x - obj2.x
+	local dy = obj1.y - obj2.y
+	local dz = obj1.z - obj2.z
+
+	return FixedHypot(FixedHypot(dx, dy), dz) -- 3D distance calculationd
+end)
+
+function A_StopMomentum(actor)
+	if actor.momx and actor.momy and actor.momz
+		actor.angle = R_PointToAngle2(0, 0, actor.momx, actor.momy)
+		local horizontalSpeed = R_PointToDist2(0, 0, actor.momx, actor.momy)
+		actor.pitch = -R_PointToAngle2(0, 0, horizontalSpeed, actor.momz)
+	end
+	actor.momx = 0
+	actor.momy = 0
+	actor.momz = 0
+	actor.flags = $|MF_NOGRAVITY
+end
+
+function A_HLRocketThinker(actor, speed)
+	actor.momx = FixedMul(speed, cos(actor.angle)) * cos(actor.pitch)
+	actor.momy = FixedMul(speed, sin(actor.angle)) * cos(actor.pitch)
+	actor.momz = -FixedMul(speed, sin(actor.pitch))
+end
+
+function A_HLExplode(actor, range, baseDamage)
+	if not (actor and actor.valid) then return end -- Ensure the actor exists
+
+	local function DamageNearby(refmobj, foundmobj)
+		if not foundmobj or foundmobj == refmobj then return end -- Skip if no object or self
+		
+		if not P_CheckSight(refmobj, foundmobj) then return end -- End early if we can't see it
+		
+		local dist = HL_GetDistance(refmobj, foundmobj)
+		if dist > range then return end -- Skip if out of range
+		
+		local damage = max(1, FixedMul(baseDamage, FixedDiv(range - dist, range))) -- Scale damage by distance
+		HL_HurtMobj(refmobj, foundmobj, damage, DMG.BLAST) -- Apply damage
+	end
+
+	-- Damage nearby objects
+	searchBlockmap("objects", DamageNearby, actor, actor.x - range, actor.x + range, actor.y - range, actor.y + range)
+
+	local function ProcessFOFs(sector)
+		-- print(sector)
+		if sector then
+			for rover in sector.ffloors() do
+				-- print(rover, rover.flags)
+				if (rover.flags & FOF_BUSTUP) then  -- Check if the FOF is breakable
+					EV_CrumbleChain(sector, rover)
+				end
+			end
+		end
+	end
+
+	-- Process breakable FOFs in the affected sectors
+	local function ProcessSectorLines(refmobj, line)
+		if line == actor return end -- For some reason, this game only indexes our own selves! What a bother...
+
+		-- Check both front and back of our lines
+		ProcessFOFs(line.frontsector)
+		ProcessFOFs(line.backsector)
+	end
+
+	-- Search for lines in the affected area
+	searchBlockmap("lines", ProcessSectorLines, actor, actor.x - (range/2), actor.x + (range/2), actor.y - (range/2), actor.y + (range/2))
+
+	-- Stop momentum and play explosion sound
+	A_StopMomentum(actor)
+	actor.scale = FRACUNIT * 3
+	S_StartSound(actor, P_RandomRange(sfx_hlexp1, sfx_hlexp3))
+end
+
+function A_HLSetupLaserMine(actor, var1, var2)
+    A_PlayAttackSound(actor)
+
+    local angle = actor.angle
+    local x, y, z = actor.x, actor.y, actor.z + (actor.height / 2) -- Start from the tripmine's center
+    local lasertype = MT_HL1_TRIPLASER -- Define the laser object type
+    local lastlaser = nil
+
+    -- Keep casting until hitting a wall
+    while true do
+        local laser = P_SpawnMobj(x, y, z, lasertype)
+        laser.angle = angle
+        laser.target = actor -- Keep track of the tripmine that spawned it
+
+        -- Check if this laser clips through a wall
+        if P_RailThinker(laser) then
+            break -- Stop if a wall was hit
+        end
+
+        lastlaser = laser
+        x = x + cos(angle) * laser.radius
+        y = y + sin(angle) * laser.radius
+    end
+end
 
 states[S_HL1_HIT] = {
 	sprite = SPR_HLHITEFFECT,
@@ -141,14 +291,150 @@ states[S_HL1_HIT] = {
 	nextstate = S_NULL
 }
 
-local skin = "kombifreeman"
-local fire = BT_ATTACK
-local altfire = BT_FIRENORMAL
-local frameSound = sfx_hl1g17
+states[S_HL1_EXPLODE] = {
+	sprite = SPR_HL1EXPLOSION,
+	frame = A,
+	action = A_HLExplode,
+	tics = 0,
+	var1 = 256*FRACUNIT, -- range
+	var2 = 192, -- damage
+	nextstate = S_HL1_EXPLOSION
+}
+
+states[S_HL1_EXPLOSION] = {
+	sprite = SPR_HL1EXPLOSION,
+	frame = A|FF_ADD|FF_ANIMATE,
+	tics = 13*3,
+	var1 = 13,
+	var2 = 3,
+	nextstate = S_NULL
+}
+
+states[S_HL1_TRIPMINETHROWN] = {
+	sprite = SPR_HL1EXPLOSION,
+	frame = A,
+	action = A_PlayActiveSound,
+	tics = 105,
+	var1 = 0,
+	var2 = 0,
+	nextstate = S_HL1_ACTIVETRIPMINE
+}
+
+states[S_HL1_INACTIVETRIPMINE] = {
+	sprite = SPR_HL1EXPLOSION,
+	frame = A,
+	action = A_PlaySeeSound,
+	tics = 105,
+	var1 = 0,
+	var2 = 0,
+	nextstate = S_HL1_ACTIVETRIPMINE
+}
+
+states[S_HL1_ACTIVETRIPMINE] = {
+	sprite = SPR_HL1EXPLOSION,
+	frame = A,
+	action = A_HLSetupLaserMine,
+	tics = -1,
+	var1 = 0,
+	var2 = 0,
+	nextstate = S_HL1_EXPLODE
+}
+
+states[S_HL1_ROCKET] = {
+	sprite = SPR_HL1EXPLOSION,
+	frame = A,
+	action = A_StopMomentum,
+	tics = 18,
+	var1 = 0,
+	var2 = 0,
+	nextstate = S_HL1_ROCKETACTIVE
+}
+
+states[S_HL1_ROCKETACTIVE] = {
+	sprite = SPR_HL1EXPLOSION,
+	frame = A,
+	action = A_HLRocketThinker,
+	tics = -1,
+	var1 = 30*FRACUNIT,
+	var2 = 0,
+	nextstate = S_HL1_EXPLODE
+}
+
+mobjinfo[MT_HL1_ROCKET] = {
+spawnstate = S_HL1_ROCKET,
+spawnhealth = 100,
+deathstate = S_HL1_EXPLODE,
+reactiontime = 18,
+activesound = sfx_hlrckt,
+speed = 6*FRACUNIT,
+radius = mobjinfo[MT_CORK].radius,
+height = mobjinfo[MT_CORK].height,
+dispoffset = 4,
+flags = MF_MISSILE|MF_NOGRAVITY,
+}
+
+mobjinfo[MT_HL1_ARGRENADE] = {
+spawnstate = S_KOMBI_SHURIKEN,
+spawnhealth = 100,
+deathstate = S_HL1_EXPLODE,
+speed = 8*mobjinfo[MT_CORK].speed/2,
+radius = mobjinfo[MT_CORK].radius,
+height = mobjinfo[MT_CORK].height,
+dispoffset = 4,
+flags = MF_MISSILE,
+}
+
+mobjinfo[MT_HL1_HANDGRENADE] = {
+spawnstate = S_KOMBI_SHURIKEN,
+spawnhealth = 100,
+deathstate = S_HL1_EXPLODE,
+xdeathstate = S_HL1_EXPLODE,
+speed = 12*FRACUNIT,
+radius = mobjinfo[MT_CORK].radius,
+height = mobjinfo[MT_CORK].height,
+dispoffset = 4,
+flags = MF_MISSILE|MF_BOUNCE|MF_GRENADEBOUNCE,
+}
+
+mobjinfo[MT_HL1_SATCHEL] = {
+spawnstate = S_KOMBI_SHURIKEN,
+spawnhealth = 100,
+deathstate = S_HL1_EXPLODE,
+speed = 12*FRACUNIT,
+radius = mobjinfo[MT_CORK].radius,
+height = mobjinfo[MT_CORK].height,
+dispoffset = 4,
+flags = MF_SLIDEME,
+}
+
+mobjinfo[MT_HL1_TRIPMINE] = {
+	spawnstate = S_HL1_TRIPMINETHROWN,
+	spawnhealth = 100,
+	deathstate = S_HL1_EXPLODE,
+	speed = FRACUNIT,
+	radius = FRACUNIT/2,
+	height = FRACUNIT/2,
+	dispoffset = 4,
+	flags = MF_NOGRAVITY,
+	activesound = sfx_hltmdp,
+	seesound = sfx_hlthch,
+	attacksound = sfx_hltmac,
+	missilestate = S_HL1_INACTIVETRIPMINE
+}
+
+mobjinfo[MT_HL1_TRIPLASER] = {
+	spawnstate = S_KOMBI_SHURIKEN,
+	spawnhealth = 100,
+	speed = FRACUNIT,
+	radius = FRACUNIT/2,
+	height = FRACUNIT/2,
+	dispoffset = 4,
+	flags = MF_NOGRAVITY,
+}
 
 rawset(_G, "VMDL_FLIP", 1)
-rawset(_G, "VBOB_NONE", 1)
-rawset(_G, "VBOB_DOOM", 2)
+rawset(_G, "VBOB_DOOM", 1)
+rawset(_G, "VBOB_NONE", 2)
 rawset(_G, "WEAPON_NONE", -1)
 
 rawset(_G, "kombihl1viewmodels", {
@@ -394,7 +680,6 @@ rawset(_G, "kombihl1viewmodels", {
 		},
 	},
 	["SHOTGUN"] = {
-		idleanims = 3,
 		flags = VMDL_FLIP,
 		animations = {
 			ready = {
@@ -497,6 +782,64 @@ rawset(_G, "kombihl1viewmodels", {
 			},
 		}
 	},
+	["MP5-"] = {
+		flags = VMDL_FLIP,
+		animations = {
+			ready = {
+				sentinel = "MP5READY",
+				frameDurations = {
+					[1] = 5,
+					[3] = 8,
+				},
+			},
+			primaryfire = {
+				sentinel = "SHOTGUNFIRE1",
+				frameDurations = {
+					[1] = 3,
+					[12] = 3,
+				},
+				frameSounds = {
+					[6] = sfx_hl1sgc
+				}
+			},
+			secondaryfire = {
+				sentinel = "SHOTGUNAFIRE1",
+				frameDurations = {
+					[1] = 3,
+					[20] = 6,
+				},
+				frameSounds = {
+					[13] = sfx_hl1sgc,
+				}
+			},
+			reload = {
+				sentinel = "SHOTGUNRELOADE1",
+				frameDurations = {
+					[1] = 4,
+					[8] = 4,
+				},
+				frameSounds = {
+					[4] = sfx_hl1sgc,
+				}
+			},
+			idle = {
+				{
+					sentinel = "SHOTGUNIDLE1-1",
+					frameDurations = {
+						[1] = 8,
+						[10] = 8,
+					},
+				},
+				{
+					sentinel = "SHOTGUNIDLE2-1",
+					frameDurations = {
+						[1] = 10,
+						[11] = 10,
+					},
+				},
+			},
+		}
+	},
 	["DOOMWP2-"] = {
 		idleanims = 1,
 		bobtype = VBOB_DOOM,
@@ -590,18 +933,18 @@ rawset(_G, "kombihl1viewmodels", {
 rawset(_G, "HL_WpnStats", {
 	["crowbar"] =
 	{
-		israycaster = true, -- the rest probably don't need this property. determines if the bullet object takes the guy with the lightning's advice if it doesn't hit anything.
 		viewmodel = "CROWBAR", -- the graphic we'll use for the weapon. Graphic format is VMDL[vmdlkey][baseFrameIndex]!!
 		vmdlflip = true,
 		selectgraphic = "HL1HUDCROWBAR",
-		neverdenyuse = true,
 		autoswitchweight = 0,
 		weaponslot = 1,
 		priority = 1,
 		primary = {
+			israycaster = true, -- the rest probably don't need this property. determines if the bullet object takes the guy with the lightning's advice if it doesn't hit anything.
 			ammo = "melee",
 			ismelee = true, -- Gets affected by DoomGuy's berserk if set to true.
 			clipsize = WEAPON_NONE,
+			neverdenyuse = true,
 			shotcost = 0,
 			damage = 5,
 			firesound = sfx_hlcbar,
@@ -654,7 +997,7 @@ rawset(_G, "HL_WpnStats", {
 		globalfiredelay = {
 			ready = 12,
 			reload = 53,
-			["reloadpost"] = 18,
+			reloadpost = 18,
 		},
 		realname = "9mm Handgun",
 	},
@@ -697,6 +1040,7 @@ rawset(_G, "HL_WpnStats", {
 	},
 	["mp5"] = 
 		{
+		viewmodel = "MP5-",
 		crosshair = "XHR9MM",
 		selectgraphic = "HL1HUDMP5",
 		autoswitchweight = 15,
@@ -810,14 +1154,17 @@ rawset(_G, "HL_WpnStats", {
 		crosshair = "XHRRPG",
 		selectgraphic = "HL1HUDRPG",
 		autoswitchweight = 20,
-		pickupgift = 1,
 		weaponslot = 4,
 		priority = 1,
-		ammo = "rocket",
-		clipsize = 5,
-		shotcost = 1,
-		kickback = 5*FRACUNIT/2,
-		firesound = sfx_hl1g17,
+		primary = {
+			pickupgift = 1,
+			ammo = "rocket",
+			clipsize = 5,
+			shotcost = 1,
+			kickback = 5*FRACUNIT/2,
+			firesound = sfx_hl1g17,
+			firedelay = 35,
+		},
 		autoreload = true,
 		altfire = false,
 		globalfiredelay = {
@@ -907,23 +1254,22 @@ rawset(_G, "HL_WpnStats", {
 		viewmodel = "CROWBAR",
 		selectgraphic = "HL1HUDGRENADE",
 		autoswitchweight = 5,
-		pickupgift = 5,
 		weaponslot = 5,
 		priority = 1,
-		ammo = "grenade",
-		clipsize = WEAPON_NONE,
-		["shootmobj"] = MT_HL1_HANDGRENADE,
-		maxdistance = 3*TICRATE,
-		shotcost = 1,
-		damage = 1,
-		["explosionradius"] = 100,
-		firesound = sfx_none,
+		primary = {
+			pickupgift = 5,
+			ammo = "grenade",
+			clipsize = WEAPON_NONE,
+			maxdistance = 3*TICRATE,
+			shotcost = 1,
+			damage = 1,
+			firesound = sfx_none,
+			firedelay = 12,
+		},
 		autoreload = true,
 		altfire = false,
 		globalfiredelay = {
 			ready = 12,
-			["normal"] = 12,
-			["alt"] = 6,
 			reload = 54,
 		},
 		realname = "Grenades",
@@ -933,13 +1279,16 @@ rawset(_G, "HL_WpnStats", {
 		viewmodel = "PISTOL",
 		selectgraphic = "HL1HUDSATCHEL",
 		autoswitchweight = 5,
-		pickupgift = 1,
 		weaponslot = 5,
 		priority = 2,
-		ammo = "satchel",
-		clipsize = WEAPON_NONE,
-		shotcost = 1,
-		firesound = sfx_none,
+		primary = {
+			pickupgift = 1,
+			ammo = "satchel",
+			clipsize = WEAPON_NONE,
+			maxdistance = 5*TICRATE,
+			shotcost = 1,
+			firesound = sfx_none,
+		},
 		autoreload = true,
 		altfire = false,
 		globalfiredelay = {
@@ -955,13 +1304,17 @@ rawset(_G, "HL_WpnStats", {
 		viewmodel = "PISTOL",
 		selectgraphic = "HL1HUDTRIPMINE",
 		autoswitchweight = -10, -- VERY unlikely we'll even need to check past here.
-		pickupgift = 1,
 		weaponslot = 5,
 		priority = 3,
-		ammo = "tripmine",
-		clipsize = WEAPON_NONE,
-		shotcost = 1,
-		firesound = sfx_none,
+		primary = {
+			pickupgift = 1,
+			ammo = "tripmine",
+			clipsize = WEAPON_NONE,
+			shotcost = 1,
+			firesound = sfx_none,
+			firedelay = 12,
+			maxdistance = 128,
+		},
 		autoreload = true,
 		altfire = false,
 		globalfiredelay = {

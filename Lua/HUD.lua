@@ -49,18 +49,8 @@ local function printTable(data, prefix)
 end
 
 hud.add(function(v, player)
-    if not player.mo then return end
-    if kombilastseen and kombilastseen.valid and kombilastseen.mo.skin == "kombifreeman" then
-        -- Display Freeman's status when hovered over
-        local splayer = kombilastseen
-        local sweapon = splayer.hl1weapon
-        local swepstats = HL_WpnStats[sweapon]
-        local swepname = swepstats.realname or sweapon
-        v.drawString(160, 124, "Wielding " .. swepname, V_GREENMAP|V_ALLOWLOWERCASE|V_HUDTRANSHALF, "thin-center")
-        v.drawString(160, 132, tostring(splayer.mo.hl1health) .. "%", V_GREENMAP|V_ALLOWLOWERCASE|V_HUDTRANSHALF, "thin-center")
-    end
+    if not player.mo or player.mo.skin ~= "kombifreeman" then return end
 
-    if player.mo.skin ~= "kombifreeman" then return end
     hud.disable("score")
     hud.disable("time")
     hud.disable("rings")
@@ -68,55 +58,51 @@ hud.add(function(v, player)
     hud.disable("weaponrings")
     hud.disable("crosshair")
 
-    -- Viewmodel drawing
-    if player.playerstate ~= PST_DEAD and not camera.chase and player.hl1inventory[player.hl1weapon] then
-        local kmbivmdl = HL_WpnStats[player.hl1weapon].viewmodel or "PISTOL"
-        local curvmdl = kombihl1viewmodels[kmbivmdl]
-        local curframe = player.hl1frame or 1 -- current frame
-        local vmdlflags = V_PERPLAYER
-        local colormapfunc = IsAboveVersion(202, 13) and v.getSectorColormap or dummy
+    -- Skip rendering if player is dead or in third person
+    if player.playerstate == PST_DEAD or camera.chase or not player.hl1inventory[player.hl1weapon] then return end
 
-        if curvmdl.flags and (curvmdl.flags & VMDL_FLIP) then
-            vmdlflags = vmdlflags | V_FLIP
-        end
+    local weaponStats = HL_WpnStats[player.hl1weapon]
+    local curvmdl = kombihl1viewmodels[weaponStats.viewmodel or "PISTOL"]
+    local curframe = player.hl1frame or 1
+    local vmdlflags = V_PERPLAYER
 
-        -- Fetch animation details
-        local animationDef = player.hl1currentAnimation
-        local sentinel = animationDef and animationDef.sentinel or "PISTOLIDLE1-1"
-        local prefix = sentinel:match("^(.-)%d+$") or ""
-        local baseNum = tonumber(sentinel:match("(%d+)$")) or 0
-        local effectiveFrame = baseNum + (curframe - baseNum)
-        local patchName = prefix .. effectiveFrame
-
-        -- Bobbing calculations (Half-Life Viewbobbing)
-        local angle = FixedAngle((leveltime * 12) * FRACUNIT)
-
-        if curvmdl.bobtype == VBOB_DOOM then
-            local bobAngle = ((128 * leveltime) & 8191) << 19
-            local bobx = FixedMul((player.hl1wepbob or 0), cos(bobAngle))
-            bobAngle = ((128 * leveltime) & 4095) << 19
-            local boby = FixedMul((player.hl1wepbob or 0), sin(bobAngle))
-
-            v.drawScaled(
-                (160 * FRACUNIT) + bobx,
-                (106 * FRACUNIT) + boby,
-                FRACUNIT,
-                v.cachePatch(patchName),
-                vmdlflags | V_SNAPTOBOTTOM,
-                colormapfunc(player.mo.subsector.sector, player.mo.x, player.mo.y, player.mo.z, player.mo.subsector.sector.lightlevel)
-            )
-        else
-            local bobOffset = FixedMul(FRACUNIT, FixedMul((player.hl1wepbob or 0) / 256, sin(angle)))
-            v.drawScaled(
-                160 * FRACUNIT,
-                106 * FRACUNIT,
-                FRACUNIT + bobOffset,
-                v.cachePatch(patchName),
-                vmdlflags | V_SNAPTOBOTTOM,
-                colormapfunc(player.mo.subsector.sector, player.mo.x, player.mo.y, player.mo.z, player.mo.subsector.sector.lightlevel)
-            )
-        end
+    if curvmdl.flags and (curvmdl.flags & VMDL_FLIP) ~= 0 then
+        vmdlflags = vmdlflags | V_FLIP
     end
+
+    -- Fetch animation
+    local animationDef = player.hl1currentAnimation
+    local sentinel = animationDef and animationDef.sentinel or "PISTOLIDLE1-1"
+    local prefix, baseNum = sentinel:match("^(.-)(%d+)$")
+    local patchName = prefix .. (tonumber(baseNum) + (curframe - tonumber(baseNum)))
+
+    -- Viewbobbing
+    local bobx, boby = 0, 0
+    local angle = FixedAngle(leveltime * 12 * FRACUNIT)
+    local bobOffset = 0
+
+    if curvmdl.bobtype == VBOB_DOOM then
+        local bobAngle = ((128 * leveltime) & 8191) << 19
+        bobx = FixedMul((player.hl1wepbob or 0), cos(bobAngle))
+        bobAngle = ((128 * leveltime) & 4095) << 19
+        boby = FixedMul((player.hl1wepbob or 0), sin(bobAngle))
+	else
+		bobOffset = FixedMul(FRACUNIT, FixedMul((player.hl1wepbob or 0) / 256, sin(angle)))
+    end
+
+    -- Cache patch and colormap lookup
+    local patch = v.cachePatch(patchName)
+    local colormap = IsAboveVersion(202, 13) and v.getSectorColormap(player.mo.subsector.sector, player.mo.x, player.mo.y, player.mo.z, player.mo.subsector.sector.lightlevel) or nil
+
+    -- Single draw call
+    v.drawScaled(
+        (160 * FRACUNIT) + bobx,
+        (106 * FRACUNIT) + boby,
+        FRACUNIT + bobOffset,
+        patch,
+        vmdlflags | V_SNAPTOBOTTOM,
+        colormap
+    )
 end, "game")
 
 -- Ammo
@@ -174,11 +160,11 @@ end, "game")
 hud.add(function(v, player)
 	if not player.mo return end
 	if player.mo.skin != "kombifreeman" return end
-	local armor = min(player.mo.hl1armor, 100 * FRACUNIT)
+	local armor = min((player.mo.hl1armor or 0), 100 * FRACUNIT)
 	local crop = FixedDiv((100 * FRACUNIT - armor) * 40, 100 * FRACUNIT)
 	v.drawCropped(52 * FRACUNIT, 178 * FRACUNIT, FRACUNIT / 2, FRACUNIT / 2, v.cachePatch("HL1SUITE"), V_PERPLAYER|V_ADD|V_SNAPTOBOTTOM|V_SNAPTOLEFT, v.getColormap(nil, player.skincolor), 0, 0, 40 * FRACUNIT, crop)
 	v.drawCropped(52 * FRACUNIT, 178 * FRACUNIT + crop / 2, FRACUNIT / 2, FRACUNIT / 2, v.cachePatch("HL1SUITF"), V_PERPLAYER|V_ADD|V_SNAPTOBOTTOM|V_SNAPTOLEFT, v.getColormap(nil, player.skincolor), 0, crop, 40 * FRACUNIT, 40 * FRACUNIT - crop)
-	K_DrawHL1Number(v, player.mo.hl1armor / FRACUNIT, 99 * FRACUNIT, 196 * FRACUNIT, V_ADD|V_PERPLAYER|V_SNAPTOBOTTOM|V_SNAPTOLEFT, v.getColormap(nil, player.skincolor))
+	K_DrawHL1Number(v, (player.mo.hl1armor or 0) / FRACUNIT, 99 * FRACUNIT, 196 * FRACUNIT, V_ADD|V_PERPLAYER|V_SNAPTOBOTTOM|V_SNAPTOLEFT, v.getColormap(nil, player.skincolor))
 end, "game")
 
 -- Damage Direction Indicator (Currently Empty)
