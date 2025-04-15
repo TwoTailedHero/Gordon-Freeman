@@ -167,13 +167,71 @@ hud.add(function(v, player)
 	K_DrawHL1Number(v, (player.mo.hl1armor or 0) / FRACUNIT, 99 * FRACUNIT, 196 * FRACUNIT, V_ADD|V_PERPLAYER|V_SNAPTOBOTTOM|V_SNAPTOLEFT, v.getColormap(nil, player.skincolor))
 end, "game")
 
--- Damage Direction Indicator (Currently Empty)
+local damageFadeTics = 5
+
+-- Damage Direction Indicator
 hud.add(function(v, player)
-	if not player.mo return end
-	if player.mo.skin != "kombifreeman" return end
-	if player.hl1dmgdir then
-		-- You may want to add visual feedback for different damage directions here
-	end
+    if not player.mo then return end
+    if player.mo.skin ~= "kombifreeman" then return end
+	if player.mo.hl1dmgdir == nil return end
+	local fade = ease.linear(FixedDiv(player.hl1damagetics, damageFadeTics), 0, 10)
+	if fade >= 10 return end
+	fade = fade<<V_ALPHASHIFT
+
+    local centerdist = 50 * FRACUNIT
+    local flags = V_PERPLAYER | V_ADD | fade
+    local hitAngle = player.mo.hl1dmgdir
+
+    -- Un-angled hit, all indicators light up
+    if hitAngle == -FRACUNIT then
+        v.drawScaled(160 * FRACUNIT, (100 * FRACUNIT) - centerdist, FRACUNIT / 2, v.cachePatch("HLPAINUP"), flags)
+        v.drawScaled((160 * FRACUNIT) - centerdist, 100 * FRACUNIT, FRACUNIT / 2, v.cachePatch("HLPAINRIGHT"), flags | V_FLIP)
+        v.drawScaled(160 * FRACUNIT, (100 * FRACUNIT) + centerdist, FRACUNIT / 2, v.cachePatch("HLPAINDOWN"), flags)
+        v.drawScaled((160 * FRACUNIT) + centerdist, 100 * FRACUNIT, FRACUNIT / 2, v.cachePatch("HLPAINRIGHT"), flags)
+        return
+    end
+
+    -- The tolerance for each indicator
+    local tolerance = 45 * FRACUNIT
+
+    -- Normalize the angle to a 0 - 360° range
+    local function normalizeAngle(angle)
+        local full = 360 * FRACUNIT
+        return angle % full
+    end
+
+    hitAngle = normalizeAngle(hitAngle)
+
+    -- Helper: Check if the absolute difference between two angles is within tolerance
+    local function isWithin(angle, target, tol)
+        local diff = abs(angle - target)
+        if diff > 180 * FRACUNIT then
+            diff = (360 * FRACUNIT) - diff
+        end
+        return diff <= tol
+    end
+
+    -- SRB2 has no native knowledge on carvinal directions, let's fix that by defining our own
+    local centers = {
+        up = 0,
+        right = 90 * FRACUNIT,
+        down = 180 * FRACUNIT,
+        left = 270 * FRACUNIT,
+    }
+
+    -- Only draw an indicator if the hit angle is within tolerance
+    if isWithin(hitAngle, centers.up, tolerance) then
+        v.drawScaled(160 * FRACUNIT, (100 * FRACUNIT) - centerdist, FRACUNIT / 2, v.cachePatch("HLPAINUP"), flags)
+    end
+    if isWithin(hitAngle, centers.right, tolerance) then
+        v.drawScaled((160 * FRACUNIT) - centerdist, 100 * FRACUNIT, FRACUNIT / 2, v.cachePatch("HLPAINRIGHT"), flags | V_FLIP)
+    end
+    if isWithin(hitAngle, centers.down, tolerance) then
+        v.drawScaled(160 * FRACUNIT, (100 * FRACUNIT) + centerdist, FRACUNIT / 2, v.cachePatch("HLPAINDOWN"), flags)
+    end
+    if isWithin(hitAngle, centers.left, tolerance) then
+        v.drawScaled((160 * FRACUNIT) + centerdist, 100 * FRACUNIT, FRACUNIT / 2, v.cachePatch("HLPAINRIGHT"), flags)
+    end
 end, "game")
 
 -- Pickup History Display
@@ -194,61 +252,84 @@ end, "game")
 
 -- Weapon Selection Menu
 hud.add(function(v, player)
-	if not player.mo return end
-	if player.mo.skin != "kombifreeman" return end
-	if not player.kombihl1wpn then return end
-	local weaponamount = player.selectionlist.weaponcount
-	local weaponlist = player.selectionlist.weapons
-	local weaponslots = player.selectionlist.wepslotamounts
-	local colormap = v.getColormap(nil, player.skincolor)
+    if not player.mo then return end
+    if player.mo.skin ~= "kombifreeman" then return end
+    if not player.kombiaccessinghl1menu then return end
 
-	-- Weapon Category Buckets
-	for i = 1, 7 do
-		local drawx = ((i > player.kombihl1category) and weaponlist and 65 or -10) * FRACUNIT + (i * 12 * FRACUNIT)
-		v.drawScaled(drawx, 2 * FRACUNIT, FRACUNIT / 2, v.cachePatch("HUDSELBUCKET" .. i), V_PERPLAYER|V_ADD|V_SNAPTOTOP|V_SNAPTOLEFT, colormap)
-		for d = 1, weaponslots[i] do
-			if i == player.kombihl1category then break end
-			v.drawScaled(drawx, 2 * FRACUNIT + (d * 12 * FRACUNIT), FRACUNIT / 2, v.cachePatch("HUDSELBUCKETITEM"), V_PERPLAYER|V_ADD|V_SNAPTOTOP|V_SNAPTOLEFT, colormap)
-		end
-	end
+    local weaponamount   = player.selectionlist.weaponcount
+    local weaponlist     = player.selectionlist.weapons
+    local weaponslots    = player.selectionlist.wepslotamounts
+    local colormap       = v.getColormap(nil, player.skincolor)
 
-	-- Individual Weapon Selection
-	for i = 1, weaponamount do
-		local currentweapon = weaponlist[i].name
-		local wepproperties = HL_WpnStats[currentweapon]
-		local selectgraphic = wepproperties.selectgraphic or "HL1HUD9MM"
-		local ammostats = HL_AmmoStats[wepproperties.primary and wepproperties.primary.ammo or "9mm"] or { max = 0 }
+    -- Determine extra separation value based on whether the selected bucket has weapons.
+    local extraSepValue = (weaponslots[player.kombihl1category] and weaponslots[player.kombihl1category] > 0) and 65 or -10
 
-		-- Highlight Selected Weapon
-		if i == player.kombihl1wpn then
-			selectgraphic = selectgraphic .. "S"
-		end
+    -- Weapon Category Buckets
+    for i = 0, 9 do
+        -- For buckets after the selected bucket, add extra separation; otherwise use the standard offset (-10)
+        local sep = (i > player.kombihl1category) and extraSepValue or -10
+        local drawx = (sep * FRACUNIT) + ((i + 1) * 12 * FRACUNIT)
+        v.drawScaled(drawx, 2 * FRACUNIT, FRACUNIT / 2, v.cachePatch("HUDSELBUCKET" .. i),
+            V_PERPLAYER|V_ADD|V_SNAPTOTOP|V_SNAPTOLEFT, colormap)
 
-		-- Determine Ammo Availability
-		if (player.hl1clips[currentweapon] and (player.hl1clips[player.hl1weapon].primary or 0) <= 0)
-		and player.hl1ammo[player.hl1clips[player.hl1weapon].primary and wepproperties.primary.ammo or "9mm"]
-		and player.hl1ammo[wepproperties.primary and wepproperties.primary.ammo or "9mm"] <= 0
-		and not ((wepproperties.primary and wepproperties.primary.neverdenyuse) or (wepproperties.secondary and wepproperties.secondary.neverdenyuse)) then
-			colormap = v.getColormap(nil, SKINCOLOR_RED)
-		else
-			colormap = v.getColormap(nil, player.skincolor)
-		end
+        for d = 1, weaponslots[i] do
+            if i == player.kombihl1category then break end
+            v.drawScaled(drawx, 2 * FRACUNIT + (d * 12 * FRACUNIT), FRACUNIT / 2, v.cachePatch("HUDSELBUCKETITEM"),
+                V_PERPLAYER|V_ADD|V_SNAPTOTOP|V_SNAPTOLEFT, colormap)
+        end
+    end
 
-		-- Draw Weapon Icon
-		v.drawScaled(-10 * FRACUNIT + (player.kombihl1category * 12 * FRACUNIT), (14 * FRACUNIT) + ((49 * (i - 1)) * FRACUNIT / 2), FRACUNIT / 2, v.cachePatch(selectgraphic), V_PERPLAYER|V_ADD|V_SNAPTOTOP|V_SNAPTOLEFT, colormap)
+    -- Individual Weapon Selection
+    for i = 1, weaponamount do
+        local currentweapon = weaponlist[i].name
+        local wepproperties = HL_WpnStats[currentweapon]
+        local selectgraphic = wepproperties.selectgraphic or "HL1HUD9MM"
+        local ammostats = HL_AmmoStats[ (wepproperties.primary and wepproperties.primary.ammo) or "9mm" ] or { max = 0 }
+        local border
 
-		-- Draw Ammo Bar
-		if player.hl1ammo[wepproperties.primary and wepproperties.primary.ammo or "9mm"] then
-			local effectiveMaxAmmo = player.hl1doubleammo and (ammostats.backpackmax or ammostats.max * 2) or ammostats.max
+        -- Highlight Selected Weapon
+        if i == player.kombihl1wpn then
+            selectgraphic = selectgraphic .. "S"
+            border = i
+        end
 
-			v.drawStretched(-9 * FRACUNIT + (player.kombihl1category * 12 * FRACUNIT), (15 * FRACUNIT) + ((49 * (i - 1)) * FRACUNIT / 2), FRACUNIT * 10, 5 * FRACUNIT / 2, v.cachePatch("HL1HUDSELGRAY"), V_PERPLAYER|V_50TRANS|V_SNAPTOTOP|V_SNAPTOLEFT)
-			v.drawStretched(-9 * FRACUNIT + (player.kombihl1category * 12 * FRACUNIT),
-				(15 * FRACUNIT) + ((49 * (i - 1)) * FRACUNIT / 2),
-				FixedDiv((player.hl1ammo[wepproperties.ammo] or 0) * 10,
-				effectiveMaxAmmo or 10),
-				5 * FRACUNIT / 2,
-				v.cachePatch("HL1HUDSELGREEN"),
-				V_PERPLAYER|V_SNAPTOTOP|V_SNAPTOLEFT)
-		end
-	end
+        -- Determine Ammo Availability
+        if (player.hl1clips[currentweapon] and (player.hl1clips[player.hl1weapon].primary or 0) <= 0)
+           and player.hl1ammo[ (player.hl1clips[player.hl1weapon] and player.hl1clips[player.hl1weapon].primary and (wepproperties.primary and wepproperties.primary.ammo) or "9mm") ]
+           and player.hl1ammo[ (wepproperties.primary and wepproperties.primary.ammo or "9mm") ] <= 0
+           and not ((wepproperties.primary and wepproperties.primary.neverdenyuse)
+                    or (wepproperties.secondary and wepproperties.secondary.neverdenyuse)) then
+            colormap = v.getColormap(nil, SKINCOLOR_RED)
+        else
+            colormap = v.getColormap(nil, player.skincolor)
+        end
+
+        -- Draw Weapon Icon
+        v.drawScaled(-10 * FRACUNIT + ((player.kombihl1category + 1) * 12 * FRACUNIT),
+            (14 * FRACUNIT) + ((49 * (i - 1)) * FRACUNIT / 2),
+            FRACUNIT / 2, v.cachePatch(selectgraphic),
+            V_PERPLAYER|V_ADD|V_SNAPTOTOP|V_SNAPTOLEFT, colormap)
+
+        if i == border then
+            v.drawScaled(-10 * FRACUNIT + ((player.kombihl1category + 1) * 12 * FRACUNIT),
+                (14 * FRACUNIT) + ((49 * (i - 1)) * FRACUNIT / 2),
+                FRACUNIT / 2, v.cachePatch("HUDSELITEMBORDER"),
+                V_PERPLAYER|V_ADD|V_SNAPTOTOP|V_SNAPTOLEFT, colormap)
+        end
+
+        -- Draw Ammo Bar
+        if player.hl1ammo[ (wepproperties.primary and wepproperties.primary.ammo or "9mm") ] then
+            local effectiveMaxAmmo = player.hl1doubleammo and (ammostats.backpackmax or ammostats.max * 2) or ammostats.max
+            v.drawStretched(-9 * FRACUNIT + ((player.kombihl1category + 1) * 12 * FRACUNIT),
+                (15 * FRACUNIT) + ((49 * (i - 1)) * FRACUNIT / 2),
+                FRACUNIT * 10, 5 * FRACUNIT / 2, v.cachePatch("HL1HUDSELGRAY"),
+                V_PERPLAYER|V_50TRANS|V_SNAPTOTOP|V_SNAPTOLEFT)
+            v.drawStretched(-9 * FRACUNIT + ((player.kombihl1category + 1) * 12 * FRACUNIT),
+                (15 * FRACUNIT) + ((49 * (i - 1)) * FRACUNIT / 2),
+                FixedDiv((player.hl1ammo[ (wepproperties.primary and wepproperties.primary.ammo or "9mm") ] or 0) * 10, effectiveMaxAmmo or 10),
+                5 * FRACUNIT / 2,
+                v.cachePatch("HL1HUDSELGREEN"),
+                V_PERPLAYER|V_SNAPTOTOP|V_SNAPTOLEFT)
+        end
+    end
 end, "game")

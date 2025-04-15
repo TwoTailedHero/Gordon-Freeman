@@ -49,15 +49,17 @@ local kombilocalplayer
 local function FireWeapon(player, mode)
 	mode = mode or "primary" -- Default to primary if not specified
 
+	-- If we aren't supposed to be shooting, don't. (world peace solved!!)
+	if player.hl1 and player.hl1.holdyourfire and mode == "primary" then return end
+
 	-- Handle weapon selection and preparation
-	if player.selectionlist and player.selectionlist["weapons"] and player.kombihl1wpn then
+	if player.selectionlist and player.selectionlist["weapons"] and player.kombiaccessinghl1menu and mode == "primary" then
 		-- Determine the viewmodel based on the current weapon
 		local viewmodel = kombihl1viewmodels[HL_WpnStats[player.selectionlist["weapons"][player.kombihl1wpn]["name"].viewmodel or "PISTOL"]]
-		if player.hl1weapon ~= player.selectionlist["weapons"][player.kombihl1wpn]["name"] then
+		if player.hl1weapon ~= player.selectionlist.weapons[player.kombihl1wpn].name then
 			-- Switch weapon and set delays
 			player.hl1weapon = player.selectionlist["weapons"][player.kombihl1wpn]["name"]
 			player.hl1weapondelay = HL_WpnStats[player.hl1weapon].globalfiredelay.ready
-			player.kombihl1wpn = 0
 
 			-- Set animation
 			HL_ChangeViewmodelState(player, "ready", "idle 1")
@@ -70,6 +72,13 @@ local function FireWeapon(player, mode)
 				player.hl1clips[player.hl1weapon] = {primary = clipsize, secondary = clipsize2}
 			end
 		end
+
+		-- Play the corresponding sound and close the menu, now that we selected something.
+		S_StartSound(player.mo, sfx_pwepen)
+		player.kombiaccessinghl1menu = false
+		player.hl1 = $ or {}
+		player.hl1.holdyourfire = true
+
 		return
 	end
 	
@@ -101,7 +110,12 @@ local function FireWeapon(player, mode)
 	-- Break if we're in the weapon selection menu
 	if player.kombipressingwpnkeys then return end
 	
-	player.kombireloading = 0 -- Reset reload state
+	-- Interrupt reloading if we're in one
+	if player.kombireloading
+		player.kombireloading = 0
+		player.hl1weapondelay = 0
+		player.weaponaltdelay = 0
+	end
 	
 	-- Use the viewmodel from the weapon whose stats we are using
 	local viewmodel = kombihl1viewmodels[HL_WpnStats[weaponID].viewmodel or "PISTOL"]
@@ -145,6 +159,12 @@ local function FireWeapon(player, mode)
 		else
 			theproj = P_SpawnPlayerMissile(player.mo, projectile)
 		end
+		if not theproj and theproj.valid continue end
+		if mystats.carrymomentum
+			theproj.momx = $+player.mo.momx
+			theproj.momy = $+player.mo.momy
+			theproj.momz = $+player.mo.momz
+		end
 	end
 	
 	-- Handle firing and ammo consumption
@@ -158,6 +178,7 @@ local function FireWeapon(player, mode)
 		end
 		
 		-- Set weapon delay and decrement ammo
+		print(mystats.firedelay)
 		if mode == "primary" then
 			player.hl1weapondelay = mystats.firedelay
 		else
@@ -180,6 +201,12 @@ addHook("PlayerThink", function(player)
 	-- Reset refire flag if the fire button is released
 	if not player.hl1weapondelay and not (player.cmd.buttons & fire) and player.refire
 		player.refire = false
+	end
+	
+	if player.hl1 and player.hl1.holdyourfire then
+		if not (player.cmd.buttons & fire) then
+			player.hl1.holdyourfire = false
+		end
 	end
 	
 	-- Handle primary and secondary fire inputs
@@ -206,6 +233,7 @@ end
 addHook("MobjSpawn", HL_InitBullet, MT_HL1_BULLET)
 addHook("MobjSpawn", HL_InitBullet, MT_HL1_HANDGRENADE)
 addHook("MobjSpawn", HL_InitBullet, MT_HL1_TRIPMINE)
+addHook("MobjSpawn", HL_InitBullet, MT_HL1_ARGRENADE)
 
 addHook("MobjMoveCollide", function(tmthing, thing)
 	if tmthing.z + tmthing.height > thing.z and tmthing.z < thing.z + thing.height
@@ -248,7 +276,7 @@ addHook("PreThinkFrame", function()
 	end
 end)
 
-addHook("MobjThinker", function(mobj)
+local function HL_TheRaycastingAtHome(mobj)
 	local shooter = mobj.target
 	local didathing = false
 	shooter.flags = $|MF_NOCLIP -- No touchie.
@@ -260,19 +288,15 @@ addHook("MobjThinker", function(mobj)
 		P_KillMobj(mobj, nil, nil, DMG_INSTAKILL)
 	end
 	shooter.flags = $&~MF_NOCLIP
-end, MT_HL1_BULLET)
+end
+
+addHook("MobjThinker", HL_TheRaycastingAtHome, MT_HL1_BULLET)
+
+addHook("MobjThinker", HL_TheRaycastingAtHome, MT_HL1_TRIPMINE)
 
 addHook("MobjThinker", function(mobj)
-	local shooter = mobj.target
-	local didathing = false
-	shooter.flags = $|MF_NOCLIP -- No touchie.
-	for i = 1, mobj.fuse do
-		if not mobj and not mobj.valid break end
-		if P_RailThinker(mobj) didathing = true break end
-	end
-	if didathing mobj.fuse = 0 end
-	shooter.flags = $&~MF_NOCLIP
-end, MT_HL1_TRIPMINE)
+	mobj.info.activesound = sfx_hlgrn1 + leveltime%3
+end, MT_HL1_HANDGRENADE)
 
 addHook("PostThinkFrame", function()
 	for player in players.iterate do

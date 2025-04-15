@@ -296,12 +296,15 @@ end)
 
 rawset(_G, "HL_GetWeapons", function(items, targetSlot, player) -- gets all available weapons.
 	local filtered = {}
-	local filteredweps = {0,0,0,0,0,0,0}
+	local filteredweps = {}
+	for i = 0, 9 do filteredweps[i] = 0 end -- initialize all slot counts from 0 to 10
+
 	if not player then
 		local errortype = type(player) == "userdata" and userdataType(player) or type(player)
 		error("Bad argument #3 to 'HL_GetWeapons' (PLAYER_T* expected, got "..errortype..")", 2)
 		return
 	end
+
 	for name, data in pairs(items) do
 		if player.hl1inventory and player.hl1inventory[name] then
 			-- Check if 'weaponslot' or 'priority' is missing
@@ -315,18 +318,28 @@ rawset(_G, "HL_GetWeapons", function(items, targetSlot, player) -- gets all avai
 					data.priority = INT32_MIN
 				end
 			end
-			filteredweps[data.weaponslot] = (filteredweps[data.weaponslot] or 0) + 1
-			if data.weaponslot == targetSlot then
-				table.insert(filtered, {name = name, priority = data.priority, id = #filtered + 1})
+
+			if data.weaponslot >= 0 and data.weaponslot <= 9 then
+				filteredweps[data.weaponslot] = (filteredweps[data.weaponslot] or 0) + 1
+				if data.weaponslot == targetSlot then
+					table.insert(filtered, {name = name, priority = data.priority, id = #filtered + 1})
+				end
+			else
+				warn('Warning: Weapon "' .. data.realname .. '" has an out-of-bounds weaponslot: ' .. data.weaponslot)
 			end
 		end
 	end
+
 	table.sort(filtered, function(a, b)
 		return a.priority < b.priority
 	end)
-	return {["weapons"] = filtered, ["weaponcount"] = #filtered, ["wepslotamounts"] = filteredweps}
-end)
 
+	return {
+		weapons = filtered,
+		weaponcount = (#filtered or 0),
+		wepslotamounts = filteredweps
+	}
+end)
 
 rawset(_G, "HL_AddAmmo", function(freeman, ammotype, ammo) -- give player some munitions
 	if not ammotype

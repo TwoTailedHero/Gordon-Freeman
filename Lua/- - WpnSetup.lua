@@ -63,6 +63,7 @@ SafeFreeSlot("sfx_hl1wpn",
 "sfx_hl1ar1","sfx_hl1ar2","sfx_hl1ar3","sfx_hlarr1","sfx_hlarr2","sfx_hlarg1","sfx_hlarg2",
 "sfx_hl1sg1","sfx_hl1sgc","sfx_hldsht",
 "sfx_hlrckt","sfx_hlexp1","sfx_hlexp2","sfx_hlexp3",
+"sfx_hlgrn1","sfx_hlgrn2","sfx_hlgrn3",
 "sfx_hltpdp","sfx_hltpch","sfx_hltpac",
 "SPR_HLHITEFFECT","S_HL1_HIT",
 "SPR_HL1EXPLOSION","S_HL1_EXPLODE","S_HL1_EXPLOSION",
@@ -144,23 +145,32 @@ rawset(_G, "kombiHL1SpecialHandlers", { -- rawset to _G to open up modding envir
 })
 
 rawset(_G, "HL_DamageGordon", function(thing, tmthing, dmg) -- damage something, respecting HL1's logic
-	local hldamage = dmg or tmthing and tmthing.hl1damage
-	if not thing.hl1health
+	-- Get damage direction relative to the player
+	local damageDir = -FRACUNIT
+	if tmthing then
+		local source = tmthing and tmthing.target or tmthing -- unused, for some reason this makes PointToAngle fuck up
+		damageDir = abs(AngleFixed(R_PointToAngle2(thing.x, thing.y, tmthing.x, tmthing.y)) - AngleFixed(thing.angle))
+	end
+	thing.hl1dmgdir = damageDir
+	if thing.player
+		thing.player.hl1damagetics = 0
+	end
+	
+	local hldamage = dmg or (tmthing and tmthing.hl1damage)
+	if not thing.hl1health then
 		HL_InitHealth(thing)
 	end
-	print(thing.hl1health)
-	if hldamage
-		if thing.hl1armor
-			thing.hl1armor = $-(2*(hldamage*FRACUNIT)/5)
-			thing.hl1health = $-hldamage/5+min(thing.hl1armor/FRACUNIT,0)
-			thing.hl1health = max($,0)
-			thing.hl1armor = max($,0)
+	if hldamage then
+		if thing.hl1armor then
+			thing.hl1armor = $ - (2 * (hldamage * FRACUNIT) / 5)
+			thing.hl1health = $ - hldamage / 5 + min(thing.hl1armor / FRACUNIT, 0)
+			thing.hl1health = max($, 0)
+			thing.hl1armor = max($, 0)
 		else
-			thing.hl1health = ($ or 0)-hldamage
+			thing.hl1health = ($ or 0) - hldamage
 		end
-		print(thing.hl1health)
-		if thing.hl1health <= 0 -- get killed idiot
-			P_KillMobj(thing, tmthing, tmthing and tmthing.target or tmthing, 0)
+		if thing.hl1health <= 0 then -- get killed idiot
+			P_KillMobj(thing, tmthing, (tmthing and tmthing.target) or tmthing, 0)
 		end
 	end
 end)
@@ -168,8 +178,7 @@ end)
 rawset(_G, "HL_HurtMobj", function(tmthing, thing, customDamage, customDamageType) -- damage something depending on its health logic
 	-- Use the provided damage override if given, otherwise default to tmthing.hl1damage
 	local damage = customDamage or tmthing.hl1damage
-	if not (thing.flags & MF_SHOOTABLE) return end -- return early if we're not supposed to get shot.
-	print(damage)
+	if not (thing.flags & MF_SHOOTABLE) return end -- Return early if we're not supposed to get shot.
 	if damage and not tmthing.hitenemy -- Don't double tap
 		if kombiHL1SpecialHandlers[thing.skin] -- already has its own health system?
 			kombiHL1SpecialHandlers[thing.skin](tmthing, thing)
@@ -212,38 +221,53 @@ end
 function A_HLExplode(actor, range, baseDamage)
 	if not (actor and actor.valid) then return end -- Ensure the actor exists
 
-	local function DamageNearby(refmobj, foundmobj)
+	local function DamageAndBoostNearby(refmobj, foundmobj)
 		if not foundmobj or foundmobj == refmobj then return end -- Skip if no object or self
-		
-		if not P_CheckSight(refmobj, foundmobj) then return end -- End early if we can't see it
-		
+		if not P_CheckSight(refmobj, foundmobj) then return end -- Skip if we don't have a clear view
+		if not (foundmobj.flags & MF_SHOOTABLE) then return end -- Don't attempt to hurt things that shouldn't be hurt in the first place
+
 		local dist = HL_GetDistance(refmobj, foundmobj)
-		if dist > range then return end -- Skip if out of range
-		
-		local damage = max(1, FixedMul(baseDamage, FixedDiv(range - dist, range))) -- Scale damage by distance
-		HL_HurtMobj(refmobj, foundmobj, damage, DMG.BLAST) -- Apply damage
+		if dist > range then return end -- Only affect objects within range
+
+		-- Calculate and apply damage
+		local damage = max(1, FixedMul(baseDamage, FixedDiv(range - dist, range)))
+		HL_HurtMobj(refmobj, foundmobj, damage, DMG.BLAST)
+
+		-- Damage Boosting: apply shockwave momentum to boost objects
+		local impulseFactor = FixedDiv(range - dist, range) -- Closer objects get a stronger boost
+		local boostFactor = FRACUNIT * 36 -- Base multiplier for force
+		if P_IsObjectOnGround(foundmobj) then boostFactor = $/2 end -- Bad rocket jump "multiplier"
+
+		-- Compute horizontal direction and thrust
+		local angle = R_PointToAngle2(refmobj.x, refmobj.y, foundmobj.x, foundmobj.y)
+		local thrustPower = FixedMul(boostFactor, impulseFactor)
+		P_Thrust(foundmobj, angle, thrustPower)
+
+		-- Get the vertical thrust that we'll use later
+		local heightDiff = foundmobj.z - refmobj.z
+		local heightFactor = FixedDiv(abs(heightDiff), range + FRACUNIT) -- Normalize height effect
+		local verticalBoost = FixedMul(boostFactor, impulseFactor) -- Base scaling
+		verticalBoost = FixedMul(verticalBoost, (FRACUNIT - heightFactor)) -- Reduce if higher up
+
+		P_SetObjectMomZ(foundmobj, verticalBoost, true)
 	end
 
-	-- Damage nearby objects
-	searchBlockmap("objects", DamageNearby, actor, actor.x - range, actor.x + range, actor.y - range, actor.y + range)
+	-- Process nearby objects for damage and boosting
+	searchBlockmap("objects", DamageAndBoostNearby, actor, actor.x - range, actor.x + range, actor.y - range, actor.y + range)
 
+	-- Process breakable FOFs in affected sectors
 	local function ProcessFOFs(sector)
-		-- print(sector)
 		if sector then
 			for rover in sector.ffloors() do
-				-- print(rover, rover.flags)
-				if (rover.flags & FOF_BUSTUP) then  -- Check if the FOF is breakable
+				if (rover.flags & FOF_BUSTUP) and (rover.flags & FOF_EXISTS) then  -- Check if the FOF is real and is breakable
 					EV_CrumbleChain(sector, rover)
 				end
 			end
 		end
 	end
 
-	-- Process breakable FOFs in the affected sectors
 	local function ProcessSectorLines(refmobj, line)
-		if line == actor return end -- For some reason, this game only indexes our own selves! What a bother...
-
-		-- Check both front and back of our lines
+		-- Check both front and back sectors of the line
 		ProcessFOFs(line.frontsector)
 		ProcessFOFs(line.backsector)
 	end
@@ -251,7 +275,7 @@ function A_HLExplode(actor, range, baseDamage)
 	-- Search for lines in the affected area
 	searchBlockmap("lines", ProcessSectorLines, actor, actor.x - (range/2), actor.x + (range/2), actor.y - (range/2), actor.y + (range/2))
 
-	-- Stop momentum and play explosion sound
+	-- Stop momentum and play a random explosion sound
 	A_StopMomentum(actor)
 	actor.scale = FRACUNIT * 3
 	S_StartSound(actor, P_RandomRange(sfx_hlexp1, sfx_hlexp3))
@@ -377,7 +401,7 @@ mobjinfo[MT_HL1_ARGRENADE] = {
 spawnstate = S_KOMBI_SHURIKEN,
 spawnhealth = 100,
 deathstate = S_HL1_EXPLODE,
-speed = 8*mobjinfo[MT_CORK].speed/2,
+speed = 20*FRACUNIT,
 radius = mobjinfo[MT_CORK].radius,
 height = mobjinfo[MT_CORK].height,
 dispoffset = 4,
@@ -389,6 +413,7 @@ spawnstate = S_KOMBI_SHURIKEN,
 spawnhealth = 100,
 deathstate = S_HL1_EXPLODE,
 xdeathstate = S_HL1_EXPLODE,
+activesound = sfx_hlgrn1,
 speed = 12*FRACUNIT,
 radius = mobjinfo[MT_CORK].radius,
 height = mobjinfo[MT_CORK].height,
@@ -786,30 +811,42 @@ rawset(_G, "kombihl1viewmodels", {
 		flags = VMDL_FLIP,
 		animations = {
 			ready = {
-				sentinel = "MP5READY",
+				sentinel = "MP5READY1",
 				frameDurations = {
 					[1] = 5,
 					[3] = 8,
 				},
 			},
 			primaryfire = {
-				sentinel = "SHOTGUNFIRE1",
-				frameDurations = {
-					[1] = 3,
-					[12] = 3,
+				{
+					sentinel = "MP5FIRE1-1",
+					frameDurations = {
+						[1] = 5,
+						[5] = 5,
+					},
 				},
-				frameSounds = {
-					[6] = sfx_hl1sgc
-				}
+				{
+					sentinel = "MP5FIRE2-1",
+					frameDurations = {
+						[1] = 5,
+						[2] = 4,
+						[5] = 4,
+					},
+				},
+				{
+					sentinel = "MP5FIRE3-1",
+					frameDurations = {
+						[1] = 5,
+						[2] = 4,
+						[5] = 4,
+					},
+				},
 			},
 			secondaryfire = {
-				sentinel = "SHOTGUNAFIRE1",
+				sentinel = "MPARGRENADE1",
 				frameDurations = {
-					[1] = 3,
-					[20] = 6,
-				},
-				frameSounds = {
-					[13] = sfx_hl1sgc,
+					[1] = 5,
+					[6] = 5,
 				}
 			},
 			reload = {
@@ -824,17 +861,18 @@ rawset(_G, "kombihl1viewmodels", {
 			},
 			idle = {
 				{
-					sentinel = "SHOTGUNIDLE1-1",
-					frameDurations = {
-						[1] = 8,
-						[10] = 8,
-					},
-				},
-				{
-					sentinel = "SHOTGUNIDLE2-1",
+					sentinel = "MP5IDLE1-1",
 					frameDurations = {
 						[1] = 10,
 						[11] = 10,
+					},
+				},
+				{
+					sentinel = "MP5IDLE2-1",
+					frameDurations = {
+						[1] = 5,
+						[2] = 6,
+						[30] = 6,
 					},
 				},
 			},
@@ -1062,6 +1100,7 @@ rawset(_G, "HL_WpnStats", {
 		},
 		secondary = {
 			pickupgift = 2,
+			carrymomentum = true,
 			ammo = "argrenade",
 			clipsize = WEAPON_NONE,
 			shotcost = 1,
@@ -1083,7 +1122,6 @@ rawset(_G, "HL_WpnStats", {
 		crosshair = "XHRSHOT",
 		selectgraphic = "HL1HUDSHOTGUN",
 		autoswitchweight = 15,
-		pickupgift = 12, -- why does the shotgun have 12 shells in it? is it stupid?
 		weaponslot = 3,
 		priority = 2,
 		primary = {
@@ -1092,6 +1130,7 @@ rawset(_G, "HL_WpnStats", {
 			pellets = 6,
 			clipsize = 8,
 			shotcost = 1,
+			pickupgift = 12, -- why does the shotgun have 12 shells in it? is it stupid?
 			damage = 5,
 			horizspread = 7*FRACUNIT,
 			vertspread = 5*FRACUNIT,
@@ -1257,6 +1296,7 @@ rawset(_G, "HL_WpnStats", {
 		weaponslot = 5,
 		priority = 1,
 		primary = {
+			carrymomentum = true,
 			pickupgift = 5,
 			ammo = "grenade",
 			clipsize = WEAPON_NONE,
