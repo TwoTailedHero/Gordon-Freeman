@@ -103,6 +103,16 @@ local soundinfolist = {
 			steps = {sfx_hlgl1, sfx_hlgl2, sfx_hlgl3, sfx_hlgl4, sfx_hlgl5},
 			jump = {sfx_hlgl1, sfx_hlgl2, sfx_hlgl3, sfx_hlgl4, sfx_hlgl5},
 			land = {sfx_hlgl1, sfx_hlgl2, sfx_hlgl3, sfx_hlgl4, sfx_hlgl5}
+		},		
+		tile = {
+			steps = {sfx_hlgl1, sfx_hlgl2, sfx_hlgl3, sfx_hlgl4, sfx_hlgl5},
+			jump = {sfx_hlgl1, sfx_hlgl2, sfx_hlgl3, sfx_hlgl4, sfx_hlgl5},
+			land = {sfx_hlgl1, sfx_hlgl2, sfx_hlgl3, sfx_hlgl4, sfx_hlgl5}
+		},		
+		ice = {
+			steps = {sfx_hlgl1, sfx_hlgl2, sfx_hlgl3, sfx_hlgl4, sfx_hlgl5},
+			jump = {sfx_hlgl1, sfx_hlgl2, sfx_hlgl3, sfx_hlgl4, sfx_hlgl5},
+			land = {sfx_hlgl1, sfx_hlgl2, sfx_hlgl3, sfx_hlgl4, sfx_hlgl5}
 		}
 }
 
@@ -179,8 +189,8 @@ local flatsounds = {
 	THZREDP2 = "metal_heavy",
 	THZGRYP1 = "metal_heavy",
 	THZGRYP2 = "metal_heavy",
-	F_metal_heavy1 = "metal_heavy",
-	F_metal_heavy2 = "metal_heavy",
+	F_METAL1 = "metal_heavy",
+	F_METAL2 = "metal_heavy",
 	THZ2FN1 = "concrete",
 	THZ3DPF1 = "concrete",
 	THZ3DPF2 = "concrete",
