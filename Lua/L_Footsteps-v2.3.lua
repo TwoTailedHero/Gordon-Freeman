@@ -2377,7 +2377,7 @@ rawset(_G, "L_MakeFootstep", function(player, steptype)
 	local backupmap = "A"
 	local mapTitle = G_BuildMapTitle(gamemap) or backupmap
 	local lowerMapTitle = string.lower(mapTitle)
-	local textureKey = "$gamemap " .. lowerMapTitle .. " " .. player.groundtexture
+	local textureKey = gamemap .. " " .. lowerMapTitle .. " " .. player.groundtexture
 	local material = flatsounds[textureKey] or flatsounds[player.groundtexture]
 
 	if not soundinfolist[material] then
@@ -2460,7 +2460,7 @@ addHook("PlayerThink", function(player)
 					local backupmap = "A"
 					local mapTitle = G_BuildMapTitle(gamemap) or backupmap
 					local lowerMapTitle = string.lower(mapTitle)
-					local textureKey = "$gamemap " .. lowerMapTitle .. " " .. player.groundtexture
+					local textureKey = gamemap .. " " .. lowerMapTitle .. " " .. player.groundtexture
 					local mat = flatsounds[textureKey] or flatsounds[player.groundtexture]
 					if not soundinfolist[mat] then
 						warn("Invalid material " .. tostring(mat) .. "!")
@@ -2479,7 +2479,7 @@ addHook("PlayerThink", function(player)
 				local backupmap = "A"
 				local mapTitle = G_BuildMapTitle(gamemap) or backupmap
 				local lowerMapTitle = string.lower(mapTitle)
-				local textureKey = "$gamemap " .. lowerMapTitle .. " " .. player.groundtexture
+				local textureKey = gamemap .. " " .. lowerMapTitle .. " " .. player.groundtexture
 				local mat = flatsounds[textureKey] or flatsounds[player.groundtexture]
 
 				if not (player.mo.eflags & MFE_GOOWATER) then
@@ -2490,7 +2490,8 @@ addHook("PlayerThink", function(player)
 							CONS_Printf(player,
 								"Attempt to index texture " .. player.groundtexture .. " in level " ..
 								gamemap .. " " .. string.lower(G_BuildMapTitle(gamemap)) ..
-								" returned nil! Please report this issue."
+								" returned nil! Lmfaooo imagine",
+								"...But still. Please report it I need to know"
 							)
 						end
 						material = "concrete"
@@ -2506,12 +2507,12 @@ addHook("PlayerThink", function(player)
 				end
 
 				if (player.mo.eflags & MFE_TOUCHLAVA) ~= 0 then
-					local sounds = soundinfolistlava[soundType]
+					local sounds = soundinfolist.lava[soundType]
 					if sounds then
 						S_StartSound(player.mo, sounds[P_RandomKey(#sounds) + 1])
 					end
 				elseif (player.mo.eflags & MFE_TOUCHWATER) ~= 0 or (player.mo.eflags & MFE_GOOWATER) ~= 0 then
-					local sounds = soundinfolistwater[soundType]
+					local sounds = soundinfolist.water[soundType]
 					if sounds then
 						S_StartSound(player.mo, sounds[P_RandomKey(#sounds) + 1])
 					end
