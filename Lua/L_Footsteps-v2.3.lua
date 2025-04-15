@@ -35,79 +35,74 @@ end
 
 local soundinfolist = {
 		grass = {
-		  steps = {sfx_hldi1, sfx_hldi2, sfx_hldi3, sfx_hldi4},
-		  jump = {sfx_hldi1, sfx_hldi2, sfx_hldi3, sfx_hldi4},
-		  land = {sfx_hldi1, sfx_hldi2, sfx_hldi3, sfx_hldi4}
+			steps = {sfx_hldi1, sfx_hldi2, sfx_hldi3, sfx_hldi4},
+			jump = {sfx_hldi1, sfx_hldi2, sfx_hldi3, sfx_hldi4},
+			land = {sfx_hldi1, sfx_hldi2, sfx_hldi3, sfx_hldi4}
 		},
 		metal_heavy = {
-		  steps = {sfx_hlme1, sfx_hlme2, sfx_hlme3, sfx_hlme4},
-		  jump = {sfx_hlme1, sfx_hlme2, sfx_hlme3, sfx_hlme4},
-		  land = {sfx_hlme1, sfx_hlme2, sfx_hlme3, sfx_hlme4}
+			steps = {sfx_hlme1, sfx_hlme2, sfx_hlme3, sfx_hlme4},
+			jump = {sfx_hlme1, sfx_hlme2, sfx_hlme3, sfx_hlme4},
+			land = {sfx_hlme1, sfx_hlme2, sfx_hlme3, sfx_hlme4}
 		},
 		metal_light = {
-		  steps = {sfx_hlme1, sfx_hlme2, sfx_hlme3, sfx_hlme4},
-		  jump = {sfx_hlme1, sfx_hlme2, sfx_hlme3, sfx_hlme4},
-		  land = {sfx_hlme1, sfx_hlme2, sfx_hlme3, sfx_hlme4}
+			steps = {sfx_hlme1, sfx_hlme2, sfx_hlme3, sfx_hlme4},
+			jump = {sfx_hlme1, sfx_hlme2, sfx_hlme3, sfx_hlme4},
+			land = {sfx_hlme1, sfx_hlme2, sfx_hlme3, sfx_hlme4}
 		},
 		dirt = {
-		  steps = {sfx_hldi1, sfx_hldi2, sfx_hldi3, sfx_hldi4},
-		  jump = {sfx_hldi1, sfx_hldi2, sfx_hldi3, sfx_hldi4},
-		  land = {sfx_hldi1, sfx_hldi2, sfx_hldi3, sfx_hldi4}
+			steps = {sfx_hldi1, sfx_hldi2, sfx_hldi3, sfx_hldi4},
+			jump = {sfx_hldi1, sfx_hldi2, sfx_hldi3, sfx_hldi4},
+			land = {sfx_hldi1, sfx_hldi2, sfx_hldi3, sfx_hldi4}
 		},
 		snow = {
-		  steps = {sfx_hlsn1, sfx_hlsn2, sfx_hlsn3, sfx_hlsn4},
-		  jump = {sfx_hlsn1, sfx_hlsn2, sfx_hlsn3, sfx_hlsn4},
-		  land = {sfx_hlsn1, sfx_hlsn2, sfx_hlsn3, sfx_hlsn4}
+			steps = {sfx_hlsn1, sfx_hlsn2, sfx_hlsn3, sfx_hlsn4},
+			jump = {sfx_hlsn1, sfx_hlsn2, sfx_hlsn3, sfx_hlsn4},
+			land = {sfx_hlsn1, sfx_hlsn2, sfx_hlsn3, sfx_hlsn4}
 		},
 		cloth = {
-		  steps = {sfx_hldi1, sfx_hldi2, sfx_hldi3, sfx_hldi4},
-		  jump = {sfx_hldi1, sfx_hldi2, sfx_hldi3, sfx_hldi4},
-		  land = {sfx_hldi1, sfx_hldi2, sfx_hldi3, sfx_hldi4}
+			steps = {sfx_hldi1, sfx_hldi2, sfx_hldi3, sfx_hldi4},
+			jump = {sfx_hldi1, sfx_hldi2, sfx_hldi3, sfx_hldi4},
+			land = {sfx_hldi1, sfx_hldi2, sfx_hldi3, sfx_hldi4}
 		},
 		sand = {
-		  steps = {sfx_hldi1, sfx_hldi2, sfx_hldi3, sfx_hldi4},
-		  jump = {sfx_hldi1, sfx_hldi2, sfx_hldi3, sfx_hldi4},
-		  land = {sfx_hldi1, sfx_hldi2, sfx_hldi3, sfx_hldi4}
+			steps = {sfx_hldi1, sfx_hldi2, sfx_hldi3, sfx_hldi4},
+			jump = {sfx_hldi1, sfx_hldi2, sfx_hldi3, sfx_hldi4},
+			land = {sfx_hldi1, sfx_hldi2, sfx_hldi3, sfx_hldi4}
 		},			
 		wood_heavy = {
-		  steps = {sfx_hlwo1, sfx_hlwo2, sfx_hlwo3, sfx_hlwo4},
-		  jump = {sfx_hlwo1, sfx_hlwo2, sfx_hlwo3, sfx_hlwo4},
-		  land = {sfx_hlwo1, sfx_hlwo2, sfx_hlwo3, sfx_hlwo4}
+			steps = {sfx_hlwo1, sfx_hlwo2, sfx_hlwo3, sfx_hlwo4},
+			jump = {sfx_hlwo1, sfx_hlwo2, sfx_hlwo3, sfx_hlwo4},
+			land = {sfx_hlwo1, sfx_hlwo2, sfx_hlwo3, sfx_hlwo4}
 		},
 		wood_light = {
-		  steps = {sfx_hlwo1, sfx_hlwo2, sfx_hlwo3, sfx_hlwo4},
-		  jump = {sfx_hlwo1, sfx_hlwo2, sfx_hlwo3, sfx_hlwo4},
-		  land = {sfx_hlwo1, sfx_hlwo2, sfx_hlwo3, sfx_hlwo4}
+			steps = {sfx_hlwo1, sfx_hlwo2, sfx_hlwo3, sfx_hlwo4},
+			jump = {sfx_hlwo1, sfx_hlwo2, sfx_hlwo3, sfx_hlwo4},
+			land = {sfx_hlwo1, sfx_hlwo2, sfx_hlwo3, sfx_hlwo4}
 		},
 		concrete = {
-		  steps = {sfx_hlco1, sfx_hlco2, sfx_hlco3, sfx_hlco4},
-		  jump = {sfx_hlco1, sfx_hlco2, sfx_hlco3, sfx_hlco4},
-		  land = {sfx_hlco1, sfx_hlco2, sfx_hlco3, sfx_hlco4}
+			steps = {sfx_hlco1, sfx_hlco2, sfx_hlco3, sfx_hlco4},
+			jump = {sfx_hlco1, sfx_hlco2, sfx_hlco3, sfx_hlco4},
+			land = {sfx_hlco1, sfx_hlco2, sfx_hlco3, sfx_hlco4}
 		},
 		water = {
-		  steps = {sfx_hlsp1, sfx_hlsp2, sfx_hlsp3, sfx_hlsp4},
-		  jump = {sfx_hlsp1, sfx_hlsp2, sfx_hlsp3, sfx_hlsp4},
-		  land = {sfx_hlsp1, sfx_hlsp2, sfx_hlsp3, sfx_hlsp4}
+			steps = {sfx_hlsp1, sfx_hlsp2, sfx_hlsp3, sfx_hlsp4},
+			jump = {sfx_hlsp1, sfx_hlsp2, sfx_hlsp3, sfx_hlsp4},
+			land = {sfx_hlsp1, sfx_hlsp2, sfx_hlsp3, sfx_hlsp4}
 		},
 		slosh = {
-		  steps = {sfx_hlsp1, sfx_hlsp2, sfx_hlsp3, sfx_hlsp4},
-		  jump = {sfx_hlsp1, sfx_hlsp2, sfx_hlsp3, sfx_hlsp4},
-		  land = {sfx_hlsp1, sfx_hlsp2, sfx_hlsp3, sfx_hlsp4}
+			steps = {sfx_hlsp1, sfx_hlsp2, sfx_hlsp3, sfx_hlsp4},
+			jump = {sfx_hlsp1, sfx_hlsp2, sfx_hlsp3, sfx_hlsp4},
+			land = {sfx_hlsp1, sfx_hlsp2, sfx_hlsp3, sfx_hlsp4}
 		},
 		lava = {
-		  steps = {sfx_hlsp1, sfx_hlsp2, sfx_hlsp3, sfx_hlsp4},
-		  jump = {sfx_hlsp1, sfx_hlsp2, sfx_hlsp3, sfx_hlsp4},
-		  land = {sfx_hlsp1, sfx_hlsp2, sfx_hlsp3, sfx_hlsp4}
+			steps = {sfx_hlsp1, sfx_hlsp2, sfx_hlsp3, sfx_hlsp4},
+			jump = {sfx_hlsp1, sfx_hlsp2, sfx_hlsp3, sfx_hlsp4},
+			land = {sfx_hlsp1, sfx_hlsp2, sfx_hlsp3, sfx_hlsp4}
 		},		
 		glass = {
-		  steps = {sfx_hlgl1, sfx_hlgl2, sfx_hlgl3, sfx_hlgl4, sfx_hlgl5},
-		  jump = {sfx_hlgl1, sfx_hlgl2, sfx_hlgl3, sfx_hlgl4, sfx_hlgl5},
-		  land = {sfx_hlgl1, sfx_hlgl2, sfx_hlgl3, sfx_hlgl4, sfx_hlgl5}
-		},		
-		tile = {
-		  steps = {sfx_hlgl1, sfx_hlgl2, sfx_hlgl3, sfx_hlgl4, sfx_hlgl5},
-		  jump = {sfx_hlgl1, sfx_hlgl2, sfx_hlgl3, sfx_hlgl4, sfx_hlgl5},
-		  land = {sfx_hlgl1, sfx_hlgl2, sfx_hlgl3, sfx_hlgl4, sfx_hlgl5}
+			steps = {sfx_hlgl1, sfx_hlgl2, sfx_hlgl3, sfx_hlgl4, sfx_hlgl5},
+			jump = {sfx_hlgl1, sfx_hlgl2, sfx_hlgl3, sfx_hlgl4, sfx_hlgl5},
+			land = {sfx_hlgl1, sfx_hlgl2, sfx_hlgl3, sfx_hlgl4, sfx_hlgl5}
 		}
 }
 
@@ -847,18 +842,18 @@ local flatsounds = {
 	GHZROCKF = "concrete",
 	GRNLITE1 = "concrete",
 	GATE2 = "concrete",
-	2FORTF1 = "wood_heavy",
-	2FORTF2 = "wood_heavy",
-	2FORTF3 = "wood_light",
-	2FORTF4 = "wood_light",
-	2FORTF5 = "wood_heavy",
-	2FORTF6 = "wood_heavy",
-	2FORTF7 = "wood_heavy",
-	2FORTF8 = "wood_heavy",
-	2FORTF9 = "wood_heavy",
-	2FORTFA = "wood_heavy",
-	2FORTFB = "concrete",
-	2FORTFC = "concrete",
+	["2FORTF1"] = "wood_heavy",
+	["2FORTF2"] = "wood_heavy",
+	["2FORTF3"] = "wood_light",
+	["2FORTF4"] = "wood_light",
+	["2FORTF5"] = "wood_heavy",
+	["2FORTF6"] = "wood_heavy",
+	["2FORTF7"] = "wood_heavy",
+	["2FORTF8"] = "wood_heavy",
+	["2FORTF9"] = "wood_heavy",
+	["2FORTFA"] = "wood_heavy",
+	["2FORTFB"] = "concrete",
+	["2FORTFC"] = "concrete",
 	WHITEFLR = "concrete",
 	LIMEFLR = "concrete",
 	BLUEFLR = "concrete",
@@ -1319,7 +1314,7 @@ local flatsounds = {
 	SRB1FV1 = "concrete",
 	SRB1FV2 = "concrete",
 	SRB1FV3 = "concrete",
-	HPFLOOR%20 = "concrete",
+	HPFLOOR = "concrete",
 	HPEMERAL = "concrete",
 	MHFL1 = "dirt",
 	MHFL2A = "grass",
@@ -1394,262 +1389,262 @@ local flatsounds = {
 	TOMBNTOP = "concrete",
 	HHZBLAC2 = "concrete",
 	HHZBLACK = "concrete",
-	~000 = "concrete",
-	~001 = "concrete",
-	~002 = "concrete",
-	~003 = "concrete",
-	~004 = "concrete",
-	~005 = "concrete",
-	~006 = "concrete",
-	~007 = "concrete",
-	~008 = "concrete",
-	~009 = "concrete",
-	~010 = "concrete",
-	~011 = "concrete",
-	~012 = "concrete",
-	~013 = "concrete",
-	~014 = "concrete",
-	~015 = "concrete",
-	~016 = "concrete",
-	~017 = "concrete",
-	~018 = "concrete",
-	~019 = "concrete",
-	~020 = "concrete",
-	~021 = "concrete",
-	~022 = "concrete",
-	~023 = "concrete",
-	~024 = "concrete",
-	~025 = "concrete",
-	~026 = "concrete",
-	~027 = "concrete",
-	~028 = "concrete",
-	~029 = "concrete",
-	~030 = "concrete",
-	~031 = "concrete",
-	~032 = "concrete",
-	~033 = "concrete",
-	~034 = "concrete",
-	~035 = "concrete",
-	~036 = "concrete",
-	~037 = "concrete",
-	~038 = "concrete",
-	~039 = "concrete",
-	~040 = "concrete",
-	~041 = "concrete",
-	~042 = "concrete",
-	~043 = "concrete",
-	~044 = "concrete",
-	~045 = "concrete",
-	~046 = "concrete",
-	~047 = "concrete",
-	~048 = "concrete",
-	~049 = "concrete",
-	~050 = "concrete",
-	~051 = "concrete",
-	~052 = "concrete",
-	~053 = "concrete",
-	~054 = "concrete",
-	~055 = "concrete",
-	~056 = "concrete",
-	~057 = "concrete",
-	~058 = "concrete",
-	~059 = "concrete",
-	~060 = "concrete",
-	~061 = "concrete",
-	~062 = "concrete",
-	~063 = "concrete",
-	~064 = "concrete",
-	~065 = "concrete",
-	~066 = "concrete",
-	~067 = "concrete",
-	~068 = "concrete",
-	~069 = "concrete",
-	~070 = "concrete",
-	~071 = "concrete",
-	~072 = "concrete",
-	~073 = "concrete",
-	~074 = "concrete",
-	~075 = "concrete",
-	~076 = "concrete",
-	~077 = "concrete",
-	~078 = "concrete",
-	~079 = "concrete",
-	~080 = "concrete",
-	~081 = "concrete",
-	~082 = "concrete",
-	~083 = "concrete",
-	~084 = "concrete",
-	~085 = "concrete",
-	~086 = "concrete",
-	~087 = "concrete",
-	~088 = "concrete",
-	~089 = "concrete",
-	~090 = "concrete",
-	~091 = "concrete",
-	~092 = "concrete",
-	~093 = "concrete",
-	~094 = "concrete",
-	~095 = "concrete",
-	~096 = "concrete",
-	~097 = "concrete",
-	~098 = "concrete",
-	~099 = "concrete",
-	~100 = "concrete",
-	~101 = "concrete",
-	~102 = "concrete",
-	~103 = "concrete",
-	~104 = "concrete",
-	~105 = "concrete",
-	~106 = "concrete",
-	~107 = "concrete",
-	~108 = "concrete",
-	~109 = "concrete",
-	~110 = "concrete",
-	~111 = "concrete",
-	~112 = "concrete",
-	~113 = "concrete",
-	~114 = "concrete",
-	~115 = "concrete",
-	~116 = "concrete",
-	~117 = "concrete",
-	~118 = "concrete",
-	~119 = "concrete",
-	~120 = "concrete",
-	~121 = "concrete",
-	~122 = "concrete",
-	~123 = "concrete",
-	~124 = "concrete",
-	~125 = "concrete",
-	~126 = "concrete",
-	~127 = "concrete",
-	~128 = "concrete",
-	~129 = "concrete",
-	~130 = "concrete",
-	~131 = "concrete",
-	~132 = "concrete",
-	~133 = "concrete",
-	~134 = "concrete",
-	~135 = "concrete",
-	~136 = "concrete",
-	~137 = "concrete",
-	~138 = "concrete",
-	~139 = "concrete",
-	~140 = "concrete",
-	~141 = "concrete",
-	~142 = "concrete",
-	~143 = "concrete",
-	~144 = "concrete",
-	~145 = "concrete",
-	~146 = "concrete",
-	~147 = "concrete",
-	~148 = "concrete",
-	~149 = "concrete",
-	~150 = "concrete",
-	~151 = "concrete",
-	~152 = "concrete",
-	~153 = "concrete",
-	~154 = "concrete",
-	~155 = "concrete",
-	~156 = "concrete",
-	~157 = "concrete",
-	~158 = "concrete",
-	~159 = "concrete",
-	~160 = "concrete",
-	~161 = "concrete",
-	~162 = "concrete",
-	~163 = "concrete",
-	~164 = "concrete",
-	~165 = "concrete",
-	~166 = "concrete",
-	~167 = "concrete",
-	~168 = "concrete",
-	~169 = "concrete",
-	~170 = "concrete",
-	~171 = "concrete",
-	~172 = "concrete",
-	~173 = "concrete",
-	~174 = "concrete",
-	~175 = "concrete",
-	~176 = "concrete",
-	~177 = "concrete",
-	~178 = "concrete",
-	~179 = "concrete",
-	~180 = "concrete",
-	~181 = "concrete",
-	~182 = "concrete",
-	~183 = "concrete",
-	~184 = "concrete",
-	~185 = "concrete",
-	~186 = "concrete",
-	~187 = "concrete",
-	~188 = "concrete",
-	~189 = "concrete",
-	~190 = "concrete",
-	~191 = "concrete",
-	~192 = "concrete",
-	~193 = "concrete",
-	~194 = "concrete",
-	~195 = "concrete",
-	~196 = "concrete",
-	~197 = "concrete",
-	~198 = "concrete",
-	~199 = "concrete",
-	~200 = "concrete",
-	~201 = "concrete",
-	~202 = "concrete",
-	~203 = "concrete",
-	~204 = "concrete",
-	~205 = "concrete",
-	~206 = "concrete",
-	~207 = "concrete",
-	~208 = "concrete",
-	~209 = "concrete",
-	~210 = "concrete",
-	~211 = "concrete",
-	~212 = "concrete",
-	~213 = "concrete",
-	~214 = "concrete",
-	~215 = "concrete",
-	~216 = "concrete",
-	~217 = "concrete",
-	~218 = "concrete",
-	~219 = "concrete",
-	~220 = "concrete",
-	~221 = "concrete",
-	~222 = "concrete",
-	~223 = "concrete",
-	~224 = "concrete",
-	~225 = "concrete",
-	~226 = "concrete",
-	~227 = "concrete",
-	~228 = "concrete",
-	~229 = "concrete",
-	~230 = "concrete",
-	~231 = "concrete",
-	~232 = "concrete",
-	~233 = "concrete",
-	~234 = "concrete",
-	~235 = "concrete",
-	~236 = "concrete",
-	~237 = "concrete",
-	~238 = "concrete",
-	~239 = "concrete",
-	~240 = "concrete",
-	~241 = "concrete",
-	~242 = "concrete",
-	~243 = "concrete",
-	~244 = "concrete",
-	~245 = "concrete",
-	~246 = "concrete",
-	~247 = "concrete",
-	~248 = "concrete",
-	~249 = "concrete",
-	~250 = "concrete",
-	~251 = "concrete",
-	~252 = "concrete",
-	~253 = "concrete",
-	~254 = "concrete",
-	~255 = "concrete",
+	["~000"] = "concrete",
+	["~001"] = "concrete",
+	["~000"] = "concrete",
+	["~003"] = "concrete",
+	["~004"] = "concrete",
+	["~005"] = "concrete",
+	["~006"] = "concrete",
+	["~007"] = "concrete",
+	["~008"] = "concrete",
+	["~009"] = "concrete",
+	["~010"] = "concrete",
+	["~011"] = "concrete",
+	["~012"] = "concrete",
+	["~013"] = "concrete",
+	["~014"] = "concrete",
+	["~015"] = "concrete",
+	["~016"] = "concrete",
+	["~017"] = "concrete",
+	["~018"] = "concrete",
+	["~019"] = "concrete",
+	["~020"] = "concrete",
+	["~021"] = "concrete",
+	["~022"] = "concrete",
+	["~023"] = "concrete",
+	["~024"] = "concrete",
+	["~025"] = "concrete",
+	["~026"] = "concrete",
+	["~027"] = "concrete",
+	["~028"] = "concrete",
+	["~029"] = "concrete",
+	["~030"] = "concrete",
+	["~031"] = "concrete",
+	["~032"] = "concrete",
+	["~033"] = "concrete",
+	["~034"] = "concrete",
+	["~035"] = "concrete",
+	["~036"] = "concrete",
+	["~037"] = "concrete",
+	["~038"] = "concrete",
+	["~039"] = "concrete",
+	["~040"] = "concrete",
+	["~041"] = "concrete",
+	["~042"] = "concrete",
+	["~043"] = "concrete",
+	["~044"] = "concrete",
+	["~045"] = "concrete",
+	["~046"] = "concrete",
+	["~047"] = "concrete",
+	["~048"] = "concrete",
+	["~049"] = "concrete",
+	["~050"] = "concrete",
+	["~051"] = "concrete",
+	["~052"] = "concrete",
+	["~053"] = "concrete",
+	["~054"] = "concrete",
+	["~055"] = "concrete",
+	["~056"] = "concrete",
+	["~057"] = "concrete",
+	["~058"] = "concrete",
+	["~059"] = "concrete",
+	["~060"] = "concrete",
+	["~061"] = "concrete",
+	["~062"] = "concrete",
+	["~063"] = "concrete",
+	["~064"] = "concrete",
+	["~065"] = "concrete",
+	["~066"] = "concrete",
+	["~067"] = "concrete",
+	["~068"] = "concrete",
+	["~069"] = "concrete",
+	["~070"] = "concrete",
+	["~071"] = "concrete",
+	["~072"] = "concrete",
+	["~073"] = "concrete",
+	["~074"] = "concrete",
+	["~075"] = "concrete",
+	["~076"] = "concrete",
+	["~077"] = "concrete",
+	["~078"] = "concrete",
+	["~079"] = "concrete",
+	["~080"] = "concrete",
+	["~081"] = "concrete",
+	["~082"] = "concrete",
+	["~083"] = "concrete",
+	["~084"] = "concrete",
+	["~085"] = "concrete",
+	["~086"] = "concrete",
+	["~087"] = "concrete",
+	["~088"] = "concrete",
+	["~089"] = "concrete",
+	["~090"] = "concrete",
+	["~091"] = "concrete",
+	["~092"] = "concrete",
+	["~093"] = "concrete",
+	["~094"] = "concrete",
+	["~095"] = "concrete",
+	["~096"] = "concrete",
+	["~097"] = "concrete",
+	["~098"] = "concrete",
+	["~099"] = "concrete",
+	["~100"] = "concrete",
+	["~101"] = "concrete",
+	["~102"] = "concrete",
+	["~103"] = "concrete",
+	["~104"] = "concrete",
+	["~105"] = "concrete",
+	["~106"] = "concrete",
+	["~107"] = "concrete",
+	["~108"] = "concrete",
+	["~109"] = "concrete",
+	["~110"] = "concrete",
+	["~111"] = "concrete",
+	["~112"] = "concrete",
+	["~113"] = "concrete",
+	["~114"] = "concrete",
+	["~115"] = "concrete",
+	["~116"] = "concrete",
+	["~117"] = "concrete",
+	["~118"] = "concrete",
+	["~119"] = "concrete",
+	["~120"] = "concrete",
+	["~121"] = "concrete",
+	["~122"] = "concrete",
+	["~123"] = "concrete",
+	["~124"] = "concrete",
+	["~125"] = "concrete",
+	["~126"] = "concrete",
+	["~127"] = "concrete",
+	["~128"] = "concrete",
+	["~129"] = "concrete",
+	["~130"] = "concrete",
+	["~131"] = "concrete",
+	["~132"] = "concrete",
+	["~133"] = "concrete",
+	["~134"] = "concrete",
+	["~135"] = "concrete",
+	["~136"] = "concrete",
+	["~137"] = "concrete",
+	["~138"] = "concrete",
+	["~139"] = "concrete",
+	["~140"] = "concrete",
+	["~141"] = "concrete",
+	["~142"] = "concrete",
+	["~143"] = "concrete",
+	["~144"] = "concrete",
+	["~145"] = "concrete",
+	["~146"] = "concrete",
+	["~147"] = "concrete",
+	["~148"] = "concrete",
+	["~149"] = "concrete",
+	["~150"] = "concrete",
+	["~151"] = "concrete",
+	["~152"] = "concrete",
+	["~153"] = "concrete",
+	["~154"] = "concrete",
+	["~155"] = "concrete",
+	["~156"] = "concrete",
+	["~157"] = "concrete",
+	["~158"] = "concrete",
+	["~159"] = "concrete",
+	["~160"] = "concrete",
+	["~161"] = "concrete",
+	["~162"] = "concrete",
+	["~163"] = "concrete",
+	["~164"] = "concrete",
+	["~165"] = "concrete",
+	["~166"] = "concrete",
+	["~167"] = "concrete",
+	["~168"] = "concrete",
+	["~169"] = "concrete",
+	["~170"] = "concrete",
+	["~171"] = "concrete",
+	["~172"] = "concrete",
+	["~173"] = "concrete",
+	["~174"] = "concrete",
+	["~175"] = "concrete",
+	["~176"] = "concrete",
+	["~177"] = "concrete",
+	["~178"] = "concrete",
+	["~179"] = "concrete",
+	["~180"] = "concrete",
+	["~181"] = "concrete",
+	["~182"] = "concrete",
+	["~183"] = "concrete",
+	["~184"] = "concrete",
+	["~185"] = "concrete",
+	["~186"] = "concrete",
+	["~187"] = "concrete",
+	["~188"] = "concrete",
+	["~189"] = "concrete",
+	["~190"] = "concrete",
+	["~191"] = "concrete",
+	["~192"] = "concrete",
+	["~193"] = "concrete",
+	["~194"] = "concrete",
+	["~195"] = "concrete",
+	["~196"] = "concrete",
+	["~197"] = "concrete",
+	["~198"] = "concrete",
+	["~199"] = "concrete",
+	["~200"] = "concrete",
+	["~201"] = "concrete",
+	["~202"] = "concrete",
+	["~203"] = "concrete",
+	["~204"] = "concrete",
+	["~205"] = "concrete",
+	["~206"] = "concrete",
+	["~207"] = "concrete",
+	["~208"] = "concrete",
+	["~209"] = "concrete",
+	["~210"] = "concrete",
+	["~211"] = "concrete",
+	["~212"] = "concrete",
+	["~213"] = "concrete",
+	["~214"] = "concrete",
+	["~215"] = "concrete",
+	["~216"] = "concrete",
+	["~217"] = "concrete",
+	["~218"] = "concrete",
+	["~219"] = "concrete",
+	["~220"] = "concrete",
+	["~221"] = "concrete",
+	["~222"] = "concrete",
+	["~223"] = "concrete",
+	["~224"] = "concrete",
+	["~225"] = "concrete",
+	["~226"] = "concrete",
+	["~227"] = "concrete",
+	["~228"] = "concrete",
+	["~229"] = "concrete",
+	["~230"] = "concrete",
+	["~231"] = "concrete",
+	["~232"] = "concrete",
+	["~233"] = "concrete",
+	["~234"] = "concrete",
+	["~235"] = "concrete",
+	["~236"] = "concrete",
+	["~237"] = "concrete",
+	["~238"] = "concrete",
+	["~239"] = "concrete",
+	["~240"] = "concrete",
+	["~241"] = "concrete",
+	["~242"] = "concrete",
+	["~243"] = "concrete",
+	["~244"] = "concrete",
+	["~245"] = "concrete",
+	["~246"] = "concrete",
+	["~247"] = "concrete",
+	["~248"] = "concrete",
+	["~249"] = "concrete",
+	["~250"] = "concrete",
+	["~251"] = "concrete",
+	["~252"] = "concrete",
+	["~253"] = "concrete",
+	["~254"] = "concrete",
+	["~255"] = "concrete",
 	BSZFLOOR = "grass",
 	FLOWB_04 = "grass",
 	FLOWO_04 = "grass",
@@ -2291,34 +2286,37 @@ GFZTIL02 = CONCRETE
 
 local playeraniminfo = {
 	kombifreeman = {
-		runFrames = {0, 2},
-		dashFrames = {-1},
-		walkFrames = {3, 7},
-		milnekickFrames = {0, 4},
-		run = true,
-		dash = false,
-		walk = true,
-		idle = false,
-		wait = false,
-		milnekick = true,
-		superRun = false,
-		superDash = false,
-		superWalk = true,
-		superIdle = true,
-		superWait = false
+		runFrames			= { 0, 2 },
+		dashFrames		 = { -1 },
+		walkFrames		 = { 3, 7 },
+		milnekickFrames = { 0, 4 },
+		run						= true,
+		dash					 = false,
+		walk					 = true,
+		idle					 = false,
+		wait					 = false,
+		milnekick			= true,
+		superRun			 = false,
+		superDash			= false,
+		superWalk			= true,
+		superIdle			= true,
+		superWait			= false,
 	},
 }
 
-for skin, animinfo in pairs(playeraniminfo)
+-- Assuming PlayerAnimInfo is a global table that must be populated
+for skin, animinfo in pairs(playeraniminfo) do
 	PlayerAnimInfo[skin] = animinfo
 end
 
+-- Returns if a map object (mo) is valid.
 local function valid(mo)
 	return mo and mo.valid
 end
 
+-- Resets player state, if the player's map object is valid.
 local function reset(player)
-	if player.mo and player.mo.valid
+	if player.mo and player.mo.valid then
 		player.lastframe = 0
 		player.lastanim = nil
 		player.playsound = false
@@ -2329,93 +2327,116 @@ local function reset(player)
 	end
 end
 
-local function has_value (tab, val)
-    for index, value in ipairs(tab) do
-        if value == val then
-            return true
-        end
-    end
-
-    return false
+-- Utility: Checks if a table contains a given value.
+local function has_value(tab, val)
+	for _, value in ipairs(tab) do
+		if value == val then
+			return true
+		end
+	end
+	return false
 end
 
+-- Returns the ground texture based on the map object's state.
 local function getGroundTexture(mo)
-    local result = nil
-    
-    if mo.eflags & MFE_VERTICALFLIP
-		if mo.ceilingrover
+	local result = nil
+	
+	if mo.eflags & MFE_VERTICALFLIP then
+		if mo.ceilingrover then
 			result = mo.ceilingrover.bottompic
-        elseif mo.standingslope and mo.standingslope == mo.subsector.sector.c_slope
-            result = mo.subsector.sector.ceilingpic
-        elseif mo.ceilingz == mo.subsector.sector.ceilingheight
-            result = mo.subsector.sector.ceilingpic
+		elseif mo.standingslope and mo.standingslope == mo.subsector.sector.c_slope then
+			result = mo.subsector.sector.ceilingpic
+		elseif mo.ceilingz == mo.subsector.sector.ceilingheight then
+			result = mo.subsector.sector.ceilingpic
 		end
-    else
-        if mo.floorrover
-            result = mo.floorrover.toppic
-		elseif mo.standingslope and mo.standingslope == mo.subsector.sector.f_slope
-            result = mo.subsector.sector.floorpic
-        elseif mo.floorz == mo.subsector.sector.floorheight
+	else
+		if mo.floorrover then
+			result = mo.floorrover.toppic
+		elseif mo.standingslope and mo.standingslope == mo.subsector.sector.f_slope then
 			result = mo.subsector.sector.floorpic
-        end
+		elseif mo.floorz == mo.subsector.sector.floorheight then
+			result = mo.subsector.sector.floorpic
+		end
 	end
 	
 	return result
 end
 
+-- Register the footstep function in the global environment.
 rawset(_G, "L_MakeFootstep", function(player, steptype)
-	local material = flatsounds\$gamemap\ \$string.lower((G_BuildMapTitle(gamemap) or backupmap))\ \$player.groundtexture\ or flatsounds[player.groundtexture]
-	if not soundinfolist[material] warn("Invalid material " .. tostring(material) .. "!") end
-	local soundType = steptype
-	local sounds = soundinfolist and soundinfolist[material] and soundinfolist[material][soundType]
-	if sounds ~= nil
+	local backupmap = "A"
+	local mapTitle = G_BuildMapTitle(gamemap) or backupmap
+	local lowerMapTitle = string.lower(mapTitle)
+	local textureKey = "$gamemap " .. lowerMapTitle .. " " .. player.groundtexture
+	local material = flatsounds[textureKey] or flatsounds[player.groundtexture]
+
+	if not soundinfolist[material] then
+		warn("Invalid material " .. tostring(material) .. "!")
+	end
+
+	local sounds = soundinfolist[material] and soundinfolist[material][steptype]
+	if sounds then
 		S_StartSound(player.mo, sounds[P_RandomKey(#sounds) + 1])
 	end
 end)
 
-addHook("PlayerThink", function(player) 
-	if player.mo and player.mo.state ~= S_PLAY_DEAD and player.mo.skin == "kombifreeman"
+-- Hook into the player thinking cycle.
+addHook("PlayerThink", function(player)
+	if player.mo and player.mo.state ~= S_PLAY_DEAD and player.mo.skin == "kombifreeman" then
 		local panimInfo = PlayerAnimInfo[player.mo.skin]
-		if panimInfo ~= nil
-			if player.variablesset == nil
+		if panimInfo then
+			if player.variablesset == nil then
 				reset(player)
 			end
+
 			player.groundtexture = getGroundTexture(player.mo)
-			if player.groundtexture == nil and player.lastgroundtexture
+			if not player.groundtexture and player.lastgroundtexture then
 				player.groundtexture = player.lastgroundtexture
 			end
-			local material
-			local soundType
+
+			local material, soundType
 			player.playsound = false
-			if P_IsObjectOnGround(player.mo)
-				if not(player.wasfalling)
-					if player.skidtime == 16
+
+			if P_IsObjectOnGround(player.mo) then
+				if not player.wasfalling then
+					if player.skidtime == 16 then
 						player.playsound = true
 						soundType = "skid"
-					elseif not (player.powers[pw_carry])						
-						if player.milnecarry
-							if player.mo.state == S_PLAY_WALK
-								player.playsound = panimInforun and (player.powers[pw_super] == 0 or panimInfosuperRun) and (has_value(panimInforunFrames, player.mo.frame & FF_FRAMEMASK) or has_value(panimInforunFrames, player.mo.frame))
-							elseif player.mo.state == S_PLAY_FLY or player.mo.state == S_PLAY_SWIM
-								player.playsound = panimInfowalk and (player.powers[pw_super] == 0 or panimInfosuperWalk) and (has_value(panimInfowalkFrames, player.mo.frame & FF_FRAMEMASK) or has_value(panimInfowalkFrames, player.mo.frame))
-							elseif player.mo.state == S_PLAY_GLIDE_LANDING
-								player.playsound = panimInfoidle and (player.powers[pw_super] == 0 or panimInfosuperIdle) and player.lastanim ~= player.panim
+					elseif not player.powers[pw_carry] then
+						if player.milnecarry then
+							if player.mo.state == S_PLAY_WALK then
+								player.playsound = panimInfo.run and (player.powers[pw_super] == 0 or panimInfo.superRun) and
+									(has_value(panimInfo.runFrames, player.mo.frame & FF_FRAMEMASK) or has_value(panimInfo.runFrames, player.mo.frame))
+							elseif player.mo.state == S_PLAY_FLY or player.mo.state == S_PLAY_SWIM then
+								player.playsound = panimInfo.walk and (player.powers[pw_super] == 0 or panimInfo.superWalk) and
+									(has_value(panimInfo.walkFrames, player.mo.frame & FF_FRAMEMASK) or has_value(panimInfo.walkFrames, player.mo.frame))
+							elseif player.mo.state == S_PLAY_GLIDE_LANDING then
+								player.playsound = panimInfo.idle and (player.powers[pw_super] == 0 or panimInfo.superIdle) and
+									(player.lastanim ~= player.panim)
 							end
 						else
-							if player.mo.state == S_PLAY_RUN
-								player.playsound = panimInforun and (player.powers[pw_super] == 0 or panimInfosuperRun) and (has_value(panimInforunFrames, player.mo.frame & FF_FRAMEMASK) or has_value(panimInforunFrames, player.mo.frame))
-							elseif player.mo.state == S_PLAY_DASH
-								player.playsound = panimInfodash and (player.powers[pw_super] == 0 or panimInfosuperDash) and (has_value(panimInfodashFrames, player.mo.frame & FF_FRAMEMASK) or has_value(panimInfodashFrames, player.mo.frame))
-							elseif player.mo.state == S_PLAY_WALK
-								player.playsound = panimInfowalk and (player.powers[pw_super] == 0 or panimInfosuperWalk) and (has_value(panimInfowalkFrames, player.mo.frame & FF_FRAMEMASK) or has_value(panimInfowalkFrames, player.mo.frame))
-							elseif player.mo.state == S_PLAY_STND or player.mo.state == S_PLAY_EDGE
-								player.playsound = panimInfoidle and (player.powers[pw_super] == 0 or panimInfosuperIdle) and player.lastanim ~= player.panim
-							elseif player.milnekick and player.mo.state == S_MILNE_KICK
-								player.playsound = panimInfomilnekick and (has_value(panimInfomilnekickFrames, player.mo.frame & FF_FRAMEMASK) or has_value(panimInfomilnekickFrames, player.mo.frame))
-							end						
+							if player.mo.state == S_PLAY_RUN then
+								player.playsound = panimInfo.run and (player.powers[pw_super] == 0 or panimInfo.superRun) and
+									(has_value(panimInfo.runFrames, player.mo.frame & FF_FRAMEMASK) or has_value(panimInfo.runFrames, player.mo.frame))
+							elseif player.mo.state == S_PLAY_DASH then
+								player.playsound = panimInfo.dash and (player.powers[pw_super] == 0 or panimInfo.superDash) and
+									(has_value(panimInfo.dashFrames, player.mo.frame & FF_FRAMEMASK) or has_value(panimInfo.dashFrames, player.mo.frame))
+							elseif player.mo.state == S_PLAY_WALK then
+								player.playsound = panimInfo.walk and (player.powers[pw_super] == 0 or panimInfo.superWalk) and
+									(has_value(panimInfo.walkFrames, player.mo.frame & FF_FRAMEMASK) or has_value(panimInfo.walkFrames, player.mo.frame))
+							elseif player.mo.state == S_PLAY_STND or player.mo.state == S_PLAY_EDGE then
+								player.playsound = panimInfo.idle and (player.powers[pw_super] == 0 or panimInfo.superIdle) and
+									(player.lastanim ~= player.panim)
+							elseif player.milnekick and player.mo.state == S_MILNE_KICK then
+								player.playsound = panimInfo.milnekick and
+									(has_value(panimInfo.milnekickFrames, player.mo.frame & FF_FRAMEMASK) or has_value(panimInfo.milnekickFrames, player.mo.frame))
+							end
 						end
+
 						soundType = "steps"
-						player.playsound = player.playsound and player.lastframe ~= player.mo.frame
+						if player.lastframe == player.mo.frame then
+							player.playsound = false
+						end
 						player.lastframe = player.mo.frame
 						player.lastanim = player.panim
 					end
@@ -2425,50 +2446,73 @@ addHook("PlayerThink", function(player)
 					soundType = "land"
 				end
 			else
-				if not player.wasfalling and player.mo.state == S_PLAY_JUMP
-					local material = flatsounds\$gamemap\ \$string.lower((G_BuildMapTitle(gamemap) or backupmap))\ \$player.groundtexture\ or flatsounds[player.groundtexture]
-					if not soundinfolist[material] warn("Invalid material " .. material .. "!") end
-					local soundType = "jump"
-					local sounds = soundinfolist and soundinfolist[material] and soundinfolist[material][soundType]
-					if sounds ~= nil
+				if not player.wasfalling and player.mo.state == S_PLAY_JUMP then
+					local backupmap = "A"
+					local mapTitle = G_BuildMapTitle(gamemap) or backupmap
+					local lowerMapTitle = string.lower(mapTitle)
+					local textureKey = "$gamemap " .. lowerMapTitle .. " " .. player.groundtexture
+					local mat = flatsounds[textureKey] or flatsounds[player.groundtexture]
+					if not soundinfolist[mat] then
+						warn("Invalid material " .. tostring(mat) .. "!")
+					end
+
+					local jumpType = "jump"
+					local sounds = soundinfolist[mat] and soundinfolist[mat][jumpType]
+					if sounds then
 						S_StartSound(player.mo, sounds[P_RandomKey(#sounds) + 1])
 					end
 				end
 				player.wasfalling = true
 			end
 
-			if player.playsound
+			if player.playsound then
 				local backupmap = "A"
-				local mat = flatsounds\$gamemap\ \$string.lower((G_BuildMapTitle(gamemap) or backupmap))\ \$player.groundtexture\ or flatsounds[player.groundtexture]
-				if not (player.mo.eflags & MFE_GOOWATER)
-					if player.groundtexture and mat
+				local mapTitle = G_BuildMapTitle(gamemap) or backupmap
+				local lowerMapTitle = string.lower(mapTitle)
+				local textureKey = "$gamemap " .. lowerMapTitle .. " " .. player.groundtexture
+				local mat = flatsounds[textureKey] or flatsounds[player.groundtexture]
+
+				if not (player.mo.eflags & MFE_GOOWATER) then
+					if player.groundtexture and mat then
 						material = mat
 					else
-						if not mat
-							CONS_Printf(player,"Attempt to index texture \$player.groundtexture\ in level \$gamemap\ \$string.lower(G_BuildMapTitle(gamemap))\ returned nil!","Make sure to complain to the creator with the above information if this slips through!!")
+						if not mat then
+							CONS_Printf(player,
+								"Attempt to index texture " .. player.groundtexture .. " in level " ..
+								gamemap .. " " .. string.lower(G_BuildMapTitle(gamemap)) ..
+								" returned nil! Please report this issue."
+							)
 						end
 						material = "concrete"
 					end
 				end
-				if (cv_hldebug.value & DEBUG_FOOTSTEP)
-					CONS_Printf(player,"indexing texture \$player.groundtexture\ in level \$gamemap\ \$string.lower(G_BuildMapTitle(gamemap))\, which is returning \$material\...")
+
+				if (cv_hldebug.value & DEBUG_FOOTSTEP) ~= 0 then
+					CONS_Printf(player,
+						"indexing texture " .. player.groundtexture .. " in level " ..
+						gamemap .. " " .. string.lower(G_BuildMapTitle(gamemap)) ..
+						", which is returning " .. tostring(material) .. "..."
+					)
 				end
-				if (player.mo.eflags & MFE_TOUCHLAVA)
+
+				if (player.mo.eflags & MFE_TOUCHLAVA) ~= 0 then
 					local sounds = soundinfolistlava[soundType]
-					if sounds ~= nil
+					if sounds then
 						S_StartSound(player.mo, sounds[P_RandomKey(#sounds) + 1])
 					end
-				elseif (player.mo.eflags & MFE_TOUCHWATER) or (player.mo.eflags & MFE_GOOWATER)
+				elseif (player.mo.eflags & MFE_TOUCHWATER) ~= 0 or (player.mo.eflags & MFE_GOOWATER) ~= 0 then
 					local sounds = soundinfolistwater[soundType]
-					if sounds ~= nil
+					if sounds then
 						S_StartSound(player.mo, sounds[P_RandomKey(#sounds) + 1])
 					end
 				else
-					if material ~= nil
+					if material then
 						player.lastgroundtexture = player.groundtexture
-						if not soundinfolist[material] warn("Invalid material " .. material .. "!") end
-						local sounds = soundinfolist and soundinfolist[material] and soundinfolist[material][soundType]
-						if sounds ~= nil
+						if not soundinfolist[material] then
+							warn("Invalid material " .. material .. "!")
+						end
+						local sounds = soundinfolist[material] and soundinfolist[material][soundType]
+						if sounds then
 							S_StartSound(player.mo, sounds[P_RandomKey(#sounds) + 1])
 						end
 					end
