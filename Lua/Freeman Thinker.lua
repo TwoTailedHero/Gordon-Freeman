@@ -8,13 +8,23 @@ local skin = "kombifreeman"
 local kombiseentime
 local kombilastseen
 
-SafeFreeSlot("SPR2_CRCH", "S_PLAY_FREEMCROUCH",
+SafeFreeSlot("SPR2_CRCH", "S_PLAY_FREEMCROUCH", "S_PLAY_FREEMCROUCHMOVE",
 "MT_HLRAY",
-"sfx_hldeny","sfx_hlflas",
+"sfx_hldeny","sfx_hlflas","sfx_hlspra",
 "sfx_pwepst","sfx_pwepsl","sfx_pwepcl","sfx_pwepen",
 "sfx_hlfal1","sfx_hlfal2","sfx_hlfal3",
-"sfx_frpai1","sfx_frpai2","sfx_frpai3","sfx_frpai4","sfx_frpai5")
+"sfx_frpai1","sfx_frpai2","sfx_frpai3","sfx_frpai4","sfx_frpai5",
+"sfx_hlla1","sfx_hlla2","sfx_hlla3","sfx_hlla4")
 sfxinfo[sfx_hldeny].caption = "\135Can't Use\x80" -- for SOME reason using the usual hex for this caption turns it cyan and eats the first two proper letters
+
+states[S_PLAY_FREEMCROUCHMOVE] = {
+	sprite = SPR_PLAY,
+	frame = SPR2_CRCH|FF_ANIMATE,
+	tics = -1,
+	var1 = 3,
+	var2 = 12,
+	nextstate = S_PLAY_FREEMCROUCH
+}
 
 states[S_PLAY_FREEMCROUCH] = {
 	sprite = SPR_PLAY,
@@ -25,11 +35,27 @@ states[S_PLAY_FREEMCROUCH] = {
 	nextstate = S_PLAY_FREEMCROUCH
 }
 
+spr2defaults[SPR2_CRCH] = SPR2_WALK
+
 rawset(_G, "cv_kombifalldamage", CV_RegisterVar({
 	name = "mp_falldamage",
 	defaultvalue = "On",
 	flags = CV_SAVE|CV_SHOWMODIF|CV_NETVAR,
-	PossibleValue = {On = 1, Off = 0, Dont = 0},
+	PossibleValue = {On = 1, Fixed = 0, Dont = -1},
+}))
+
+rawset(_G, "cv_hldecallimit", CV_RegisterVar({
+	name = "mp_decals",
+	defaultvalue = 50,
+	flags = CV_SAVE|CV_SHOWMODIF|CV_NETVAR,
+	PossibleValue = CV_Unsigned,
+}))
+
+rawset(_G, "cv_hldecaldelay", CV_RegisterVar({
+	name = "decalfrequency",
+	defaultvalue = 30,
+	flags = CV_SAVE|CV_SHOWMODIF|CV_NETVAR,
+	PossibleValue = CV_Unsigned,
 }))
 
 local HL_KEYBINDS_PATH = "client/halflife/keybinds.dat"
@@ -45,6 +71,14 @@ COM_AddCommand("hlbind", function(player, key, command)
 	CONS_Printf(player, "Bound key '" .. key .. "' to command '" .. command .. "'")
 end)
 
+local function SpawnSpray(mo)
+    local spr  = P_SpawnPlayerMissile(mo, MT_SPRAY)
+    spr.pangle = mo.angle
+    spr.tracer = mo
+	spr.z      = $+(mo.player.viewheight/2)
+    return spr
+end
+
 COM_AddCommand("impulse", function(player, impulse)
 	if gamestate ~= GS_LEVEL
 		return
@@ -58,6 +92,8 @@ COM_AddCommand("impulse", function(player, impulse)
 		player.hl.flashlight = not $
 		S_StartSound(player.mo, sfx_hlflas)
 	elseif impulse == "201"
+		player.hl = $ or {}
+		player.hl.spraying = true
 	end
 end)
 
@@ -90,92 +126,126 @@ local function setSlot(player, slot)
 	player.desiredSlot = slot
 end
 
-COM_AddCommand("slot0", function(player) setSlot(player, 0) end)
-COM_AddCommand("slot1", function(player) setSlot(player, 1) end)
-COM_AddCommand("slot2", function(player) setSlot(player, 2) end)
-COM_AddCommand("slot3", function(player) setSlot(player, 3) end)
-COM_AddCommand("slot4", function(player) setSlot(player, 4) end)
-COM_AddCommand("slot5", function(player) setSlot(player, 5) end)
-COM_AddCommand("slot6", function(player) setSlot(player, 6) end)
-COM_AddCommand("slot7", function(player) setSlot(player, 7) end)
-COM_AddCommand("slot8", function(player) setSlot(player, 8) end)
-COM_AddCommand("slot9", function(player) setSlot(player, 9) end)
+for slot = 0, 9 do
+	COM_AddCommand("slot" .. slot, function(player) setSlot(player, slot) end)
+end
 
--- Helper function for cycling weapons.
-local function HL_CycleWeapon(player, direction)
-	-- Ensure we have a valid player and selection list
-	if not player or not player.hl1inventory then
-		return
+-- Constants
+local CATEGORY_COUNT = 10
+
+-- Returns an empty weapon selection structure
+local function emptySelection()
+	local ws = {}
+	for i = 0, 9 do ws[i] = 0 end
+	return {
+		weapons = {},
+		weaponcount = 0,
+		wepslotamounts = ws
+	}
+end
+
+-- Returns the index of the first usable weapon, or nil if none
+local function getFirstUsableIndex(sel)
+	if not sel or not sel.weapons then return nil end
+	for i, w in ipairs(sel.weapons) do
+		if w.usable then return i end
+	end
+	return nil
+end
+
+-- Steps through the current bucket without wrapping
+local function cycleWithinCategory(sel, startIndex, step)
+	local cnt = sel and sel.weaponcount or 0
+	if cnt < 2 then return nil end
+
+	local idx = startIndex + step
+	while idx >= 1 and idx <= cnt do
+		if sel.weapons[idx].usable then return idx end
+		idx = idx + step
 	end
 
-	-- Set this to true so the menu appears
+	return nil
+end
+
+-- Steps through the current bucket with wraparound
+local function cycleWithinCategoryWrap(sel, startIndex, step)
+	local cnt = sel and sel.weaponcount or 0
+	if cnt < 1 then return nil end
+
+	local idx = startIndex
+	for _ = 1, cnt do
+		idx = ((idx - 1 + step) % cnt) + 1
+		if sel.weapons[idx].usable then return idx end
+	end
+
+	return nil
+end
+
+-- Tries to switch to a new weapon category with at least one usable weapon
+local function switchCategory(currentCat, dir, player)
+	for i = 1, CATEGORY_COUNT do
+		local offset = (dir == 1 and i or -i)
+		local newCat = (currentCat + offset + CATEGORY_COUNT) % CATEGORY_COUNT
+		local sel = HL_GetWeapons(HL_WpnStats, newCat, player) or emptySelection()
+		if getFirstUsableIndex(sel) then
+			return newCat, sel
+		end
+	end
+	local fallback = HL_GetWeapons(HL_WpnStats, 11, player)
+	return CATEGORY_COUNT + 1, fallback or emptySelection() -- fallback if nothing usable
+end
+
+-- Main weapon cycling function (non-wrapping within category)
+local function HL_CycleWeapon(player, direction)
+	if not player or not player.hl1inventory then return end
 	player.kombiaccessinghl1menu = true
 
-	-- Retrieve the current selection list for the player's current category.
+	local dirstep = direction == "next" and 1 or -1
 	local cat = player.kombihl1category or 0
-	local selection = player.selectionlist or HL_GetWeapons(HL_WpnStats, cat, player)
-	local wpnCount = selection.weaponcount or 0
-	
-	print(selection.weaponcount)
+	local sel = player.selectionlist or HL_GetWeapons(HL_WpnStats, cat, player) or emptySelection()
+	local first = getFirstUsableIndex(sel)
 
-	if wpnCount == 0 then
+	if sel.weaponcount == 0 or not first then
+		local nc, ns = switchCategory(cat, dirstep, player)
+		player.kombiprevhl1category = cat
+		player.kombihl1category = nc
+		player.selectionlist = ns
+		player.kombihl1wpn = getFirstUsableIndex(ns) or 0
 		return
 	end
 
+	local cur = player.kombihl1wpn or first
+	local newIndex = cycleWithinCategory(sel, cur, dirstep)
+
+	if newIndex then
+		player.kombihl1wpn = newIndex
+		return
+	end
+
+	local nc, ns = switchCategory(cat, dirstep, player)
+	player.kombiprevhl1category = cat
+	player.kombihl1category = nc
+	player.selectionlist = ns
+
 	if direction == "next" then
-		if player.kombihl1wpn > 1 then
-			player.kombihl1wpn = player.kombihl1wpn - 1
-		else
-			-- At the top of the list; wrap around to the previous category.
-			local newCat = cat - 1
-			
-			-- Obtain the selection list for the new category.
-			local iterations = 0
-			repeat
-				newCat = selection.weaponcount > 0 and $ or $ - 1
-				if newCat < 0 then newCat = 9 end
-				selection = HL_GetWeapons(HL_WpnStats, newCat, player)
-				iterations = $+1
-			until iterations > 64 or selection.weaponcount > 0
-			player.kombiprevhl1category = cat
-			player.kombihl1category = newCat
-			player.selectionlist = selection
-
-			-- Start at the last weapon, if available.
-			player.kombihl1wpn = (selection.weaponcount > 0) and selection.weaponcount or 0
+		player.kombihl1wpn = getFirstUsableIndex(ns) or 0
+	else
+		for i = #ns.weapons, 1, -1 do
+			if ns.weapons[i].usable then
+				player.kombihl1wpn = i
+				break
+			end
 		end
-	elseif direction == "prev" then
-		if player.kombihl1wpn < wpnCount then
-			player.kombihl1wpn = player.kombihl1wpn + 1
-		else
-			-- At bottom of list; wrap around to the next category.
-			local newCat = cat + 1
-
-			-- Obtain the selection list for the new category.
-			local iterations = 0
-			repeat
-				newCat = selection.weaponcount > 0 and $ or $ + 1
-				if newCat > 9 then newCat = 0 end
-				selection = HL_GetWeapons(HL_WpnStats, newCat, player)
-				iterations = $+1
-			until iterations > 64 or selection.weaponcount > 0
-			player.kombiprevhl1category = cat
-			player.kombihl1category = newCat
-			player.selectionlist = selection
-
-			-- Start at the first weapon, if available.
-			player.kombihl1wpn = (selection.weaponcount > 0) and 1 or 0
-		end
+		player.kombihl1wpn = player.kombihl1wpn or 0
 	end
 end
 
--- Example of adding commands via impulse.
 COM_AddCommand("invnext", function(player)
 	if gamestate ~= GS_LEVEL then
 		CONS_Printf(player, "Can't do that right now.")
 		return
 	end
-	HL_CycleWeapon(player, "next")
+	HL_CycleWeapon(player, "prev")
 end)
 
 COM_AddCommand("invprev", function(player)
@@ -183,7 +253,7 @@ COM_AddCommand("invprev", function(player)
 		CONS_Printf(player, "Can't do that right now.")
 		return
 	end
-	HL_CycleWeapon(player, "prev")
+	HL_CycleWeapon(player, "next")
 end)
 
 COM_AddCommand("use", function(player, wep)
@@ -239,7 +309,6 @@ local function RegisterDualCommand(cmd, onPress, onRelease)
 	-- Create the press command ("+<cmd>")
 	COM_AddCommand("+" .. cmd, function(player, ...)
 		if not player.mo then
-			CONS_Printf(player, "I don't think you can use this command at the current moment...")
 			return
 		end
 		-- Register that the player is holding the command
@@ -252,7 +321,6 @@ local function RegisterDualCommand(cmd, onPress, onRelease)
 	-- Create the release command ("-<cmd>")
 	COM_AddCommand("-" .. cmd, function(player, ...)
 		if not player.mo then
-			CONS_Printf(player, "I don't think you can use this command at the current moment...")
 			return
 		end
 		-- Mark the command as released
@@ -279,31 +347,51 @@ RegisterDualCommand("attack")
 RegisterDualCommand("attack2")
 RegisterDualCommand("speed")
 
--- Helper function: Normalize binding entry so both table and string forms are handled.
+-- Helper function: Get what the command is supposed to be ("+cmd" for dual, "cmd" for normal)
 local function getBinding(bind)
 	if type(bind) == "string" then
 		local dual = false
 		local command = bind
+
+		-- Fix inconsistent behavior problems that SOMEHOW pop up for SOME godforsaken reason by removing surrounding double quotes if they exist
+		if command:sub(1, 1) == '"' and command:sub(-1) == '"' then
+			command = command:sub(2, -2)
+		end
+
 		-- If the command starts with "+", we mark it as dual and remove the "+" marker.
-		if command:sub(2, 2) == "+" then
+		if command:sub(1, 1) == "+" then
 			dual = true
-			command = command:sub(3)
+			command = command:sub(2)
 		end
 		return { command = command, dual = dual }
 	end
 	return bind
 end
 
+local function playerHasControl(player)
+return not (
+  player.exiting
+  or player.powers[pw_nocontrol]
+  or P_PlayerInPain(player)
+  or (player.pflags & PF_STASIS)
+  or (player.pflags & PF_FULLSTASIS)
+  or (player.powers[pw_carry] > CR_NONE)
+  or (player.playerstate ~= PST_LIVE)
+) end
+
 -- KeyDown hook function
 local function OnKeyDown(keyevent)
-	print(keyevent.name)
+	-- print(keyevent.name)
 	if not consoleplayer then return end
+	if not playerHasControl(consoleplayer) then return end
+	if not consoleplayer.mo then return end
+	if consoleplayer.mo.skin != skin then return end
 	local bindEntry = consoleplayer.keyBinds[keyevent.name]
 	if bindEntry then
 		local binding = getBinding(bindEntry)
 		-- For dual commands we send the "+" command on key down.
 		if binding.dual then
-			if not keyevent.repeated then  -- avoid re-triggering when the key is held down
+			if not keyevent.repeated then	-- avoid re-triggering when the key is held down
 				COM_BufInsertText(consoleplayer, "+" .. binding.command)
 			end
 		else
@@ -314,14 +402,17 @@ local function OnKeyDown(keyevent)
 		-- Return true to override default behavior.
 		return true
 	end
-	return false  -- No binding: allow normal processing.
+	return false	-- No binding: allow normal processing.
 end
 
 -- KeyUp hook function, only needed for dual commands.
 local function OnKeyUp(keyevent)
 	if not consoleplayer then return end
+	if not playerHasControl(consoleplayer) then return end
+	if not consoleplayer.mo then return end
+	if consoleplayer.mo.skin != skin then return end
 	local bindEntry = consoleplayer.keyBinds[keyevent.name]
-	if bindEntry then
+	if type(bindEntry) == "string" then
 		local binding = getBinding(bindEntry)
 		if binding.dual then
 			COM_BufInsertText(consoleplayer, "-" .. binding.command)
@@ -340,71 +431,388 @@ local PLAYER_MAX_SAFE_FALL_SPEED = 26*FRACUNIT
 local DAMAGE_FOR_FALL_SPEED = FixedDiv(100*FRACUNIT,(PLAYER_FATAL_FALL_SPEED - PLAYER_MAX_SAFE_FALL_SPEED))
 local PLAYER_FALL_PUNCH_THRESHOLD = 18*FRACUNIT
 
-local function HL_GetFallDamage(fallSpeed, eflags)
-	HL.valuemodes["HLFallDamage"] = HL_LASTFUNC
-	local damage = HL.RunHook("HLFallDamage", fallSpeed, abs(fallSpeed) <= PLAYER_MAX_SAFE_FALL_SPEED, abs(fallSpeed) >= PLAYER_FATAL_FALL_SPEED)
-	if damage == nil
-		if (eflags & MFE_TOUCHWATER) then return {dmg = 0, fallpunch = fallSpeed >= PLAYER_FALL_PUNCH_THRESHOLD} end
-		if abs(fallSpeed) <= PLAYER_MAX_SAFE_FALL_SPEED
-			return {dmg = 0, fallpunch = fallSpeed >= PLAYER_FALL_PUNCH_THRESHOLD}
-		elseif abs(fallSpeed) >= PLAYER_FATAL_FALL_SPEED
-			return {dmg = 100, fallpunch = fallSpeed >= PLAYER_FALL_PUNCH_THRESHOLD}
-		else
-			if cv_kombifalldamage.value > -1
-				if cv_kombifalldamage.value
-					local damage = FixedMul((abs(fallSpeed) - PLAYER_MAX_SAFE_FALL_SPEED), DAMAGE_FOR_FALL_SPEED)
-					return {dmg = min(FixedInt(damage), 100), fallpunch = fallSpeed >= PLAYER_FALL_PUNCH_THRESHOLD}
-				else
-					return {dmg = 10, fallpunch = fallSpeed >= PLAYER_FALL_PUNCH_THRESHOLD}
-				end
-			else
-				return {dmg = 0, fallpunch = fallSpeed >= PLAYER_FALL_PUNCH_THRESHOLD}
-			end
-		end
-	else
-		return {dmg = damage, fallpunch = fallSpeed >= PLAYER_FALL_PUNCH_THRESHOLD}
+local nofalldmgmaps = {
+	["12 convoy assault"] = function(player)
+		return player.awayviewtics
 	end
+}
+
+local function HL_GetFallDamage(fallSpeed, player)
+	HL.valuemodes["HLFallDamage"] = HL_LASTFUNC
+
+	local damage = HL.RunHook("HLFallDamage", fallSpeed, abs(fallSpeed) <= PLAYER_MAX_SAFE_FALL_SPEED, abs(fallSpeed) >= PLAYER_FATAL_FALL_SPEED)
+	if damage ~= nil then
+		return {dmg = damage, fallpunch = (fallSpeed >= PLAYER_FALL_PUNCH_THRESHOLD)}
+	end
+
+	local mapkey = gamemap .. " " .. string.lower(G_BuildMapTitle(gamemap) or "")
+	local nofalldmg = nofalldmgmaps[mapkey]
+
+	-- Skip fall damage if map says so, if in water, or player flags it off
+	if (nofalldmg and (type(nofalldmg) ~= "function" or nofalldmg(player)))
+	or (player.mo.eflags & (MFE_TOUCHWATER|MFE_UNDERWATER) ~= 0)
+	or (player.hl and (player.hl.nofalldmg or player.hl.fallcount))
+	then
+		if player.hl.fallcount then player.hl.fallcount = $-1 end
+		return {dmg = 0, fallpunch = (fallSpeed >= PLAYER_FALL_PUNCH_THRESHOLD)}
+	end
+
+	local fallspeed_abs = abs(fallSpeed)
+
+	-- Respect cv_kombifalldamage.value before checking for safe/fatal speed thresholds
+	local falldmgmode = cv_kombifalldamage.value
+	if falldmgmode == -1 then -- "Dont"
+		return {dmg = 0, fallpunch = (fallSpeed >= PLAYER_FALL_PUNCH_THRESHOLD)}
+	elseif falldmgmode == 0 then -- "Fixed"
+		return {dmg = 10, fallpunch = (fallSpeed >= PLAYER_FALL_PUNCH_THRESHOLD)}
+	end
+
+	-- Handle safe fall (no damage) and fatal fall (max damage)
+	if fallspeed_abs <= PLAYER_MAX_SAFE_FALL_SPEED then
+		return {dmg = 0, fallpunch = (fallSpeed >= PLAYER_FALL_PUNCH_THRESHOLD)}
+	elseif fallspeed_abs >= PLAYER_FATAL_FALL_SPEED then
+		-- If not "On", still apply damage based on custom setting.
+		if falldmgmode == 1 then -- "On"
+			local calcDamage = FixedMul(fallspeed_abs - PLAYER_MAX_SAFE_FALL_SPEED, DAMAGE_FOR_FALL_SPEED)
+			return {dmg = min(FixedInt(calcDamage), 100), fallpunch = (fallSpeed >= PLAYER_FALL_PUNCH_THRESHOLD)}
+		else
+			return {dmg = 100, fallpunch = (fallSpeed >= PLAYER_FALL_PUNCH_THRESHOLD)}
+		end
+	end
+
+	-- Handle fall damage between safe and fatal fall
+	if falldmgmode == 1 then -- "On"
+		local calcDamage = FixedMul(fallspeed_abs - PLAYER_MAX_SAFE_FALL_SPEED, DAMAGE_FOR_FALL_SPEED)
+		return {dmg = min(FixedInt(calcDamage), 100), fallpunch = (fallSpeed >= PLAYER_FALL_PUNCH_THRESHOLD)}
+	end
+
+	-- Default fixed value
+	return {dmg = 10, fallpunch = (fallSpeed >= PLAYER_FALL_PUNCH_THRESHOLD)}
 end
 
 addHook("PlayerThink", function(player)
-	if not player.mo return end
-	if player.realmo.skin == "kombifreeman"
-		if (player.mo.eflags & MFE_JUSTHITFLOOR)
-			local fallhurt = HL_GetFallDamage(player.kombifallz, player.mo.eflags)
-			player.mo.hl1health = $-fallhurt.dmg
-			if player.mo.hl1health <= 0
-				player.mo.hl1health = 0
-				P_KillMobj(player.mo, player.mo, player.mo, 0)
-			elseif fallhurt.dmg > 0
+	if not player.mo then return end
+
+	-- Handle impulse 201 call (since SRB2 seems to whine when we do it in the command itself)
+	if player.hl and player.hl.spraying then
+		SpawnSpray(player.mo)
+		player.hl.spraying = false
+	end
+
+	-- If Freeman, handle fall damage
+	if player.realmo.skin == "kombifreeman" then
+		local mapkey = gamemap .. " " .. string.lower(G_BuildMapTitle(gamemap) or "")
+		local nofalldmg = nofalldmgmaps[mapkey]
+		if player.hl and (nofalldmg and (type(nofalldmg) ~= "function" or nofalldmg(player)))
+			player.hl.fallcount = 1
+		end
+		if player.mo.eflags & MFE_JUSTHITFLOOR then
+			local fallhurt = HL_GetFallDamage(abs(player.kombifallz or 0), player)
+			if fallhurt.dmg then
+				player.mo.hl1health = $-fallhurt.dmg
 				S_StartSound(player.mo,P_RandomRange(sfx_hlfal1,sfx_hlfal3))
+				if player.mo.hl1health <= 0 then
+					player.mo.hl1health = 0
+					P_KillMobj(player.mo, player.mo, player.mo, 0)
+				end
 			end
-		elseif not P_IsObjectOnGround(player.mo)
+			if fallhurt.fallpunch then
+				player.hl = $ or {}
+				player.hl.viewrollpunch = ANG350+ANG2+ANG2+ANG2
+			end
+		elseif not P_IsObjectOnGround(player.mo) then
+			-- Record the fall velocity for future fall damage checks
 			player.kombifallz = player.mo.momz
 		end
 	end
+
+	-- Handle decay of the view roll punch
+	local decayRate = ANG1 / 4 -- How much to decay by each tic
+	if player.hl and player.hl.viewrollpunch then
+		if player.hl.viewrollpunch > 0 then
+			player.hl.viewrollpunch = $ - decayRate
+			if player.hl.viewrollpunch < 0 then player.hl.viewrollpunch = 0 end
+		elseif player.hl.viewrollpunch < 0 then
+			player.hl.viewrollpunch = $ + decayRate
+			if player.hl.viewrollpunch > 0 then player.hl.viewrollpunch = 0 end
+		end
+	end
+end)
+
+local laddertextures = {
+    CUT10   = true,
+    LADDER1 = true,
+    LADDER2 = true,
+	ConL    = true,
+}
+
+local function intervalsIntersect(aBottom, aTop, bBottom, bTop)
+    -- True if they share *any* non‑zero overlap
+    return (aTop  > bBottom)
+       and (aBottom < bTop)
+end
+
+addHook("MobjMoveBlocked", function(mo, thing, line)
+    -- Basic sanity
+    if not (mo and mo.valid and mo.player and line) then
+        if mo.player then mo.player.hl = mo.player.hl or {} end
+        return
+    end
+
+    local hl = mo.player.hl or {}
+    mo.player.hl = hl
+
+    -- Determine which side of the line we're on
+    local sideIndex = P_PointOnLineSide(mo.x, mo.y, line)
+    local mysec     = (sideIndex == 0) and line.frontsector or line.backsector
+    local oppsec    = (sideIndex == 0) and line.backsector  or line.frontsector
+    local sidedef   = (sideIndex == 0) and line.frontside   or line.backside
+
+    local pBot = mo.z
+    local pTop = mo.z + mo.height
+
+    -- Prepare texture lookup table
+    local ladderTexs = laddertextures
+
+    -- Fast-path: iterate both sectors' ffloors lists in one go
+    local sectors = { mysec, oppsec }
+    for si = 1, 2 do
+        local sec = sectors[si]
+        if sec then
+            for ff in sec.ffloors() do
+                if ff.valid and (ff.flags & FOF_EXISTS) ~= 0 then
+                    local fBot = ff.bottomheight
+                    local fTop = ff.topheight
+
+                    if intervalsIntersect(fBot, fTop, pBot, pTop) then
+                        local ms = ff.master.frontside
+                        if ms then
+                            -- grab all three texture names once
+                            local mid  = R_TextureNameForNum(ms.midtexture)
+                            local top  = R_TextureNameForNum(ms.toptexture)
+                            local bot  = R_TextureNameForNum(ms.bottomtexture)
+
+                            if ladderTexs[mid] or ladderTexs[top] or ladderTexs[bot] then
+                                hl.climb             = true
+                                hl.climbing          = line
+                                hl.climbing_is_front = sideIndex
+                                hl.ladderbottom     = fBot
+                                hl.laddertop        = fTop
+                                return
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+
+    -- No FOF ladder found — fall back on sidedef textures
+    if sidedef then
+        local mt = R_TextureNameForNum(sidedef.midtexture)
+        local tt = R_TextureNameForNum(sidedef.toptexture)
+        local bt = R_TextureNameForNum(sidedef.bottomtexture)
+
+        if ladderTexs[mt] or ladderTexs[tt] or ladderTexs[bt] then
+            hl.climb             = true
+            hl.climbing          = line
+            hl.climbing_is_front = sideIndex
+
+            if mysec ~= oppsec then
+                -- two different sectors
+                hl.ladderbottom = mysec.floorheight
+                hl.laddertop    = oppsec.floorheight
+            else
+                -- single-sided line
+                hl.ladderbottom = mysec.floorheight
+                hl.laddertop    = mysec.ceilingheight
+            end
+
+            return
+        end
+    end
+
+    -- Not a ladder: clear stored data
+    hl.climb        = nil
+    hl.climbing     = nil
+    hl.ladderbottom = nil
+    hl.laddertop    = nil
+end, MT_PLAYER)
+
+local function ClosestPointOnSegment_t(px, py, x1, y1, x2, y2)
+    local dx, dy = x2 - x1, y2 - y1
+    local denom = FixedMul(dx,dx) + FixedMul(dy,dy)
+    if denom == 0 then
+        return x1, y1, 0, true
+    end
+
+    -- projection numerator
+    local num = FixedMul(px - x1, dx) + FixedMul(py - y1, dy)
+    -- unclamped t in fixed [0..FRACUNIT] space
+    local tUnc = FixedDiv(num, denom)
+
+    local outside = false
+    local t = tUnc
+    if tUnc < 0 then
+        t, outside = 0, true
+    elseif tUnc > FRACUNIT then
+        t, outside = FRACUNIT, true
+    end
+
+    local cx = x1 + FixedMul(t, dx)
+    local cy = y1 + FixedMul(t, dy)
+    return cx, cy, t, outside
+end
+
+addHook("PreThinkFrame", function()
+    for player in players.iterate do
+        local mo = player.mo
+        if not (mo and mo.valid) then
+            if mo then mo.flags = mo.flags & ~MF_NOGRAVITY end
+            continue
+        end
+
+        local cmd = player.cmd
+        local hl  = player.hl or {}
+        player.hl = hl
+
+        if hl.climb and hl.climbing then
+            -- vertical check
+            local bottom = min(hl.ladderbottom, hl.laddertop)
+            local top    = max(hl.ladderbottom, hl.laddertop)
+            if mo.z < bottom or mo.z > top then
+				print("Vertical check fail!")
+                hl.climb = false
+				hl.sndtick = 0
+                mo.flags = mo.flags & ~MF_NOGRAVITY
+                cmd.forwardmove, cmd.sidemove = 0,0
+                continue
+            end
+
+            -- corner-segment detach
+            local x1,y1 = hl.climbing.v1.x, hl.climbing.v1.y
+            local x2,y2 = hl.climbing.v2.x, hl.climbing.v2.y
+            local ladangle = R_PointToAngle2(x1,y1, x2,y2)
+
+            -- ladder-plane normal
+            local nx,ny = cos(ladangle+ANGLE_90), sin(ladangle+ANGLE_90)
+            if not hl.climbing_is_front then nx,ny = -nx,-ny end
+
+            -- ladder tangent (for horizontal)
+            local tx,ty = cos(ladangle), sin(ladangle)
+
+            local radius = mo.radius
+            local thr   = FixedMul(radius, abs(nx)+abs(ny))
+            local SAFE  = FRACUNIT/8
+
+            local anyOn = false
+            for _,off in ipairs({{radius,radius},{radius,-radius},{-radius,radius},{-radius,-radius}}) do
+                local px,py = mo.x+off[1], mo.y+off[2]
+                local cx,cy,t,out = ClosestPointOnSegment_t(px,py, x1,y1, x2,y2)
+                if not out then
+                    local dx,dy = px-cx, py-cy
+                    local dist  = FixedSqrt(FixedMul(dx,dx)+FixedMul(dy,dy))
+                    if dist <= thr+SAFE then
+                        anyOn = true
+                        break
+                    end
+                end
+            end
+            if not anyOn then
+				print("Attach fail!")
+                hl.climb = false
+				hl.sndtick = 0
+                mo.flags = mo.flags & ~MF_NOGRAVITY
+                cmd.forwardmove, cmd.sidemove = 0,0
+                continue
+            end
+
+            -- climb movement + sound
+            mo.flags = mo.flags | MF_NOGRAVITY
+
+            -- scale inputs into fixed speeds
+            local ZSPEED = 6*FRACUNIT
+            local XSPEED = 6*FRACUNIT
+            local f = cmd.forwardmove * FRACUNIT
+            local s = cmd.sidemove    * FRACUNIT
+
+            -- sound timer (16-tic interval)
+            hl.sndtick = hl.sndtick or 0
+            if f != 0 or s != 0 then
+                hl.sndtick = hl.sndtick + 1
+                if hl.sndtick >= 16 then
+                    hl.sndtick = 0
+                    local sfx = sfx_hlla1 + P_RandomRange(0,3)
+                    S_StartSound(mo, sfx)
+                end
+            end
+
+            -- map into velocities
+            local fv = FixedMul(f, FixedDiv(ZSPEED, 50*FRACUNIT))
+            -- band-aid invert sidemove so right>0 moves you right
+            local rv = FixedMul(-s, FixedDiv(XSPEED, 50*FRACUNIT))
+
+            cmd.forwardmove, cmd.sidemove = 0,0
+
+            -- jump off
+            if cmd.buttons & BT_JUMP ~= 0 then
+                mo.momx = FixedMul(nx, 12*FRACUNIT)
+                mo.momy = FixedMul(ny, 12*FRACUNIT)
+				P_SetObjectMomZ(mo, 4*FRACUNIT)
+                hl.climb = false
+				hl.sndtick = 0
+                mo.flags = mo.flags & ~MF_NOGRAVITY
+                continue
+            end
+
+            -- build world-space vel exactly like HL
+            local a = mo.angle
+            local vpnx,vpny = cos(a), sin(a)
+            local vrx, vry  = cos(a+ANGLE_90), sin(a+ANGLE_90)
+            local vx = FixedMul(vpnx,fv) + FixedMul(vrx,rv)
+            local vy = FixedMul(vpny,fv) + FixedMul(vry,rv)
+
+            -- decompose: lateral XY + −normal→Z
+            local normal = FixedMul(vx,nx) + FixedMul(vy,ny)
+            local lx = vx - FixedMul(nx, normal)
+            local ly = vy - FixedMul(ny, normal)
+
+            mo.momx = lx
+            mo.momy = ly
+            mo.momz = -normal
+        else
+            mo.flags = mo.flags & ~MF_NOGRAVITY
+        end
+    end
 end)
 
 -- Aliased key binds.
 -- Note: By prefixing the command with "+", you automatically mark the command as dual.
 local defaultKeyBinds = {
-	e				= "+use",			-- SHIELD (when it exists)
-	r				= "+reload",		-- CUSTOM 1
-	lctrl			= "+duck",			-- SPIN
-	lshift		   = "+speed",			-- CUSTOM 3
-	f				= "impulse 100",	-- CUSTOM 2
-	["0"]			= "slot0",
-	["1"]			= "slot1",			-- WPN SLOT 1
-	["2"]			= "slot2",			-- WPN SLOT 2
-	["3"]			= "slot3",			-- WPN SLOT 3
-	["4"]			= "slot4",			-- WPN SLOT 4
-	["5"]			= "slot5",			-- WPN SLOT 5
-	["6"]			= "slot6",			-- WPN SLOT 6
-	["7"]			= "slot7",			-- WPN SLOT 7
-	["8"]			= "slot8",
-	["9"]			= "slot9",
-	["wheel 1 up"]   = "invnext",
-	["wheel 1 down"] = "invprev",
+	e				 = "+use",			-- SHIELD (when it exists)
+	r				 = "+reload",		-- CUSTOM 1
+	lctrl			 = "+duck",			-- SPIN
+	lshift			 = "+speed",		-- CUSTOM 3
+	f				 = "impulse 100",	-- CUSTOM 2
+	t				 = "impulse 201",
+	["0"]			 = "slot0",
+	["1"]			 = "slot1",			-- WPN SLOT 1
+	["2"]			 = "slot2",			-- WPN SLOT 2
+	["3"]			 = "slot3",			-- WPN SLOT 3
+	["4"]			 = "slot4",			-- WPN SLOT 4
+	["5"]			 = "slot5",			-- WPN SLOT 5
+	["6"]			 = "slot6",			-- WPN SLOT 6
+	["7"]			 = "slot7",			-- WPN SLOT 7
+	["8"]			 = "slot8",
+	["9"]			 = "slot9",
+	["wheel 1 up"]	 = "invprev",
+	["wheel 1 down"] = "invnext",
 }
+
+-- Constants for battery drain/recharge rates
+local DRAIN_RATE = FRACUNIT / 20     -- drain 1/20 battery unit per tick
+local RECHARGE_RATE = FRACUNIT / 25  -- recharge 1/25 battery unit per tick
+local MAX_BATTERY = 100 * FRACUNIT
 
 addHook("PlayerSpawn",function(player)
 	if not player.mo return end
@@ -419,15 +827,17 @@ addHook("PlayerSpawn",function(player)
 	local startammo, startclips, startinv, startweapon = HL.RunHook("HLInitInventory", player)
 	player.keyBinds = loadTableFromFile(HL_KEYBINDS_PATH, defaultKeyBinds)
 	player.hl1ammo = startammo or $ or {
-		["buckshot"] = 125,
-		["9mm"] = 68, -- the only value we have set in stone...
+		buckshot = 125,
+		["9mm"] = 68, -- the only value we have set in stone... (def 68)
 		["357"] = 36,
-		["bolt"] = 10,
-		["grenade"] = 999,
-		["melee"] = 0, -- these two require values so that any user error with default ammo types won't be pinned on me
-		["none"] = 0, -- ^ because yeah of COURSE it'd throw an error at you if you tried to decrement it IT WASN'T EVEN SUPPOSED TO BE DECREMENTED
+		bolt = 50,
+		grenade = 10,
+		melee = -1, -- these two require values so that any user error with default ammo types won't be pinned on me
+		none = -1, -- ^ because yeah of COURSE it'd throw an error at you if you tried to decrement it IT WASN'T EVEN SUPPOSED TO BE DECREMENTED
 	}
-	player.hl1clips = startclips or $ or {}
+	player.hl1clips = startclips or $ or {
+		melee = -1
+	}
 	player.hl1inventory = startinv or $ or {
 		["crowbar"] = true,
 		["9mmhandgun"] = true,
@@ -440,17 +850,25 @@ addHook("PlayerSpawn",function(player)
 	player.pickuphistory = {}
 	player.hl1deadtimer = 0
 	player.hl1weapon = startweapon or "crowbar"
+	player.hl = $ or {}
+	player.hl.flashlightbattery = MAX_BATTERY
+	if not player.hl1clips[player.hl1weapon] then
+		local clipsize = HL_WpnStats[player.hl1weapon].primary and HL_WpnStats[player.hl1weapon].primary.clipsize or -1
+		local clipsize2 = HL_WpnStats[player.hl1weapon].secondary and HL_WpnStats[player.hl1weapon].secondary.clipsize or -1
+		player.hl1clips[player.hl1weapon] = {primary = clipsize, secondary = clipsize2}
+	end
 	HL_ChangeViewmodelState(player, "ready", "idle")
 end)
 
 addHook("PlayerHeight", function(player)
-	if not player.mo then return end
-	if player.realmo.state == S_PLAY_FREEMCROUCH then return player.spinheight end
+	local shouldCrouch = (player.cmd.buttons & BT_SPIN) or (player.hlcmds and player.hlcmds.duck) or not (P_CheckPosition(player.mo, player.mo.x, player.mo.y, true) and (player.prevpos and P_CheckPosition(player.mo, player.prevpos.x, player.prevpos.y, true)))
+	if shouldCrouch then return player.spinheight end
 end)
 
 addHook("PlayerCanEnterSpinGaps", function(player)
 	if not player.mo then return end
-	if player.realmo.state == S_PLAY_FREEMCROUCH then return true end
+	local shouldCrouch = (player.cmd.buttons & BT_SPIN) or (player.hlcmds and player.hlcmds.duck) or not (P_CheckPosition(player.mo, player.mo.x, player.mo.y, true) and (player.prevpos and P_CheckPosition(player.mo, player.prevpos.x, player.prevpos.y, true)))
+	if shouldCrouch then return true end
 end)
 
 local srb2defviewheight = 89 * FRACUNIT -- def == 41
@@ -459,20 +877,16 @@ addHook("PlayerThink", function(player)
 	if not player.mo then return end
 	if player.mo.skin ~= skin then return end
 	if not player.hl then player.hl = {} end
-	
+
 	local spinHeight = P_GetPlayerSpinHeight(player)
 	local normalHeight = P_GetPlayerHeight(player)
-	local oldHeight = player.mo.height -- get our current height for this tic
 	local shouldCrouch = (player.cmd.buttons & BT_SPIN) or (player.hlcmds and player.hlcmds.duck) or not (P_CheckPosition(player.mo, player.mo.x, player.mo.y, true) and (player.prevpos and P_CheckPosition(player.mo, player.prevpos.x, player.prevpos.y, true)))
-	
+
 	player.mo.height = normalHeight
 
-	if player.hlcmds and player.hlcmds.use == true then
-		player.mo.momx, player.mo.momy = -$/2, -$/2
-	end
-	
+	-- Reset this so div operations don't make us unable to walk
 	player.normalspeed = skins[player.realmo.skin].normalspeed
-	
+
 	-- +speed's walk modifier
 	if player.hlcmds and player.hlcmds.speed then
 		player.normalspeed = $ / 2
@@ -483,6 +897,10 @@ addHook("PlayerThink", function(player)
 	-- To put the player in their roll state, so we have to fight its stupidity.
 	-- (we will still lose despite that however)
 	if shouldCrouch then
+		player.mo.height = spinHeight
+
+		local moving = (abs(player.mo.momx) > 0 or abs(player.mo.momy) > 0)
+
 		if not player.hl.crouching then
 			-- Adjust vertical position when crouch jumping
 			if not ((player.mo.eflags & MFE_JUSTHITFLOOR) or P_IsObjectOnGround(player.mo)) then
@@ -492,11 +910,21 @@ addHook("PlayerThink", function(player)
 					player.mo.z = $ + abs(normalHeight - spinHeight)
 				end
 			end
-			player.realmo.state = S_PLAY_FREEMCROUCH
 		end
-	-- If SPIN isn't held and there's enough space for standing, stand back up
+
+		-- Set the crouching animation depending on movement
+		if moving then
+			if not player.realmo.state == S_PLAY_FREEMCROUCH
+				player.realmo.state = S_PLAY_FREEMCROUCH
+			end
+		else
+			if not player.realmo.state == S_PLAY_FREEMCROUCHMOVE
+				player.realmo.state = S_PLAY_FREEMCROUCHMOVE
+			end
+		end
 	elseif player.hl.crouching then
 		-- Adjust vertical position when standing up in the air
+		player.mo.height = normalHeight
 		if not ((player.mo.eflags & MFE_JUSTHITFLOOR) or P_IsObjectOnGround(player.mo)) then
 			if player.mo.eflags & MFE_VERTICALFLIP then
 				player.mo.z = $ + abs(normalHeight - spinHeight)
@@ -506,10 +934,10 @@ addHook("PlayerThink", function(player)
 		end
 		player.realmo.state = S_PLAY_STND
 	end
-	
+
 	player.prevpos = {x = player.mo.x, y = player.mo.y}
-	
-	-- Crouch modifier for normalspeed
+
+	-- Crouch modifiers
 	if shouldCrouch then
 		player.normalspeed = $ / 4
 		player.viewheight = spinHeight - 8*FRACUNIT
@@ -521,12 +949,55 @@ addHook("PlayerThink", function(player)
 		player.hl.crouching = false
 	end
 
-	player.mo.height = oldHeight
+	-- Automatically set spriteyscale because we don't have sprites for crouching yet
+	player.mo.spriteyscale = FixedDiv(player.mo.height, 60*FRACUNIT)
 
-	-- Execute jump if buffered and conditions are met
+	-- Flashlight thinker
+	if player.hl.flashlightbattery <= 0 then
+		player.hl.flashlight = false
+		S_StartSound(player.mo, sfx_hlflas)
+	end
+
+	if player.hl.flashlight then
+		player.hl.flashlightbattery = player.hl.flashlightbattery - DRAIN_RATE
+		if player.hl.flashlightbattery < 0 then
+			player.hl.flashlightbattery = 0
+		end
+	else
+		if player.hl.flashlightbattery < MAX_BATTERY then
+			player.hl.flashlightbattery = player.hl.flashlightbattery + RECHARGE_RATE
+			if player.hl.flashlightbattery > MAX_BATTERY then
+				player.hl.flashlightbattery = MAX_BATTERY
+			end
+		end
+	end
+
+	-- Execute jump if buffered and on ground
 	if ((player.cmd.buttons & BT_JUMP) or (player.hlcmds and player.hlcmds.jump)) and P_IsObjectOnGround(player.mo) then
 		L_MakeFootstep(player, "jump")
 		P_DoJump(player)
+	end
+
+	-- Make maps using these at least somewhat playable
+	if player.powers[pw_carry] == CR_MACESPIN then
+		player.hl = $ or {}
+		player.hl.nophys = true
+	end
+
+	-- Disable falling damage under these conditions (maybe because of script breaks, or whatever may occur)
+	-- Functionally different from nofalldmgmaps, as this is checked for no matter what map we're on (so we don't have to add every map in existence)
+	if player.powers[pw_carry] == CR_MACESPIN
+	   or player.charaswap
+	then
+		player.hl = $ or {}
+		player.hl.nofalldmg = true
+	end
+
+	-- ...But clear the associated variables when we don't need them anymore.
+	if player.hl and player.hl.nophys and P_IsObjectOnGround(player.mo) then
+		player.hl = $ or {}
+		player.hl.nophys = false
+		player.hl.nofalldmg = false
 	end
 end)
 
@@ -534,7 +1005,7 @@ addHook("PlayerThink", function(player)
 	if not player.mo return end
 	if player.mo.skin != skin return end
 	player.hl1kickback = $ or 0
-	if player.mo.skin != "kombifreeman" return end
+	if player.mo.skin != skin then return end
 	if player.mo.hl1health == nil
 		if (player.mo.skin == "scieinstein" or player.mo.skin == "scinerd" or player.mo.skin == "sciluther" or player.mo.skin == "scislick")
 			player.mo.hl1health = 20 -- 20 HP for scientist users.
@@ -547,90 +1018,97 @@ addHook("PlayerThink", function(player)
 	end
 end)
 
+local function hasUsableWeapons(sel)
+	return getFirstUsableIndex(sel) ~= nil
+end
+
 addHook("PlayerThink", function(player)
-	if not player.mo then 
-		return 
-	end
-	
-	if not player.kombipressingselkeys
-		if player.cmd.buttons & BT_WEAPONNEXT then
-			-- Call our helper to cycle to the next weapon.
-			HL_CycleWeapon(player, "next")
-			player.kombipressingselkeys = true
-		elseif player.cmd.buttons & BT_WEAPONPREV then
-			HL_CycleWeapon(player, "prev")
-			player.kombipressingselkeys = true
-		end
-	else
-		player.kombipressingselkeys = false
-	end
+    if not player.mo then return end
+	if player.mo.skin != skin then return end
 
-	-- Check if a slot command was executed
-	if player.desiredSlot ~= nil then
-			player.kombiprevhl1category = player.kombihl1category
-			player.kombihl1category = player.desiredSlot
-			
-			if player.kombiprevhl1category ~= player.kombihl1category or not player.kombiaccessinghl1menu then
-				player.selectionlist = HL_GetWeapons(HL_WpnStats, player.kombihl1category, player)
-				player.kombihl1wpn = 1
-				S_StartSound(player.mo, sfx_pwepst)
-			else
-				player.kombihl1wpn = player.kombihl1wpn == player.selectionlist["weaponcount"] and 1 or player.kombihl1wpn + 1
-				S_StartSound(player.mo, sfx_pwepsl)
-			end
-			
-			player.kombiaccessinghl1menu = true
-			player.kombipressingwpnkeys = true
-			player.desiredSlot = nil
-	end
+    -- Selection via BT_WEAPONNEXT/PREV
+    if not player.kombipressingselkeys then
+        if player.cmd.buttons & BT_WEAPONNEXT then
+            HL_CycleWeapon(player, "prev")
+            player.kombipressingselkeys = true
+        elseif player.cmd.buttons & BT_WEAPONPREV then
+            HL_CycleWeapon(player, "next")
+            player.kombipressingselkeys = true
+        end
+    else
+        player.kombipressingselkeys = false
+    end
 
-	-- If there's additional filtering based on skin, etc.
-	if player.mo.skin ~= skin then 
-		return
-	end
+    -- Selection via slot keys
+    local slotKey = player.desiredSlot
+    local mask = player.cmd.buttons & BT_WEAPONMASK
+    if mask ~= 0 then
+        slotKey = mask
+    end
 
-	-- Existing logic for button presses, etc.
-	if (player.cmd.buttons & BT_WEAPONMASK) then
-		if not player.kombipressingwpnkeys then
-			player.kombiprevhl1category = player.kombihl1category
-			player.kombihl1category = (player.cmd.buttons & BT_WEAPONMASK)
-			
-			if player.kombiprevhl1category ~= player.kombihl1category or not player.kombiaccessinghl1menu then
-				player.selectionlist = HL_GetWeapons(HL_WpnStats, player.kombihl1category, player)
-				player.kombihl1wpn = 1
-			else
-				player.kombihl1wpn = player.kombihl1wpn == player.selectionlist["weaponcount"] and 1 or player.kombihl1wpn + 1
-			end
-			
-			player.kombiaccessinghl1menu = true
-			player.kombipressingwpnkeys = true
-		end
-	elseif player.kombipressingwpnkeys then
-		player.kombipressingwpnkeys = false
-	end
+    if slotKey ~= nil and not player.kombipressingwpnkeys then
+        -- remember if this really is the “first open”
+        local firstOpen = not player.kombiaccessinghl1menu
 
-	-- The rest of the PlayerThink hook, for instance the shield/armor block:
+        local prevCat = player.kombihl1category or -1
+        local newCat  = slotKey
+        player.kombiprevhl1category = prevCat
+        player.kombihl1category     = newCat
+
+        -- get the new selection list
+        local sel = HL_GetWeapons(HL_WpnStats, newCat, player) or emptySelection()
+        player.selectionlist = sel
+
+        if sel.weaponcount > 0 and hasUsableWeapons(sel) then
+            if firstOpen then
+                -- on first open always pick the first slot
+                player.kombihl1wpn = 1
+            else
+                -- same-category wrap or new-category default
+                if newCat ~= prevCat then
+                    player.kombihl1wpn = getFirstUsableIndex(sel) or 0
+                else
+                    local cur = player.kombihl1wpn or 1
+                    player.kombihl1wpn = cycleWithinCategoryWrap(sel, cur, 1) or cur
+                end
+            end
+        else
+            player.kombihl1wpn = 0
+        end
+
+        -- play sound, mark state
+        player.kombiaccessinghl1menu = true
+        S_StartSound(player.mo,
+            (newCat ~= prevCat or firstOpen)
+              and sfx_pwepst or sfx_pwepsl
+        )
+        player.kombipressingwpnkeys = true
+        player.desiredSlot = nil
+    elseif player.kombipressingwpnkeys then
+        player.kombipressingwpnkeys = false
+    end
+
 	if player.powers[pw_shield] then
 		if (player.mo.hl1armor < player.mo.hl1maxarmor) then
-			local amount = 20  
+			local amount = 20
 			if (player.powers[pw_shield] == SH_PINK) then
-				amount = 25  
+				amount = 25
 			elseif (player.powers[pw_shield] == SH_PITY) then
-				amount = 15  
+				amount = 15
 			elseif (player.powers[pw_shield] == SH_WHIRLWIND) then
-				amount = 25  
+				amount = 25
 			elseif (player.powers[pw_shield] == SH_ARMAGEDDON) then
-				amount = 30  
+				amount = 30
 			elseif (player.powers[pw_shield] == SH_ELEMENTAL) then
-				amount = 18  
+				amount = 18
 			elseif (player.powers[pw_shield] == SH_ATTRACT) then
-				amount = 10  
+				amount = 10
 			elseif (player.powers[pw_shield] == SH_FLAMEAURA) then
-				amount = 35  
+				amount = 35
 			elseif (player.powers[pw_shield] == SH_BUBBLEWRAP) then
-				amount = 28  
+				amount = 28
 			elseif (player.powers[pw_shield] == SH_THUNDERCOIN) then
-				amount = 40  
+				amount = 40
 			end
 
 			if (player.powers[pw_shield] & SH_FORCE) then
@@ -669,6 +1147,7 @@ addHook("MobjDamage", function(target, inf, src, dmg, dmgType)
 		target.player.powers[pw_flashing] = 18
 		return true
 	end
+	if not (src and src.valid) then return true end
 	local inf = (HL1_DMGStats[src.type] and HL1_DMGStats[src.type].damage and HL1_DMGStats[src.type].damage.preferaggressor) and inf or src
 	HL.valuemodes["HLFreemanHurt"] = HL_LASTFUNC
 	S_StartSound(target,P_RandomRange(sfx_frpai1,sfx_frpai5))
@@ -696,7 +1175,7 @@ addHook("MobjDamage", function(target, inf, src, dmg, dmgType)
 	P_PlayerEmeraldBurst(target.player, false)
 	P_PlayerWeaponAmmoBurst(target.player)
 	P_PlayerFlagBurst(target.player, false)
-	
+
 	HL_DamageGordon(target, inf, damage, damagetype)
 	return true
 end, MT_PLAYER)
@@ -770,7 +1249,7 @@ addHook("PlayerThink", function(player)
 			end
 		end
 		player.hl1frameclock = frameDuration
-		
+
 		-- Play frame sound if defined
 		local frameSound = currentAnim.frameSounds and currentAnim.frameSounds[player.hl1frame]
 		if frameSound then
@@ -789,8 +1268,8 @@ addHook("PlayerThink", function(player)
 				highestIndex = index
 			end
 		end
-		
-		if player.hl1frame >= highestIndex then
+
+		if player.hl1frame > highestIndex then
 			HL_ChangeViewmodelState(player, "idle", "idle")
 			return
 		end
@@ -798,7 +1277,7 @@ addHook("PlayerThink", function(player)
 end)
 
 local function contains(mainStr, subStr)
-  return string.find(mainStr, subStr) ~= nil
+	return string.find(mainStr, subStr) ~= nil
 end
 
 addHook("PlayerThink", function(player)
@@ -836,14 +1315,14 @@ addHook("PlayerThink", function(player)
 			if not weapon_clips.primary weapon_clips.primary = 0 end
 			local max_reload = primary.clipsize - weapon_clips.primary
 			local available_ammo = player.hl1ammo[ammo_type]
-			
+
 			if reload_increment
 				if player.hl1doreload
 					local to_reload = min(reload_increment, max_reload, available_ammo)
 					weapon_clips.primary = $ + to_reload
 					player.hl1ammo[ammo_type] = $ - to_reload
 				end
-				
+
 				if weapon_clips.primary >= weapon_stats.primary.clipsize or player.hl1ammo[ammo_type] <= 0
 					HL_ChangeViewmodelState(player, "reload stop", "idle 1")
 					player.kombireloading = 0 -- Stop reloading if full or out of ammo
@@ -854,13 +1333,16 @@ addHook("PlayerThink", function(player)
 					player.hl1doreload = true -- allow reloading to start
 				end
 			else
+				local wasempty = weapon_clips.primary <= 0
 				local to_reload = min(max_reload, available_ammo)
 				player.hl1ammo[ammo_type] = $ - to_reload
 				weapon_clips.primary = $ + to_reload
+				local wepstats = weapon_stats or HL_WpnStats["9mmhandgun"]
 				player.kombireloading = 0
+				player.hl1weapondelay = wasempty and wepstats.globalfiredelay.reloadpost or 0
 			end
 		else
-			print("Weapon \$player.hl1weapon\ missing necessary stats! Check 'clipsize' and 'ammo'.")
+			print("Weapon " .. player.hl1weapon .. " missing necessary stats! Check 'clipsize' and 'ammo'.")
 		end
 	end
 end)

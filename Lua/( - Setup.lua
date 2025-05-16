@@ -5,7 +5,7 @@ local function SafeFreeSlot(...)
 	end
 end
 
-SafeFreeSlot("sfx_hlwpnu")
+SafeFreeSlot("sfx_hlwpnu","sfx_hdryfi")
 
 local function warn(str)
 	print("\130WARNING: \128"..str);
@@ -17,32 +17,126 @@ end
 
 local pickupnotifytime = TICRATE*3 -- how long does each weapon notification last?
 
-rawset(_G, "DMG", { -- TYPEOFDAMAGE
-	GENERIC = 0,
-	CRUSH = 1,
-	BULLET = 2,
-	SLASH = 4,
-	BURN = 8,
-	FREEZE = 16,
-	FALL = 32,
-	BLAST = 64,
-	CLUB = 128,
-	ELEC = 256,
-	SUPERSONIC = 512,
-	ENERGYBEAM = 1024,
-	DIRECT = 2048,
-	DROWN = 4096,
-	PARALYZE = 8192,
-	NERVEGAS = 16384,
-	POISON = 32768,
-	RADIATION = 65536,
-	DROWNRECOVER = 131072,
-	ACID = 262144,
-	SLOWBURN = 524288,
-	REMOVEONDEATH = 1048576,
-	PLASMA = 2097152,
-	BUCKSHOT = 8388608,
-})
+if not HL then
+	rawset(_G, "HL", {})
+end
+
+HL.DMG = {
+	-- Potential types of damage
+	GENERIC       = 0,
+	CRUSH         = 1 << 0,
+	BULLET        = 1 << 1,
+	SLASH         = 1 << 2,
+	BURN          = 1 << 3,
+	FREEZE        = 1 << 4,
+	FALL          = 1 << 5,
+	BLAST         = 1 << 6,
+	CLUB          = 1 << 7,
+	ELEC          = 1 << 8,
+	SUPERSONIC    = 1 << 9,
+	ENERGYBEAM    = 1 << 10,
+	DIRECT        = 1 << 11,
+	DROWN         = 1 << 12,
+	PARALYZE      = 1 << 13,
+	NERVEGAS      = 1 << 14,
+	POISON        = 1 << 15,
+	RADIATION     = 1 << 16,
+	DROWNRECOVER  = 1 << 17,
+	ACID          = 1 << 18,
+	SLOWBURN      = 1 << 19,
+	REMOVEONDEATH = 1 << 20,
+	PLASMA        = 1 << 21,
+	ALWAYSGIB     = 1 << 6, -- same as BLAST (always gib)
+	NEVERGIB	  = 1 << 22	-- never gib, even if damage > critical threshold
+}
+
+HL.GmanSpots = {
+	["gamemap 1 level greenflower zone 1"] = {
+		{
+			x = 6074,
+			y = 7082,
+			z = 1248,
+			angle = {init = 180, leave = 30},
+			leavedelay = TICRATE,
+			leaverange = 256*FRACUNIT,
+			useportal = true,
+		}
+	},
+	["gamemap 2 level greenflower zone 2"] = {
+		{
+			x = 482,
+			y = 2245,
+			z = 2624,
+			angle = {init = 0, leave = 180},
+			leavedelay = TICRATE,
+			leaverange = 256*FRACUNIT
+		}
+	},
+	["gamemap 4 level techno hill zone 1"] = {
+		x = 15964,
+		y = -9244,
+		z = 3392,
+		angle = {init = 55, leave = 270},
+		leavedelay = TICRATE,
+		leaverange = 256*FRACUNIT,
+		activatecondition = {passline = {{x = 0, y = 0}, {x = 0, y = 0}}}
+	},
+	["gamemap 5 level techno hill zone 2"] = {
+		x = -14569,
+		y = 2391,
+		z = 1920,
+		angle = {init = 60, leave = 270},
+	},
+	["gamemap 7 level deep sea zone 1"] = {
+		x = 5810,
+		y = 816,
+		z = 800,
+		angle = {init = 215, leave = 45},
+		leavedelay = TICRATE,
+		leaverange = 1024*FRACUNIT,
+	},
+	["gamemap 8 level deep sea zone 2"] = {
+		x = 21472,
+		y = -5064,
+		z = 296,
+		angle = {init = 270, leave = 90},
+	},
+	["gamemap 10 level castle eggman zone 1"] = {
+		x = 10700,
+		y = 6049,
+		z = 4096,
+		angle = {init = 0, leave = 180},
+		leavedelay = TICRATE*2,
+		leaverange = 16384*FRACUNIT,
+	},
+	["gamemap 11 level castle eggman zone 2"] = {
+		x = 1068,
+		y = -18178,
+		z = 1376,
+		angle = {init = 195, leave = 90},
+		leavedelay = TICRATE,
+		leaverange = 16384*FRACUNIT,
+		dissapearcondition = {passline = {{x = 0, y = 0}, {x = 0, y = 0}}}
+	},
+	["gamemap 13 level arid canyon zone 1"] = {
+		x = -672,
+		y = 138,
+		z = 2736,
+		angle = {init = 10, leave = 200},
+		leavedelay = TICRATE,
+		leaverange = 16384*FRACUNIT,
+		activatecondition = {passline = {{x = 0, y = 0}, {x = 0, y = 0}}}
+	},
+	["gamemap 13 level arid canyon zone 1"] = {
+		x = 2800,
+		y = -2,
+		z = 2736,
+		angle = {init = 10, leave = 200},
+		leavedelay = TICRATE,
+		leaverange = 16384*FRACUNIT,
+		activatecondition = {passline = {{x = 0, y = 0}, {x = 0, y = 0}}}
+	},
+}
 
 if not HL1_DMGStats rawset(_G, "HL1_DMGStats", {}) end
 
@@ -99,13 +193,13 @@ HL_SetMTStats(safeGetMT(MT_HANGSTER), {health = 40}, {dmg = 20})
 HL_SetMTStats(safeGetMT(MT_BUGGLE), {health = 30}, {dmg = 5})
 HL_SetMTStats(safeGetMT(MT_GOOMBA), {health = 40}, {dmg = 15})
 HL_SetMTStats(safeGetMT(MT_BLUEGOOMBA), {health = 40}, {dmg = 15})
-HL_SetMTStats(safeGetMT(MT_FANG), {health = 200}, {dmg = 40})
-HL_SetMTStats(safeGetMT(MT_EGGMOBILE), {health = 360}, {dmg = 1})
-HL_SetMTStats(safeGetMT(MT_EGGMOBILE2), {health = 800}, {dmg = 1})
-HL_SetMTStats(safeGetMT(MT_EGGMOBILE3), {health = 1240}, {dmg = 1})
-HL_SetMTStats(safeGetMT(MT_EGGMOBILE4), {health = 1680}, {dmg = 1})
-HL_SetMTStats(safeGetMT(MT_METALSONIC_BATTLE), {health = 1200}, {dmg = 40})
-HL_SetMTStats(safeGetMT(MT_CYBRAKDEMON), {health = 2240}, {dmg = 25})
+HL_SetMTStats(safeGetMT(MT_FANG),         {health = 180}, {dmg = 40})
+HL_SetMTStats(safeGetMT(MT_EGGMOBILE),      {health = 300}, {dmg = 1})
+HL_SetMTStats(safeGetMT(MT_EGGMOBILE2),     {health = 420}, {dmg = 1})
+HL_SetMTStats(safeGetMT(MT_EGGMOBILE3),     {health = 540}, {dmg = 1})  -- Sea Egg rebalanced
+HL_SetMTStats(safeGetMT(MT_EGGMOBILE4),     {health = 660}, {dmg = 1})
+HL_SetMTStats(safeGetMT(MT_METALSONIC_BATTLE), {health = 780}, {dmg = 40})
+HL_SetMTStats(safeGetMT(MT_CYBRAKDEMON),    {health = 900}, {dmg = 25})
 HL_SetMTStats(safeGetMT(MT_CYBRAKDEMON_ELECTRIC_BARRIER), nil, {dmg = 1000})
 HL_SetMTStats(safeGetMT(MT_ROSY), {health = 30})
 HL_SetMTStats(safeGetMT(MT_PLAYER), {health = 100})
@@ -232,72 +326,137 @@ local function getSentinelNumber(s, player)
 end
 
 local function getFrameData(state, animations)
+    -- Split the incoming state string into keys (numbers stay numbers)
     local keys = {}
     for key in state:gmatch("%S+") do
-        table.insert(keys, tonumber(key) or key) -- Convert numeric keys if possible
+        table.insert(keys, tonumber(key) or key)
     end
 
     local node = animations
-    local lastValidNode = nil
-    local lastValidKey = nil
+    local pathParts = {}   -- keep the actual key path, for debugging
+    local lastValidNode, lastValidKey
 
+    -- Traverse as far as we can
     for _, key in ipairs(keys) do
         if node and node[key] then
             lastValidNode = node
-            lastValidKey = key
+            lastValidKey  = key
             node = node[key]
+            table.insert(pathParts, tostring(key))
         else
-            break  -- Stop at the first missing key and backtrack to the last valid node
+            break
         end
     end
 
-    -- If we failed to reach a valid node, revert to the last known valid node
+    -- If we ended up on nil, back up one step
     if not node and lastValidNode and lastValidKey then
         node = lastValidNode[lastValidKey]
     end
 
-    -- If the node is a list of numbered sub-lists, pick one at random
+    -- Build a dot-style prefix for printTable (e.g. "primaryfire.normal.")
+    local prefix = (#pathParts > 0) and (table.concat(pathParts, ".") .. ".") or ""
+
+    -- If this node has *no* numeric keys but *does* have multiple anim-tables,
+    -- that means the user stopped at an ambiguous branch—dump them out:
+    do
+        local hasNumbered = false
+        local branches = {}
+        for k, v in pairs(node or {}) do
+            if type(k) == "number" then
+                hasNumbered = true
+            elseif type(v) == "table" and v.sentinel and type(v.frameDurations) == "table" then
+                table.insert(branches, k)
+            end
+        end
+        if not hasNumbered and #branches > 0 then
+            warn("HL_ChangeViewmodelState: State '" .. state .. "' is ambiguous, available sub-states:")
+            printTable(node, prefix)
+            return nil, nil
+        end
+    end
+
+    -- If it *is* a list of numbered frames, pick one at random
     if type(node) == "table" then
         local numberedKeys = {}
-        for k, _ in pairs(node) do
+        for k in pairs(node) do
             if type(k) == "number" then
                 table.insert(numberedKeys, k)
             end
         end
-
         if #numberedKeys > 0 then
-            node = node[numberedKeys[P_RandomRange(1, #numberedKeys)]] -- Pick a random numbered sub-list
+            local choice = numberedKeys[P_RandomRange(1, #numberedKeys)]
+            table.insert(pathParts, tostring(choice))
+            node = node[choice]
         end
     end
 
-    -- Ensure the retrieved node follows the new animation format
+    -- Finally check for a valid animation definition
     if type(node) == "table" and node.sentinel and type(node.frameDurations) == "table" then
-        return node
+        return node, table.concat(pathParts, " ")
     else
         warn("HL_ChangeViewmodelState: State '" .. state .. "' is not a valid animation definition!")
-        return nil
+        return nil, nil
     end
 end
 
 rawset(_G, "HL_ChangeViewmodelState", function(player, action, backup)
-    local weapon = player.hl1weapon
+    local weapon    = player.hl1weapon
     local viewmodel = kombihl1viewmodels[HL_WpnStats[weapon].viewmodel or "PISTOL"]
-    
-    local frameData = getFrameData(action, viewmodel.animations) or getFrameData(backup, viewmodel.animations)
+
+    local frameData, realPath = getFrameData(action, viewmodel.animations)
+    if not frameData then
+        frameData, realPath = getFrameData(backup, viewmodel.animations)
+    end
     if not frameData then
         return
     end
 
-    player.hl1viewmdaction = action
-    player.hl1currentAnimation = frameData -- Store animation table
-    player.hl1frame = 0 -- Reset frame index
-    player.hl1frameclock = frameData.frameDurations[1] or 1 -- Start with the first frame's duration
+    player.hl1viewmdaction    = realPath or action
+    player.hl1currentAnimation = frameData
+    player.hl1frame           = 0
+    player.hl1frameclock      = frameData.frameDurations[1] or 1
 end)
 
-rawset(_G, "HL_GetWeapons", function(items, targetSlot, player) -- gets all available weapons.
+local function HL_IsWeaponUsable(player, name)
+	local wpnStats = HL_WpnStats[name]
+	if not wpnStats then return false end
+
+	-- Primary mode check
+	local function isUsable(mode)
+		local stats = wpnStats[mode]
+		if not stats then return false end
+
+		local clipMode = (mode == "secondary" and stats.altusesprimaryclip) and "primary" or mode
+		local curModeStats = wpnStats[clipMode]
+		if not curModeStats then return false end
+
+		local clipSize = curModeStats.clipsize or -1
+		local ammoType = curModeStats.ammo
+		local reserveCount = (ammoType and player.hl1ammo[ammoType]) or 0
+		local clipCount = (player.hl1clips[name] and player.hl1clips[name][clipMode]) or 0
+		local neverDeny = curModeStats.neverdenyuse
+
+		if clipSize > -1 then
+			return clipCount > 0 or reserveCount > 0 or neverDeny
+		elseif ammoType and reserveCount >= 0 then
+			return reserveCount > 0 or neverDeny
+		else
+			return true -- infinite ammo
+		end
+	end
+
+	return isUsable("primary") or isUsable("secondary")
+end
+
+rawset(_G, "HL_GetWeapons", function(items, targetSlot, player)
 	local filtered = {}
-	local filteredweps = {}
-	for i = 0, 9 do filteredweps[i] = 0 end -- initialize all slot counts from 0 to 10
+	local filteredweps = {
+		usable = {} -- usable entries
+	}
+	for i = 0, 9 do
+		filteredweps[i] = 0
+		filteredweps.usable[i] = {}
+	end
 
 	if not player then
 		local errortype = type(player) == "userdata" and userdataType(player) or type(player)
@@ -305,31 +464,62 @@ rawset(_G, "HL_GetWeapons", function(items, targetSlot, player) -- gets all avai
 		return
 	end
 
-	for name, data in pairs(items) do
-		if player.hl1inventory and player.hl1inventory[name] then
-			-- Check if 'weaponslot' or 'priority' is missing
-			if not data.weaponslot or data.priority == nil then
-				if not data.weaponslot then
-					warn('Warning: Weapon "' .. data.realname .. '" missing weapon slot!')
-					data.weaponslot = 1
-				end
-				if data.priority == nil then
-					warn('Warning: Weapon "' .. data.realname .. '" missing slot priority!')
-					data.priority = INT32_MIN
-				end
-			end
+	-- Temporary table for normalization per slot
+	local slotTables = {}
+	for i = 0, 9 do slotTables[i] = {} end
 
-			if data.weaponslot >= 0 and data.weaponslot <= 9 then
-				filteredweps[data.weaponslot] = (filteredweps[data.weaponslot] or 0) + 1
-				if data.weaponslot == targetSlot then
-					table.insert(filtered, {name = name, priority = data.priority, id = #filtered + 1})
-				end
-			else
-				warn('Warning: Weapon "' .. data.realname .. '" has an out-of-bounds weaponslot: ' .. data.weaponslot)
+	for name, data in pairs(items) do
+		if not data.weaponslot or data.priority == nil then
+			if not data.weaponslot then
+				warn('Warning: Weapon "' .. data.realname .. '" missing weapon slot!')
+				data.weaponslot = 1
 			end
+			if data.priority == nil then
+				warn('Warning: Weapon "' .. data.realname .. '" missing slot priority!')
+				data.priority = INT32_MIN
+			end
+		end
+
+		local slot = data.weaponslot
+		if slot >= 0 and slot <= 9 then
+			if player.hl1inventory and player.hl1inventory[name] then
+				local usable = HL_IsWeaponUsable(player, name)
+				filteredweps[slot] = (filteredweps[slot] or 0) + 1
+
+				-- Add to normalization table
+				table.insert(slotTables[slot], {
+					name = name,
+					priority = data.priority,
+					usable = usable
+				})
+
+				-- If in the selected slot, insert into filtered (which is already sorted below)
+				if slot == targetSlot then
+					table.insert(filtered, {
+						name = name,
+						priority = data.priority,
+						id = #filtered + 1,
+						usable = usable
+					})
+				end
+			end
+		else
+			warn('Warning: Weapon "' .. data.realname .. '" has an out-of-bounds weaponslot: ' .. slot)
 		end
 	end
 
+	-- Normalize `usable` entries per slot
+	for slot, weps in pairs(slotTables) do
+		table.sort(weps, function(a, b)
+			return a.priority < b.priority
+		end)
+
+		for i, wep in ipairs(weps) do
+			filteredweps.usable[slot][i] = wep.usable
+		end
+	end
+
+	-- Sort the filtered list for the selected slot
 	table.sort(filtered, function(a, b)
 		return a.priority < b.priority
 	end)
@@ -361,8 +551,8 @@ rawset(_G, "HL_AddAmmo", function(freeman, ammotype, ammo) -- give player some m
 	end
 
 	local doubleammo = freeman.hl1doubleammo
-	local effectiveMaxAmmo = doubleammo 
-		and (HL_AmmoStats[ammotype] and HL_AmmoStats[ammotype].backpackmax or maxammo * 2) 
+	local effectiveMaxAmmo = doubleammo
+		and (HL_AmmoStats[ammotype] and HL_AmmoStats[ammotype].backpackmax or maxammo * 2)
 		or maxammo
 
 	local spaceleft = effectiveMaxAmmo - curammo
@@ -558,6 +748,7 @@ rawset(_G, "HL_TakeClip", function(player, weapon, amount, alt) -- remove some a
 end)
 
 addHook("TouchSpecial", function(item, mobj)
+	if mobj.skin != "kombifreeman" then return end
 	local player = mobj.player
 	local stats = HL_PickupStats[item.type]
 	if not stats return end
@@ -638,11 +829,11 @@ addHook("TouchSpecial", function(item, mobj)
 		player.powers[pw_invulnerability] = stats.invuln.set
 		isAKeeper = false
 	end
-	
+
 	if stats.doubleammo and not player.hl1doubleammo
 		player.hl1doubleammo = true
 	end
-	
+
 	if stats.berserk
 		player.hl1berserk = INT32_MAX
 		isAKeeper = false

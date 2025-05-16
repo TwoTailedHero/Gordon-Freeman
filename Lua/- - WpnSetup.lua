@@ -115,7 +115,7 @@ rawset(_G, "kombiHL1SpecialHandlers", { -- rawset to _G to open up modding envir
 		if not thing.player.wolfenstein return end
 		thing.player.wolfenstein.health = $-tmthing.hl1damage
 		P_DamageMobj(thing, tmthing, tmthing.target, 0, 0) -- THANK YOU, BJ, for not forcing me to find a way to manage your wack-ass damage system!!
-		if thing.player.wolfenstein.health < 0 -- 
+		if thing.player.wolfenstein.health < 0 --
 			P_KillMobj(thing, tmthing, tmthing.target, 0)
 		end
 	end,
@@ -155,7 +155,7 @@ rawset(_G, "HL_DamageGordon", function(thing, tmthing, dmg) -- damage something,
 	if thing.player
 		thing.player.hl1damagetics = 0
 	end
-	
+
 	local hldamage = dmg or (tmthing and tmthing.hl1damage)
 	if not thing.hl1health then
 		HL_InitHealth(thing)
@@ -169,7 +169,7 @@ rawset(_G, "HL_DamageGordon", function(thing, tmthing, dmg) -- damage something,
 		else
 			thing.hl1health = ($ or 0) - hldamage
 		end
-		if thing.hl1health <= 0 then -- get killed idiot
+		if thing.hl1health <= 0 then -- murder
 			P_KillMobj(thing, tmthing, (tmthing and tmthing.target) or tmthing, 0)
 		end
 	end
@@ -222,20 +222,22 @@ function A_HLExplode(actor, range, baseDamage)
 	if not (actor and actor.valid) then return end -- Ensure the actor exists
 
 	local function DamageAndBoostNearby(refmobj, foundmobj)
-		if not foundmobj or foundmobj == refmobj then return end -- Skip if no object or self
-		if not P_CheckSight(refmobj, foundmobj) then return end -- Skip if we don't have a clear view
-		if not (foundmobj.flags & MF_SHOOTABLE) then return end -- Don't attempt to hurt things that shouldn't be hurt in the first place
-
 		local dist = HL_GetDistance(refmobj, foundmobj)
 		if dist > range then return end -- Only affect objects within range
 
+		if not foundmobj or foundmobj == refmobj then return end -- Skip if no object or self
+		if not P_CheckSight(refmobj, foundmobj) then return end -- Skip if we don't have a clear view
+		if foundmobj.type == MT_SPIKE and not (foundmobj.state == S_SPIKED1 or foundmobj.state == S_SPIKED2) then P_KillMobj(foundmobj, refmobj, refmobj) return end -- Kill all spikes no matter what.
+		if not (foundmobj.flags & MF_SHOOTABLE) then return end -- Don't attempt to hurt things that shouldn't be hurt in the first place
+
 		-- Calculate and apply damage
 		local damage = max(1, FixedMul(baseDamage, FixedDiv(range - dist, range)))
-		HL_HurtMobj(refmobj, foundmobj, damage, DMG.BLAST)
+		HL_HurtMobj(refmobj, foundmobj, damage, HL.DMG.BLAST)
 
 		-- Damage Boosting: apply shockwave momentum to boost objects
 		local impulseFactor = FixedDiv(range - dist, range) -- Closer objects get a stronger boost
 		local boostFactor = FRACUNIT * 36 -- Base multiplier for force
+		if not foundmobj then return end -- Early exit if the mobj deleted itself because of our shenanigans
 		if P_IsObjectOnGround(foundmobj) then boostFactor = $/2 end -- Bad rocket jump "multiplier"
 
 		-- Compute horizontal direction and thrust
@@ -878,93 +880,146 @@ rawset(_G, "kombihl1viewmodels", {
 			},
 		}
 	},
-	["DOOMWP2-"] = {
-		idleanims = 1,
-		bobtype = VBOB_DOOM,
-		animations = {
-			ready = {
-				{baseFrameIndex = 1, frameDuration = 3},
-			},
-			fire = {
-				{baseFrameIndex = 4, frameDuration = 6},
-				{baseFrameIndex = 3, frameDuration = 4},
-				{baseFrameIndex = 2, frameDuration = 5},
-			},
-			reload = { -- compatibility layer
-				{baseFrameIndex = 2, frameDuration = 6},
-			},
-			idle = {
-				{baseFrameIndex = 1, frameDuration = INT32_MAX},
-			},
+	["WP2"] = {  -- Pistol
+	  idleanims = 1,
+	  bobtype   = VBOB_DOOM,
+	  animations = {
+		ready = {
+		  sentinel       = "WP2READY1",
+		  frameDurations = {
+			[1] = 3,
+		  },
 		},
+		primaryfire = {
+		  sentinel       = "WP2FIRE1",
+		  frameDurations = {
+			[1] = 3,
+			[2] = 2,
+			[3] = 2,
+		  },
+		},
+		reload = {
+		  sentinel       = "WP2RELOAD1",
+		  frameDurations = {
+			[1] = 6,  -- compatibility-reload (in the event someone fucks up somehow)
+		  },
+		},
+		idle = {
+		  sentinel       = "WP2IDLE1",
+		  frameDurations = {
+			[1] = INT32_MAX,
+		  },
+		},
+	  },
 	},
-	["DOOMWP3-"] = {
-		idleanims = 1,
-		bobtype = VBOB_DOOM,
-			animations = {
-			ready = {
-				{baseFrameIndex = 1, frameDuration = 3},
-			},
-			fire = {
-				{baseFrameIndex = 1, frameDuration = 4, frameOverlayIndex = 5},
-				{baseFrameIndex = 1, frameDuration = 3, frameOverlayIndex = 6},
-				{baseFrameIndex = 2, frameDuration = 5, frameStepCount = 1},
-				{baseFrameIndex = 4, frameDuration = 4},
-				{baseFrameIndex = 3, frameDuration = 5},
-				{baseFrameIndex = 2, frameDuration = 5},
-				{baseFrameIndex = 1, frameDuration = 3},
-				{baseFrameIndex = 1, frameDuration = 7},
-			},
-			reload = {
-				{baseFrameIndex = 2, frameDuration = 6},
-			},
-			idle1 = {
-				{baseFrameIndex = 1, frameDuration = INT32_MAX},
-			},
+
+	["WP3"] = {  -- Shotgun
+	  idleanims = 1,
+	  bobtype   = VBOB_DOOM,
+	  animations = {
+		ready = {
+		  sentinel       = "WP3READY1",
+		  frameDurations = {
+			[1] = 3,
+		  },
 		},
+		primaryfire = {
+		  sentinel       = "WP3FIRE1",
+		  frameDurations = {
+			[1] = 4,
+			[2] = 3,
+			[3] = 5,
+			[4] = 4,
+			[5] = 5,
+			[7] = 3,
+			[8] = 7,
+		  },
+		},
+		reload = {
+		  sentinel       = "WP3RELOAD1",
+		  frameDurations = {
+			[1] = 6,
+		  },
+		},
+		idle = {
+		  sentinel       = "WP3IDLE1",
+		  frameDurations = {
+			[1] = INT32_MAX,
+		  },
+		},
+	  },
 	},
-	["DOOMWP3A-"] = {
-		idleanims = 1,
-		bobtype = VBOB_DOOM,
-		animations = {
-			ready = {
-				{baseFrameIndex = 1,3},
-			},
-			fire = {
-				{baseFrameIndex = 1, frameDuration = 3, frameOverlayIndex = 9},
-				{baseFrameIndex = 1, frameDuration = 4, frameOverlayIndex = 10},
-				{baseFrameIndex = 2, frameDuration = 7, frameStepCount = 1},
-				{baseFrameIndex = 4, frameDuration = 7, frameSound = sfx_dbopn, frameStepCount = 1},
-				{baseFrameIndex = 6, frameDuration = 7, frameSound = sfx_dbload},
-				{baseFrameIndex = 7, frameDuration = 6},
-				{baseFrameIndex = 8, frameDuration = 6, frameSound = sfx_dbcls},
-			},
-			reload = {
-				{baseFrameIndex = 2, frameDuration = 6},
-			},
-			idle1 = {
-				{baseFrameIndex = 1, frameDuration = INT32_MAX},
-			},
+
+	["WP3A"] = {  -- Super-Shotgun
+	  idleanims = 1,
+	  bobtype   = VBOB_DOOM,
+	  animations = {
+		ready = {
+		  sentinel       = "WP3AREADY1",
+		  frameDurations = {
+			[1] = 3,
+		  },
 		},
+		primaryfire = {
+		  sentinel       = "WP3AFIRE1",
+		  frameDurations = {
+			[1] = 6,
+			[3] = 8,
+			[4] = 14,
+			[9] = 10,
+			[10] = 12,
+		  },
+		  frameSounds = {
+			[5] = sfx_ssgo,
+			[7] = sfx_ssgl,
+			[9] = sfx_ssgc,
+		  },
+		},
+		reload = {
+		  sentinel       = "WP3ARELOAD1",
+		  frameDurations = {
+			[1] = 6,
+		  },
+		},
+		idle = {
+		  sentinel       = "WP3AIDLE1",
+		  frameDurations = {
+			[1] = INT32_MAX,
+		  },
+		},
+	  },
 	},
-	["DOOMWP4-"] = {
-		idleanims = 1,
-		bobtype = VBOB_DOOM,
-		animations = {
-			ready = {
-				{baseFrameIndex = 1, frameDuration = 4},
-			},
-			fire = {
-				{baseFrameIndex = 1, frameDuration = 4, frameOverlayIndex = 3},
-				{baseFrameIndex = 2, frameDuration = 4, frameOverlayIndex = 4},
-			},
-			reload = {
-				{baseFrameIndex = 2, frameDuration = 6},
-			},
-			idle1 = {
-				{baseFrameIndex = 1, frameDuration = INT32_MAX},
-			},
+
+	["WP4"] = {  -- Chaingun
+	  idleanims = 1,
+	  bobtype   = VBOB_DOOM,
+	  animations = {
+		ready = {
+		  sentinel       = "WP4READY1",
+		  frameDurations = {
+			[1] = 4,
+		  },
 		},
+		primaryfire = {
+		  sentinel       = "WP4FIRE1",
+		  frameDurations = {
+			[1] = 2,
+			[2] = 2,
+		  },
+		},
+		reload = {
+		  sentinel       = "WP4RELOAD1",
+		  frameDurations = {
+			[1] = 6,
+		  },
+		},
+		idle = {
+		  sentinel       = "WP4IDLE1",
+		  frameDurations = {
+			[1] = INT32_MAX,
+		  },
+		},
+	  },
 	},
 })
 
@@ -982,7 +1037,6 @@ rawset(_G, "HL_WpnStats", {
 			ammo = "melee",
 			ismelee = true, -- Gets affected by DoomGuy's berserk if set to true.
 			clipsize = WEAPON_NONE,
-			neverdenyuse = true,
 			shotcost = 0,
 			damage = 5,
 			firesound = sfx_hlcbar,
@@ -998,17 +1052,17 @@ rawset(_G, "HL_WpnStats", {
 		},
 		realname = "Crowbar",
 	},
-	["9mmhandgun"] = 
+	["9mmhandgun"] =
 		{
 		viewmodel = "PISTOL",
 		crosshair = "XHRPIS",
 		selectgraphic = "HL1HUD9MM",
 		autoswitchweight = 10,
-		pickupgift = 17,
 		weaponslot = 2,
 		priority = 1,
 		primary = {
 			ammo = "9mm",
+			pickupgift = 17,
 			clipsize = 17,
 			shotcost = 1,
 			damage = 8,
@@ -1039,18 +1093,18 @@ rawset(_G, "HL_WpnStats", {
 		},
 		realname = "9mm Handgun",
 	},
-	["357"] = 
+	["357"] =
 		{
 		viewmodel = "357-",
 		crosshair = "XHR357",
 		selectgraphic = "HL1HUD357",
 		autoswitchweight = 15,
-		pickupgift = 6,
 		weaponslot = 2,
 		priority = 2,
 		primary = {
 			ammo = "357",
 			clipsize = 6,
+			pickupgift = 6,
 			shotcost = 1,
 			damage = 50,
 			horizspread = 0,
@@ -1076,7 +1130,7 @@ rawset(_G, "HL_WpnStats", {
 		},
 		realname = ".357",
 	},
-	["mp5"] = 
+	["mp5"] =
 		{
 		viewmodel = "MP5-",
 		crosshair = "XHR9MM",
@@ -1101,6 +1155,7 @@ rawset(_G, "HL_WpnStats", {
 		secondary = {
 			pickupgift = 2,
 			carrymomentum = true,
+			noreserveammo = true,
 			ammo = "argrenade",
 			clipsize = WEAPON_NONE,
 			shotcost = 1,
@@ -1108,7 +1163,6 @@ rawset(_G, "HL_WpnStats", {
 			firesound = sfx_hlarg1,
 			firesounds = 2,
 			firedelay = 20,
-			firedeny = 30,
 		},
 		globalfiredelay = {
 			ready = 12,
@@ -1116,7 +1170,7 @@ rawset(_G, "HL_WpnStats", {
 		},
 		realname = "MP5",
 	},
-	["shotgun"] = 
+	["shotgun"] =
 		{
 		viewmodel = "SHOTGUN",
 		crosshair = "XHRSHOT",
@@ -1136,7 +1190,7 @@ rawset(_G, "HL_WpnStats", {
 			vertspread = 5*FRACUNIT,
 			kickback = 5*FRACUNIT/2,
 			firesound = sfx_hl1sg1,
-			firedelay = 12,
+			firedelay = 36,
 		},
 		autoreload = true,
 		secondary = {
@@ -1144,25 +1198,24 @@ rawset(_G, "HL_WpnStats", {
 			pellets = 12,
 			clipsize = WEAPON_NONE,
 			shotcost = 2,
+			damage = 5,
 			horizspread = 56*FRACUNIT/5,
 			vertspread = 71*FRACUNIT/10,
 			kickback = 5*FRACUNIT/2,
 			firesound = sfx_hldsht,
-			firedelay = 6,
+			firedelay = 59,
 		},
 		altfire = true,
 		altusesprimaryclip = true,
 		globalfiredelay = {
 			ready = 12,
-			["normal"] = 12,
-			["alt"] = 6,
 			["reloadstart"] = 18,
 			["reloadloop"] = 20,
 		},
 		realname = "SPAS-12",
 	},
 	-- everything past this point has unfinished properties!!
-	["crossbow"] = 
+	["crossbow"] =
 		{
 		viewmodel = "PISTOL",
 		crosshair = "XHRXBW",
@@ -1171,23 +1224,34 @@ rawset(_G, "HL_WpnStats", {
 		pickupgift = 5,
 		weaponslot = 3,
 		priority = 3,
-		ammo = "bolt",
-		clipsize = 5,
-		shotcost = 1,
-		damage = 50,
-		kickback = 3*FRACUNIT,
-		firesound = sfx_hl1g17,
+		primary = {
+			ammo = "bolt",
+			clipsize = 5,
+			shotcost = 1,
+			pickupgift = 5,
+			damage = 50,
+			kickback = 3*FRACUNIT,
+			firesound = sfx_hl1g17,
+			firedelay = 24,
+		},
 		autoreload = true,
-		altfire = false,
+		secondary = {
+			firefunc = function(player, mystats)
+				-- TODO: add Deathmatch Zoom-In
+				return true
+			end,
+			firedelay = 18,
+		},
+		altfire = true,
+		altusesprimaryclip = true,
 		globalfiredelay = {
 			ready = 16,
-			["normal"] = 24,
 			reload = 104,
-			["reloadpost"] = 48,
+			reloadpost = 48,
 		},
 		realname = "Crossbow",
 	},
-	["rpg"] = 
+	["rpg"] =
 		{
 		viewmodel = "PISTOL",
 		crosshair = "XHRRPG",
@@ -1214,7 +1278,7 @@ rawset(_G, "HL_WpnStats", {
 		},
 		realname = "Rocket Launcher",
 	},
-	["gauss"] = 
+	["gauss"] =
 		{
 		viewmodel = "PISTOL",
 		crosshair = "XHRGAUS",
@@ -1239,7 +1303,7 @@ rawset(_G, "HL_WpnStats", {
 		},
 		realname = "Tau Cannon",
 	},
-	["egon"] = 
+	["egon"] =
 		{
 		viewmodel = "PISTOL",
 		crosshair = "XHREGON",
@@ -1264,7 +1328,7 @@ rawset(_G, "HL_WpnStats", {
 		},
 		realname = "Gluon Gun",
 	},
-	["hornetgun"] = 
+	["hornetgun"] =
 		{
 		viewmodel = "PISTOL",
 		crosshair = "XHRHNET",
@@ -1288,7 +1352,7 @@ rawset(_G, "HL_WpnStats", {
 		},
 		realname = "Hivehand",
 	},
-	["handgrenade"] = 
+	["handgrenade"] =
 		{
 		viewmodel = "CROWBAR",
 		selectgraphic = "HL1HUDGRENADE",
@@ -1314,7 +1378,7 @@ rawset(_G, "HL_WpnStats", {
 		},
 		realname = "Grenades",
 	},
-	["satchel"] = 
+	["satchel"] =
 		{
 		viewmodel = "PISTOL",
 		selectgraphic = "HL1HUDSATCHEL",
@@ -1339,7 +1403,7 @@ rawset(_G, "HL_WpnStats", {
 		},
 		realname = "Satchels",
 	},
-	["tripmine"] = 
+	["tripmine"] =
 		{
 		viewmodel = "PISTOL",
 		selectgraphic = "HL1HUDTRIPMINE",
@@ -1365,7 +1429,7 @@ rawset(_G, "HL_WpnStats", {
 		},
 		realname = "Tripmines",
 	},
-	["snark"] = 
+	["snark"] =
 		{
 		viewmodel = "PISTOL",
 		selectgraphic = "HL1HUDSNARK",
@@ -1393,66 +1457,67 @@ rawset(_G, "HL_WpnStats", {
 rawset(_G, "HL_AmmoStats", {
 	["9mm"] = {
 		max = 250, -- How much of an ammo type the player can hold.
-		icon = "HUDSELBUCKET1",
+		icon = "AMMOTYPE9MM",
 		-- shootmobj omitted because the MT_* that'd go here is the last resort, anyway.
 	},
 	["357"] = {
 		max = 36,
-		icon = "HUDSELBUCKET1",
+		icon = "AMMOTYPE357",
 	},
 	["buckshot"] = {
 		max = 125,
-		icon = "HUDSELBUCKET1",
+		icon = "AMMOTYPEBUCKSHOT",
 	},
 	["bolt"] = {
 		max = 50,
-		icon = "HUDSELBUCKET1",
+		icon = "AMMOTYPEARROW",
 		shootmobj = MT_HL1_BOLT -- the default mobj to shoot if left unspecified.
 	},
 	["rocket"] = {
 		max = 5,
 		shootmobj = MT_HL1_ROCKET,
-		icon = "HUDSELBUCKET1",
+		icon = "AMMOTYPEROCKET",
 		safetycatch = true, -- disable autofire so we don't suddenly eat rockets if we autoswitch to the RPG.
 		explosionradius = 128
 	},
 	["grenade"] = {
 		max = 10,
 		shootmobj = MT_HL1_HANDGRENADE,
-		icon = "HUDSELBUCKET1",
+		icon = "AMMOTYPEGRENADE",
 		safetycatch = true
 	},
 	["satchel"] = {
 		max = 5,
-		icon = "HUDSELBUCKET1",
+		icon = "AMMOTYPESATCHEL",
 		shootmobj = MT_HL1_SATCHEL,
 		safetycatch = true
 	},
 	["tripmine"] = {
 		max = 5,
-		icon = "HUDSELBUCKET1",
+		icon = "AMMOTYPETRIPMINE",
 		shootmobj = MT_HL1_TRIPMINE,
 		safetycatch = true
 	},
 	["snark"] = {
 		max = 15,
-		icon = "HUDSELBUCKET1",
+		icon = "AMMOTYPESNARK",
 		shootmobj = MT_HL1_SNARK,
 		safetycatch = true
 	},
 	["uranium"] = {
 		max = 100,
-		icon = "HUDSELBUCKET1",
+		icon = "AMMOTYPEURANIUM",
 	},
 	["hornet"] = {
 		max = 8,
 		rechargerate = TICRATE/2, -- how long until we get more of this.
 		rechargeamount = 1, -- how many of this we get.
-		shootmobj = MT_HL1_HORNET
+		shootmobj = MT_HL1_HORNET,
+		icon = "AMMOTYPEHORNET",
 	},
 	["argrenade"] = {
 		max = 10,
-		icon = "HUDSELBUCKET1",
+		icon = "AMMOTYPEARGRENADE",
 		shootmobj = MT_HL1_ARGRENADE,
 		explosionradius = 128
 	},
@@ -1460,21 +1525,21 @@ rawset(_G, "HL_AmmoStats", {
 	-- shootmobj properties are put in here when the DoomGuy addon gets loaded in. Default to nothing extra for errors' sake.
 	["bull"] = {
 		max = 200,
-		icon = "HUDSELBUCKET1",
+		icon = "AMMOTYPE9MM",
 	},
 	["shel"] = {
 		max = 50,
-		icon = "HUDSELBUCKET1",
+		icon = "AMMOTYPEBUCKSHOT",
 	},
 	["rckt"] = {
 		max = 50,
-		icon = "HUDSELBUCKET1",
+		icon = "AMMOTYPEROCKET",
 		safetycatch = true,
 		explosionradius = 128
 	},
 	["cell"] = {
 		max = 300,
-		icon = "HUDSELBUCKET1",
+		icon = "AMMOTYPEURANIUM",
 	},
 })
 

@@ -34,7 +34,7 @@ local kombiHL1LocalWindows = {
 							x = 6,
 							y = 0,
 							label = "Prefer Command-Based Inputs",
-							tooltip = "Toggles if inputs use commands,\nRather than the vanilla buttons.\nRecommended ON if you've played\nHalf-Life before.",
+							tooltip = "Toggles if inputs use commands,\nRather than the vanilla buttons.\nRecommended ON.",
 							placeholder = false
 						},
 						{
@@ -77,7 +77,6 @@ local kombiHL1LocalWindows = {
 							},
 						placeholder = 1 -- both should be valid
 						},
-						/*
 						{
 						type = "checkbox",
 						x = 6,
@@ -93,6 +92,7 @@ local kombiHL1LocalWindows = {
 							},
 						placeholder = {1, 6} -- ...or index via {"Sonic Adventure", "Sonic Advance 3"} like the madman you are
 						},
+						/*
 						{
 						type = "password", -- acts like HTML <input type="password">
 						x = 6,
@@ -209,13 +209,13 @@ local function processWindowExtra(data, level, baseX, baseY)
 			elseif value.type == "input" then
 				-- Process input types (radio, button, dropdown, etc.)
 				for _, option in ipairs(value.args.options or {}) do
-					table.insert(results, { 
-						key = key, 
-						type = "input", 
-						subtype = option.type, 
-						label = option.label or option.type, 
+					table.insert(results, {
+						key = key,
+						type = "input",
+						subtype = option.type,
+						label = option.label or option.type,
 						options = option.options,
-						x = itemX+option.x, y = itemY+option.y, 
+						x = itemX+option.x, y = itemY+option.y,
 						tooltip = option.tooltip,
 						placeholder = option.placeholder,
 						min = option.min,

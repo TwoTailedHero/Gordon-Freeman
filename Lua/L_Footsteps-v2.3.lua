@@ -68,7 +68,7 @@ local soundinfolist = {
 			steps = {sfx_hldi1, sfx_hldi2, sfx_hldi3, sfx_hldi4},
 			jump = {sfx_hldi1, sfx_hldi2, sfx_hldi3, sfx_hldi4},
 			land = {sfx_hldi1, sfx_hldi2, sfx_hldi3, sfx_hldi4}
-		},			
+		},
 		wood_heavy = {
 			steps = {sfx_hlwo1, sfx_hlwo2, sfx_hlwo3, sfx_hlwo4},
 			jump = {sfx_hlwo1, sfx_hlwo2, sfx_hlwo3, sfx_hlwo4},
@@ -98,17 +98,17 @@ local soundinfolist = {
 			steps = {sfx_hlsp1, sfx_hlsp2, sfx_hlsp3, sfx_hlsp4},
 			jump = {sfx_hlsp1, sfx_hlsp2, sfx_hlsp3, sfx_hlsp4},
 			land = {sfx_hlsp1, sfx_hlsp2, sfx_hlsp3, sfx_hlsp4}
-		},		
+		},
 		glass = {
 			steps = {sfx_hlgl1, sfx_hlgl2, sfx_hlgl3, sfx_hlgl4, sfx_hlgl5},
 			jump = {sfx_hlgl1, sfx_hlgl2, sfx_hlgl3, sfx_hlgl4, sfx_hlgl5},
 			land = {sfx_hlgl1, sfx_hlgl2, sfx_hlgl3, sfx_hlgl4, sfx_hlgl5}
-		},		
+		},
 		tile = {
 			steps = {sfx_hlgl1, sfx_hlgl2, sfx_hlgl3, sfx_hlgl4, sfx_hlgl5},
 			jump = {sfx_hlgl1, sfx_hlgl2, sfx_hlgl3, sfx_hlgl4, sfx_hlgl5},
 			land = {sfx_hlgl1, sfx_hlgl2, sfx_hlgl3, sfx_hlgl4, sfx_hlgl5}
-		},		
+		},
 		ice = {
 			steps = {sfx_hlgl1, sfx_hlgl2, sfx_hlgl3, sfx_hlgl4, sfx_hlgl5},
 			jump = {sfx_hlgl1, sfx_hlgl2, sfx_hlgl3, sfx_hlgl4, sfx_hlgl5},
@@ -116,7 +116,7 @@ local soundinfolist = {
 		}
 }
 
-local flatsounds = { 
+local flatsounds = {
 	GFZROCKC = "concrete",
 	OLDGFZF1 = "dirt",
 	OLDGFZF2 = "grass",
@@ -348,18 +348,18 @@ local flatsounds = {
 	DSZRCKF2 = "concrete",
 	DSZRCKF3 = "concrete",
 	DSWHEELF = "concrete",
-	DSBLOCK1 = "concrete", 
+	DSBLOCK1 = "concrete",
 	DSBLOCK2 = "concrete",
-	DSBLOCK3 = "concrete", 
+	DSBLOCK3 = "concrete",
 	DSBLOCK4 = "concrete",
-	DSCYAN1 = "concrete",
+	DSCYAN1 = "tile",
 	DSCYAN3 = "concrete",
-	DSDEBRIS = "concrete", 
-	DSFLOOR1 = "concrete",
+	DSDEBRIS = "concrete",
+	DSFLOOR1 = "tile",
 	DSFLOOR2 = "concrete",
 	DSKNUXB1 = "concrete",
-	DSLTILE1 = "concrete",
-	DSLTILE2 = "concrete",
+	DSLTILE1 = "tile",
+	DSLTILE2 = "tile",
 	DSNOCLM2 = "concrete",
 	DSRFLOR1 = "concrete",
 	DSRFLOR2 = "concrete",
@@ -574,14 +574,14 @@ local flatsounds = {
 	ACZRFL1F = "concrete",
 	ACZRFL1G = "concrete",
 	ACZRFL1H = "concrete",
-	ACZRFL2A = "concrete",	
+	ACZRFL2A = "concrete",
 	ACZRFL2B = "concrete",
 	ACZRFL2C = "concrete",
 	ACZRFL2D = "concrete",
 	ACZRFL2E = "concrete",
 	ACZRFL2F = "concrete",
 	ACZRFL2G = "concrete",
-	ACZRFL2H = "concrete",	
+	ACZRFL2H = "concrete",
 	ACZROKF1 = "concrete",
 	ACZROKF2 = "concrete",
 	ACZROCK3 = "concrete",
@@ -706,7 +706,7 @@ local flatsounds = {
 	ERFANFL1 = "metal_heavy",
 	ERFANFL2 = "metal_heavy",
 	ERFANFL3 = "metal_heavy",
-	ERLAVA1 = "lava", 
+	ERLAVA1 = "lava",
 	ERZFLR13 = "metal_heavy",
 	ERZFLR14 = "metal_heavy",
 	ERZRCKF7 = "dirt",
@@ -831,7 +831,7 @@ local flatsounds = {
 	LFLRC3 = "concrete",
 	LFLRC4 = "concrete",
 	LFLRD1 = "concrete",
-	LFLRD2 = "concrete",	
+	LFLRD2 = "concrete",
 	LFLRE1 = "concrete",
 	LFLRE2 = "concrete",
 	LFLRF1 = "concrete",
@@ -2176,7 +2176,7 @@ local flatsounds = {
 	GRYWALL = "concrete",
 	HOTELWA3 = "concrete",
 	ISSFLR = "concrete",
-	DSDAWAL1 = "concrete",
+	DSDAWAL1 = "tile",
 	ATSLATE = "concrete",
 	DCASPHW = "concrete",
 	DCWHITEW = "concrete",
@@ -2240,10 +2240,10 @@ local flatsounds = {
 	DMGF2 = "grass",
 	DIMFLRA = "glass",
 	ICEFLR9S = "concrete",
-	PRZTIL24 = "concrete",
+	PRZTIL24 = "tile",
 	SNDWALLD = "concrete",
 	DSDAWAL1 = "concrete",
-	PRZTIL22 = "concrete",
+	PRZTIL22 = "tile",
 	PRZTIL26 = "concrete",
 	PRZTIL23 = "concrete",
 	PRZTIL25 = "concrete",
@@ -2254,7 +2254,7 @@ local flatsounds = {
 	ICEWALLA = "glass",
 	ERZPIPEB = "metal_heavy",
 	ARCADE = "cloth",
-	THZPIPE = "metal_light",
+	THZPIPE = "metal_heavy",
 	GFZTIL01 = "concrete",
 	GFZTIL02 = "concrete",
 	["182 chrispy's arcade zone GFZTIL01"] = "glass",
@@ -2265,12 +2265,12 @@ local flatsounds = {
 	DTDMD0 = "concrete",
 	DTDME0 = "glass",
 	DTDMF0 = "glass",
-	DTDMG0 = "wood",
+	DTDMG0 = "wood_light",
 	DTDMH0 = "concrete",
-	DTDMI0 = "wood",
-	DTDMJ0 = "wood",
-	DTDMK0 = "wood",
-	DTDML0 = "wood",
+	DTDMI0 = "wood_light",
+	DTDMJ0 = "wood_light",
+	DTDMK0 = "wood_light",
+	DTDML0 = "wood_light",
 	DTDMM0 = "cloth",
 	DTDMN0 = "tile",
 	DTDMO0 = "tile",
@@ -2285,32 +2285,233 @@ local flatsounds = {
 	DTDMX0 = "sand",
 	DTDMY0 = "tile",
 	DTDMZ0 = "metal_heavy",
+	TRRSA1 = "cloth",
+	TRRSA2 = "cloth",
+	TRRSB0 = "metal_light",
+	TRRSC0 = "metal_heavy",
+	TRRSD0 = "wood_light",
+	TRRSE0 = "wood_light",
+	FTDMA0 = "sand",
+	FTDMB0 = "dirt",
+	FTDMC0 = "wood_light",
+	FTDMD0 = "wood_light",
+	FTDME0 = "wood_light",
+	FTDMF0 = "wood_light",
+	FTDMG0 = "wood_light",
+	FTDMH0 = "wood_light",
+	FTDMI0 = "cloth",
+	FTDMJ0 = "cloth",
+	FTDMK0 = "cloth",
+	FTDML0 = "cloth",
+	FTDMM0 = "cloth",
+	FTDMN0 = "wood",
+	FTDMO0 = "wood",
+	FTDMP0 = "concrete",
+	FTDMQ0 = "concrete",
+	FTDMR0 = "concrete",
+	FTDMS0 = "wood_light",
+	FTDMT0 = "wood_heavy",
+	TRRSG0 = "concrete",
+	GRIMA0 = "concrete",
+	GRIMB0 = "wood_light",
+	GRIMC0 = "concrete",
+	GRIMD0 = "concrete",
+	GRIML0 = "concrete",
+	GRIMM0 = "concrete",
+	GRIMN0 = "glass",
+	GRIMO0 = "wood_light",
+	GRIMP0 = "concrete",
+	GRIMQ0 = "cloth",
+	GRIMR0 = "concrete",
+	GRIMS0 = "concrete",
+	GRIMT0 = "concrete",
+	GRIMU0 = "concrete",
+	GRIMV0 = "wood_light",
+	GRIMW0 = "wood_light",
+	GRIMX0 = "concrete",
+	GRIM00 = "cloth",
+	PTNX = "wood_light",
+	LFZWALL1 = "dirt",
+	LFZWALL2 = "dirt",
+	LFZWALL3 = "dirt",
+	WODBLU = "wood_light",
+	WODRED = "wood_light",
+	ERZGREY5 = "metal_heavy",
+	ERZGREY4 = "metal_heavy",
+	MEKPIPE5 = "metal_heavy",
+	THZMETL2 = "metal_light",
+	ERZBG3 = "metal_heavy",
+	ICEWALLR = "ice",
+	ICEWALLP = "concrete",
+	ICEWALL3 = "concrete",
+	ICEWALL1 = "concrete",
+	ICEWABT = "concrete",
+	ICEWALLV = "concrete",
+	ICEWALBU = "ice",
+	RVZGRSW1 = "grass",
+	RVZGRSW2 = "grass",
+	REVWALL3 = "concrete",
+	REVWALL4 = "concrete",
+	MMB6 = "concrete",
+	OLDCEZF2 = "grass",
+	OLDCEZW = "concrete",
+	OLDGFZW1 = "concrete",
+	GHZWALL7 = "concrete",
+	BSZRPLAN = "grass",
+	GHZWALLC = "concrete",
+	JVZFW01 = "grass",
+	JVZFW02 = "grass",
+	JVZFW03 = "grass",
+	JVZFW04 = "grass",
+	JVZFW05 = "grass",
+	GFZVINE2 = "concrete",
+	GFZBLOCK = "concrete",
+	CEBRICKC = "concrete",
+	CASTLEA = "concrete",
+	CEBRICKS = "concrete",
+	DMAWALL3 = "concrete",
+	CEZRCK0 = "concrete",
+	CEZDRT0 = "dirt",
+	ACZWALN = "concrete",
+	ROCK2 = "concrete",
+	DEM1W5 = "sand",
+	SHALE1 = "concrete",
+	SHALE2 = "concrete",
+	ACZWALI = "metal_heavy",
+	RCZWLL2 = "concrete",
+	GRASS2W = "grass",
+	GHTILE3 = "concrete",
+	GHZWALLA = "concrete",
+	SFXWALL2 = "wood_light",
+	GHTILE2 = "concrete",
+	DBTILL1 = "tile",
+	LAKEPIP2 = "metal_heavy",
+	SRB1WIP1 = "tile",
+	DBTILS1 = "tile",
+	ICEWALL9 = "ice",
+	LAKEWALB = "concrete",
+	LAKEWALD = "tile",
+	ICEWALL9 = "ice",
+	DBTILL2 = "tile",
+	ICEWAL9S = "ice",
+	NNB3 = "concrete",
+	MM8 = "concrete",
+	MMB8 = "concrete",
+	RVZGRSW6 = "dirt",
+	RVZGRSW3 = "grass",
+	MMB2 = "concrete",
+	FRSTRCK1 = "concrete",
+	LAKEWAL7 = "dirt",
+	CEZBIG5 = "concrete",
+	RCZWLL1 = "concrete",
+	ICEWALL4 = "concrete",
+	FHZICEWL = "concrete",
+	CESTONB1 = "concrete",
+	CESTONB5 = "concrete",
+	SSNOW2 = "snow",
+	["546 silver shiver zone XMSFLR03"] = "ice",
+	MMFLRB2 = "concrete",
+	ACMINE6 = "wood",
+	PLHD2F = "grass",
+	PLHD2 = "concrete",
+	PLHD3 = "concrete",
+	PLHD4 = "concrete",
+	PLHD30 = "concrete",
+	PLHD26 = "concrete",
+	PLACEH12 = "concrete",
+	PLACEH13 = "concrete",
+	SAINYF1 = "concrete",
+	TERROCKS = "concrete",
+	TERFLOOR = "sand",
+	SEGAGRAY = "metal_light",
+	SMFLOOR = "tile",
+	OFTABLE = "cloth",
+	MIKUBACK = "cloth",
+	SEGAGRAS = "grass",
+	FDROOF = "tile",
+	TARMAC = "concrete",
+	EFLR1 = "metal_heavy",
+	TEKGRATE = "metal_light",
+	TECGRATE = "metal_light",
+	FI_WA2 = "metal_light",
+	KITTOP = "tile",
+	EFLR1 = "metal_heavy",
+	VIDO1 = "metal_light",
+	SEGOUTSI = "concrete",
+	SEGAWHIT = "concrete",
+	J_HOGHED = "grass",
+	SACER = "metal_light",
+	SQFLOOR = "tile",
+	MEGADRIV = "tile",
+	CHACARPE = "cloth",
+	TOMKTOP = "wood_light",
+	["2 sega 1998 SATURN"] = "tile",
+	["2 sega 1998 SMSYSTEM"] = "tile",
+	["2 sega 1998 SMGREYST"] = "tile",
+	GRAVEL = "dirt",
+	EGGCARPE = "cloth",
+	SMMARBLE = "tile",
+	FI_WA3 = "metal_light",
+	SSIDEWAL = "concrete",
+	SASPHALT = "concrete",
+	SSBUSHES = "grass",
+	SBWAFLOO = "wood",
+	HOTINC = "tile",
+	SSCHJ = "concrete",
+	SSCROSSW = "concrete",
+	SSTRAIH = "concrete",
+	SSTATINB = "tile",
+	SSTATIND = "tile",
+	HOTIND = "cloth",
+	SSNEWE = "cloth",
+	SSWIMTIL = "tile",
+	SBBEACH = "sand",
+	["3 station square SATUSIDE"] = "metal_light",
+	SBMFLOOR = "tile",
+	["3 station square KITTOP"] = "metal_heavy",
+	SSTRAIA = "metal_light",
+	SBTBARK = "wood_heavy",
+	MRSAND = "sand",
+	MRSBND = "sand",
+	MRGRAASS = "grass",
+	MRGRASSS = "grass",
+	SBSHRUBS = "grass",
+	MRMUD = "dirt",
+	WFA1 = "water",
+	MRPLANKS = "wood_light",
+	["3 station square SCAREWAR"] = "metal_heavy",
+	["3 station square SBTVPANE"] = "metal_heavy",
+	["3 station square TOMKTOP"] = "metal_heavy",
+	FI_WIRE = "cloth",
+	MRMETAL = "metal_light",
+	SBWOODPA = "wood_light",
+	IMPCOVER = "cloth",
+	SBSTORE = "wood_light",
+	CUT1 = "concrete",
+	KHBRIDA = "wood_light",
+	CONI = "metal_heavy"
 }
-/*
-ERZPIPEB = METAL
-ARCADE = CLOTH
-THZPIPE = METAL
-GFZTIL01 = CONCRETE
-GFZTIL02 = CONCRETE
-*/
 
 local playeraniminfo = {
 	kombifreeman = {
-		runFrames			= { 0, 2 },
+		runFrames		 = { 0, 2 },
 		dashFrames		 = { -1 },
 		walkFrames		 = { 3, 7 },
-		milnekickFrames = { 0, 4 },
+		crouchFrames	 = { 3, 7 },
+		milnekickFrames  = { 0, 4 },
 		run						= true,
 		dash					 = false,
 		walk					 = true,
 		idle					 = false,
 		wait					 = false,
+		crouch					 = true,
 		milnekick			= true,
 		superRun			 = false,
 		superDash			= false,
 		superWalk			= true,
 		superIdle			= true,
 		superWait			= false,
+		superCrouch			= true,
 	},
 }
 
@@ -2350,7 +2551,7 @@ end
 -- Returns the ground texture based on the map object's state.
 local function getGroundTexture(mo)
 	local result = nil
-	
+
 	if mo.eflags & MFE_VERTICALFLIP then
 		if mo.ceilingrover then
 			result = mo.ceilingrover.bottompic
@@ -2368,12 +2569,17 @@ local function getGroundTexture(mo)
 			result = mo.subsector.sector.floorpic
 		end
 	end
-	
+
 	return result
 end
 
 -- Register the footstep function in the global environment.
 rawset(_G, "L_MakeFootstep", function(player, steptype)
+	player.groundtexture = getGroundTexture(player.mo)
+	if not player.groundtexture and player.lastgroundtexture then
+		player.groundtexture = player.lastgroundtexture
+	end
+
 	local backupmap = "A"
 	local mapTitle = G_BuildMapTitle(gamemap) or backupmap
 	local lowerMapTitle = string.lower(mapTitle)
@@ -2423,6 +2629,9 @@ addHook("PlayerThink", function(player)
 							elseif player.mo.state == S_PLAY_GLIDE_LANDING then
 								player.playsound = panimInfo.idle and (player.powers[pw_super] == 0 or panimInfo.superIdle) and
 									(player.lastanim ~= player.panim)
+							elseif player.mo.state == S_PLAY_FREEMCROUCH then
+								player.playsound = panimInfo.crouch and (player.powers[pw_super] == 0 or panimInfo.superCrouch) and
+									(has_value(panimInfo.crouchFrames, player.mo.frame & FF_FRAMEMASK) or has_value(panimInfo.crouchFrames, player.mo.frame))
 							end
 						else
 							if player.mo.state == S_PLAY_RUN then
@@ -2440,6 +2649,9 @@ addHook("PlayerThink", function(player)
 							elseif player.milnekick and player.mo.state == S_MILNE_KICK then
 								player.playsound = panimInfo.milnekick and
 									(has_value(panimInfo.milnekickFrames, player.mo.frame & FF_FRAMEMASK) or has_value(panimInfo.milnekickFrames, player.mo.frame))
+							elseif player.mo.state == S_PLAY_FREEMCROUCH then
+								player.playsound = panimInfo.crouch and (player.powers[pw_super] == 0 or panimInfo.superCrouch) and
+									(has_value(panimInfo.crouchFrames, player.mo.frame & FF_FRAMEMASK) or has_value(panimInfo.crouchFrames, player.mo.frame))
 							end
 						end
 
@@ -2479,7 +2691,7 @@ addHook("PlayerThink", function(player)
 				local backupmap = "A"
 				local mapTitle = G_BuildMapTitle(gamemap) or backupmap
 				local lowerMapTitle = string.lower(mapTitle)
-				local textureKey = gamemap .. " " .. lowerMapTitle .. " " .. player.groundtexture
+				local textureKey = gamemap .. " " .. lowerMapTitle .. " " .. tostring(player.groundtexture)
 				local mat = flatsounds[textureKey] or flatsounds[player.groundtexture]
 
 				if not (player.mo.eflags & MFE_GOOWATER) then
@@ -2488,8 +2700,8 @@ addHook("PlayerThink", function(player)
 					else
 						if not mat then
 							CONS_Printf(player,
-								"Attempt to index texture " .. player.groundtexture .. " in level " ..
-								gamemap .. " " .. string.lower(G_BuildMapTitle(gamemap)) ..
+								"Attempt to index texture " .. tostring(player.groundtexture) .. " in level " ..
+								tostring(gamemap) .. " " .. string.lower(tostring(G_BuildMapTitle(gamemap))) ..
 								" returned nil! Lmfaooo imagine",
 								"...But still. Please report it I need to know"
 							)
