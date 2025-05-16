@@ -64,8 +64,8 @@ local function shouldDraw(mode, player)
 	-- clip-based weapons
 	if clipSize > -1 then
 		return {
-			drawReserve = (reserveCnt > 0 or neverDeny),
-			drawClip	= (clipCnt > 0 or neverDeny),
+			drawReserve = (reserveCnt >= 0 or neverDeny),
+			drawClip	= (clipCnt >= 0 or neverDeny),
 			reserveCnt  = reserveCnt,
 			clipCnt	 = clipCnt,
 			ammostats   = HL_AmmoStats[ammoType] or {}
@@ -75,7 +75,7 @@ local function shouldDraw(mode, player)
 	-- pure reserve only (no clip)
 	if ammoType then
 		return {
-			drawReserve = (reserveCnt > 0 or neverDeny),
+			drawReserve = (reserveCnt >= 0 or neverDeny),
 			drawClip	= false,
 			reserveCnt  = reserveCnt,
 			ammostats   = HL_AmmoStats[ammoType] or {}
