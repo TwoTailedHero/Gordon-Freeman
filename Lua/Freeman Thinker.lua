@@ -826,6 +826,7 @@ addHook("PlayerSpawn",function(player)
 	HL.valuemodes["HLInitInventory"] = HL_LASTFUNC
 	local startammo, startclips, startinv, startweapon = HL.RunHook("HLInitInventory", player)
 	player.keyBinds = loadTableFromFile(HL_KEYBINDS_PATH, defaultKeyBinds)
+	player.hlinv = $ or {}
 	player.hl1ammo = startammo or $ or {
 		buckshot = 125,
 		["9mm"] = 68, -- the only value we have set in stone... (def 68)
@@ -835,7 +836,7 @@ addHook("PlayerSpawn",function(player)
 		melee = -1, -- these two require values so that any user error with default ammo types won't be pinned on me
 		none = -1, -- ^ because yeah of COURSE it'd throw an error at you if you tried to decrement it IT WASN'T EVEN SUPPOSED TO BE DECREMENTED
 	}
-	player.hl1clips = startclips or $ or {
+	player.hlinv.wepclips = startclips or $ or {
 		melee = -1
 	}
 	player.hl1inventory = startinv or $ or {
@@ -852,10 +853,10 @@ addHook("PlayerSpawn",function(player)
 	player.hl1weapon = startweapon or "crowbar"
 	player.hl = $ or {}
 	player.hl.flashlightbattery = MAX_BATTERY
-	if not player.hl1clips[player.hl1weapon] then
+	if not player.hlinv.wepclips[player.hl1weapon] then
 		local clipsize = HL_WpnStats[player.hl1weapon].primary and HL_WpnStats[player.hl1weapon].primary.clipsize or -1
 		local clipsize2 = HL_WpnStats[player.hl1weapon].secondary and HL_WpnStats[player.hl1weapon].secondary.clipsize or -1
-		player.hl1clips[player.hl1weapon] = {primary = clipsize, secondary = clipsize2}
+		player.hlinv.wepclips[player.hl1weapon] = {primary = clipsize, secondary = clipsize2}
 	end
 	HL_ChangeViewmodelState(player, "ready", "idle")
 end)
@@ -959,11 +960,18 @@ addHook("PlayerThink", function(player)
 	end
 
 	if player.hl.flashlight then
+		if player.hl.flashlightbeam and player.hl.flashlightbeam.valid then
+			player.hl.flashlightbeam.flags2 = $&~MF2_DONTDRAW
+		end
 		player.hl.flashlightbattery = player.hl.flashlightbattery - DRAIN_RATE
+		P_SpawnPlayerMissile(player.mo, MT_HLFLASHLIGHTBEAM)
 		if player.hl.flashlightbattery < 0 then
 			player.hl.flashlightbattery = 0
 		end
 	else
+		if player.hl.flashlightbeam and player.hl.flashlightbeam.valid then
+			player.hl.flashlightbeam.flags2 = $|MF2_DONTDRAW
+		end
 		if player.hl.flashlightbattery < MAX_BATTERY then
 			player.hl.flashlightbattery = player.hl.flashlightbattery + RECHARGE_RATE
 			if player.hl.flashlightbattery > MAX_BATTERY then
@@ -1284,8 +1292,8 @@ addHook("PlayerThink", function(player)
 	if not player.mo return end
 	if player.mo.skin != skin return end
 	local viewmodel = kombihl1viewmodels[HL_WpnStats[player.hl1weapon].viewmodel or "PISTOL"]
-	if not player.hl1clips[player.hl1weapon]
-		player.hl1clips[player.hl1weapon] = {
+	if not player.hlinv.wepclips[player.hl1weapon]
+		player.hlinv.wepclips[player.hl1weapon] = {
 			HL_WpnStats[player.hl1weapon].primary and HL_WpnStats[player.hl1weapon].primary.clipsize or -1,
 			HL_WpnStats[player.hl1weapon].secondary and HL_WpnStats[player.hl1weapon].secondary.clipsize or -1
 		}
@@ -1293,7 +1301,7 @@ addHook("PlayerThink", function(player)
 
 	-- Set-up reloading
 	local weapon_stats = HL_WpnStats[player.hl1weapon]
-	local weapon_clips = player.hl1clips[player.hl1weapon]
+	local weapon_clips = player.hlinv.wepclips[player.hl1weapon]
 	local primary = weapon_stats.primary or HL_WpnStats["9mmhandgun"].primary
 	local ammo_type = primary.ammo
 	local reload_increment = primary.reloadincrement

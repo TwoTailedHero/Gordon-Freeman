@@ -222,7 +222,7 @@ HL_SetMTStats(safeGetMT(MT_TURRETLASER), nil, {dmg = 3})
 HL_SetMTStats(safeGetMT(MT_ARROW), nil, {dmg = 15})
 HL_SetMTStats(safeGetMT(MT_DEMONFIRE), nil, {dmg = 25})
 HL_SetMTStats(safeGetMT(MT_CANNONBALL), nil, {dmg = 40})
-HL_SetMTStats(safeGetMT(MT_RING), {healh = INT32_MAX}, {dmg = 40})
+HL_SetMTStats(safeGetMT(MT_RING), {health = INT32_MAX}, {dmg = 40})
 
 local function weightedRandom(chances) -- returns one random entry based on the weighted chances
 	local total = 0
@@ -268,6 +268,19 @@ local function removeFromChanceList(chances, toremove) -- get a new weighted cha
 	return newList
 end
 
+rawset(_G, "HL_GetMonitorPickUps", function(chanceList, amount) -- get an amount-length list of weapons, chances determined by chanceList. Main purpose is to get pick-ups dropped by Monitors.
+	local results = {}
+	for i = 1, amount do
+		local selected = weightedRandom(chanceList)
+		if selected.name == "crowbar" then -- we got a dud!! make sure we don't rip people off by getting another weapon
+			local reweightedList = removeFromChanceList(chanceList, "crowbar")
+			selected = weightedRandom(reweightedList)
+		end
+		table.insert(results, selected)
+	end
+	return results
+end)
+
 rawset(_G, "HL_InitHealth", function(mobj) -- Sets up mobjs.
 	HL.valuemodes["HLGetObjectHealth"] = HL_LASTFUNC
 	local health = HL.RunHook("HLGetObjectHealth", mobj)
@@ -286,19 +299,6 @@ rawset(_G, "HL_InitHealth", function(mobj) -- Sets up mobjs.
 	local maxhealth, maxarmor = HL.RunHook("HLGetObjectMaxStats", mobj)
 	mobj.hl1maxhealth = maxhealth or 100
 	mobj.hl1maxarmor = (maxarmor or 100)*FRACUNIT
-end)
-
-rawset(_G, "HL_GetMonitorPickUps", function(chanceList, amount) -- get an amount-length list of weapons, chances determined by chanceList. Main purpose is to get pick-ups dropped by Monitors.
-	local results = {}
-	for i = 1, amount do
-		local selected = weightedRandom(chanceList)
-		if selected.name == "crowbar" then -- we got a dud!! make sure we don't rip people off by getting another weapon
-			local reweightedList = removeFromChanceList(chanceList, "crowbar")
-			selected = weightedRandom(reweightedList)
-		end
-		table.insert(results, selected)
-	end
-	return results
 end)
 
 local function printTable(data, prefix)
@@ -433,7 +433,7 @@ local function HL_IsWeaponUsable(player, name)
 		local clipSize = curModeStats.clipsize or -1
 		local ammoType = curModeStats.ammo
 		local reserveCount = (ammoType and player.hl1ammo[ammoType]) or 0
-		local clipCount = (player.hl1clips[name] and player.hl1clips[name][clipMode]) or 0
+		local clipCount = (player.hlinv.wepclips[name] and player.hlinv.wepclips[name][clipMode]) or 0
 		local neverDeny = curModeStats.neverdenyuse
 
 		if clipSize > -1 then
@@ -603,8 +603,8 @@ rawset(_G, "HL_AddWeapon", function(freeman, weapon, silent, autoswitch) -- give
 		end
 
 		-- Handle initial clip fill from pickup gift
-		freeman.hl1clips = freeman.hl1clips or {}
-		freeman.hl1clips[weapon] = freeman.hl1clips[weapon] or {min(HL_WpnStats[weapon].clipsize or 0, 0), min(HL_WpnStats[weapon].clipsizealt or 0, 0)}
+		freeman.hlinv.wepclips = freeman.hlinv.wepclips or {}
+		freeman.hlinv.wepclips[weapon] = freeman.hlinv.wepclips[weapon] or {min(HL_WpnStats[weapon].clipsize or 0, 0), min(HL_WpnStats[weapon].clipsizealt or 0, 0)}
 
 		local function handleClipGift(clipIndex, gift, clipsize, ammotype)
 			if gift
@@ -612,10 +612,10 @@ rawset(_G, "HL_AddWeapon", function(freeman, weapon, silent, autoswitch) -- give
 					HL_AddAmmo(freeman, ammotype, gift)
 				else
 					local remaining_gift = gift
-					local clip = max(freeman.hl1clips[weapon][clipIndex], 0)
+					local clip = max(freeman.hlinv.wepclips[weapon][clipIndex], 0)
 					local space_in_clip = clipsize - clip
 					local clip_to_add = min(remaining_gift, space_in_clip)
-					freeman.hl1clips[weapon][clipIndex] = clip + clip_to_add
+					freeman.hlinv.wepclips[weapon][clipIndex] = clip + clip_to_add
 					remaining_gift = remaining_gift - clip_to_add
 					-- Defer any excess to HL_AddAmmo
 					if remaining_gift > 0 and ammotype
@@ -695,50 +695,50 @@ end)
 
 rawset(_G, "HL_TakeClip", function(player, weapon, amount, alt) -- remove some amount of clip from freeman
 	if weapon == nil
-		for weapName, clips in pairs(player.hl1clips) do
+		for weapName, clips in pairs(player.hlinv.wepclips) do
 			if alt == nil -- search for SPECIFICALLY nil.
 				if amount
-					player.hl1clips[weapName].primary = max(player.hl1clips[weapName].primary - amount, 0)
-					player.hl1clips[weapName].secondary = max(player.hl1clips[weapName].secondary - amount, 0)
+					player.hlinv.wepclips[weapName].primary = max(player.hlinv.wepclips[weapName].primary - amount, 0)
+					player.hlinv.wepclips[weapName].secondary = max(player.hlinv.wepclips[weapName].secondary - amount, 0)
 				else
-					player.hl1clips[weapName].primary = 0
-					player.hl1clips[weapName].secondary = 0
+					player.hlinv.wepclips[weapName].primary = 0
+					player.hlinv.wepclips[weapName].secondary = 0
 				end
 			elseif alt
 				if amount
-					player.hl1clips[weapName].secondary = max(player.hl1clips[weapName].secondary - amount, 0)
+					player.hlinv.wepclips[weapName].secondary = max(player.hlinv.wepclips[weapName].secondary - amount, 0)
 				else
-					player.hl1clips[weapName].secondary = 0
+					player.hlinv.wepclips[weapName].secondary = 0
 				end
 			else
 				if amount
-					player.hl1clips[weapName].primary = max(player.hl1clips[weapName].primary - amount, 0)
+					player.hlinv.wepclips[weapName].primary = max(player.hlinv.wepclips[weapName].primary - amount, 0)
 				else
-					player.hl1clips[weapName].primary = 0
+					player.hlinv.wepclips[weapName].primary = 0
 				end
 			end
 		end
 	else
-		if player.hl1clips[weapon]
+		if player.hlinv.wepclips[weapon]
 			if alt == nil
 				if amount
-					player.hl1clips[weapon].primary = max(player.hl1clips[weapon].primary - amount, 0)
-					player.hl1clips[weapon].secondary = max(player.hl1clips[weapon].secondary - amount, 0)
+					player.hlinv.wepclips[weapon].primary = max(player.hlinv.wepclips[weapon].primary - amount, 0)
+					player.hlinv.wepclips[weapon].secondary = max(player.hlinv.wepclips[weapon].secondary - amount, 0)
 				else
-					player.hl1clips[weapon].primary = 0
-					player.hl1clips[weapon].secondary = 0
+					player.hlinv.wepclips[weapon].primary = 0
+					player.hlinv.wepclips[weapon].secondary = 0
 				end
 			elseif alt
 				if amount
-					player.hl1clips[weapon].secondary = max(player.hl1clips[weapon].secondary - amount, 0)
+					player.hlinv.wepclips[weapon].secondary = max(player.hlinv.wepclips[weapon].secondary - amount, 0)
 				else
-					player.hl1clips[weapon].secondary = 0
+					player.hlinv.wepclips[weapon].secondary = 0
 				end
 			else
 				if amount
-					player.hl1clips[weapon].primary = max(player.hl1clips[weapon].primary - amount, 0)
+					player.hlinv.wepclips[weapon].primary = max(player.hlinv.wepclips[weapon].primary - amount, 0)
 				else
-					player.hl1clips[weapon].primary = 0
+					player.hlinv.wepclips[weapon].primary = 0
 				end
 			end
 		else

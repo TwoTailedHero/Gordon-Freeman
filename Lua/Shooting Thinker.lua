@@ -17,7 +17,7 @@ local function HL1DecrementAmmo(player,secondary)
 		if HL_WpnStats[player.hl1weapon].altusesprimaryclip
 			if HL_WpnStats[player.hl1weapon].secondary.shotcost
 				if HL_WpnStats[player.hl1weapon].primary.clipsize > 0
-					player.hl1clips[player.hl1weapon].primary = $-HL_WpnStats[player.hl1weapon].secondary.shotcost
+					player.hlinv.wepclips[player.hl1weapon].primary = $-HL_WpnStats[player.hl1weapon].secondary.shotcost
 				else
 					player.hl1ammo[HL_WpnStats[player.hl1weapon].primary.ammo] = $-HL_WpnStats[player.hl1weapon].secondary.shotcost
 				end
@@ -25,7 +25,7 @@ local function HL1DecrementAmmo(player,secondary)
 		else
 			if HL_WpnStats[player.hl1weapon].secondary.shotcost
 				if HL_WpnStats[player.hl1weapon].secondary.clipsize > 0
-					player.hl1clips[player.hl1weapon].secondary = $-HL_WpnStats[player.hl1weapon].secondary.shotcost
+					player.hlinv.wepclips[player.hl1weapon].secondary = $-HL_WpnStats[player.hl1weapon].secondary.shotcost
 				else
 					player.hl1ammo[HL_WpnStats[player.hl1weapon].secondary.ammo] = ($ or 0)-HL_WpnStats[player.hl1weapon].secondary.shotcost
 				end
@@ -34,7 +34,7 @@ local function HL1DecrementAmmo(player,secondary)
 	else
 		if HL_WpnStats[player.hl1weapon].primary and HL_WpnStats[player.hl1weapon].primary.shotcost
 			if HL_WpnStats[player.hl1weapon].primary.clipsize > 0
-				player.hl1clips[player.hl1weapon].primary = $-HL_WpnStats[player.hl1weapon].primary.shotcost
+				player.hlinv.wepclips[player.hl1weapon].primary = $-HL_WpnStats[player.hl1weapon].primary.shotcost
 			else
 				player.hl1ammo[HL_WpnStats[player.hl1weapon].primary.ammo] = $-HL_WpnStats[player.hl1weapon].primary.shotcost
 			end
@@ -77,10 +77,11 @@ local function FireWeapon(player, mode)
 			player.kombireloading = 0
 
 			-- Set clips if necessary
-			if not player.hl1clips[player.hl1weapon] then
+			if not player.hlinv.wepclips[player.hl1weapon] then
+				print("No clips for weapon! Building...")
 				local clipsize = HL_WpnStats[player.hl1weapon].primary and HL_WpnStats[player.hl1weapon].primary.clipsize or -1
 				local clipsize2 = HL_WpnStats[player.hl1weapon].secondary and HL_WpnStats[player.hl1weapon].secondary.clipsize or -1
-				player.hl1clips[player.hl1weapon] = {primary = clipsize, secondary = clipsize2}
+				player.hlinv.wepclips[player.hl1weapon] = {primary = clipsize, secondary = clipsize2}
 			end
 		end
 
@@ -104,7 +105,7 @@ local function FireWeapon(player, mode)
 	if not mystats then return end
 
 	-- Check if the weapon is available in inventory and has clips
-    if not player.hl1clips[weaponID] then return end
+    if not player.hlinv.wepclips[weaponID] then return end
 
 	-- Either use clip or reserve depending on if clipsize is nil or -1
     local useClip
@@ -126,7 +127,7 @@ local function FireWeapon(player, mode)
 
 	local clip
 	if useClip then
-		clip = player.hl1clips[weaponID][clipMode]
+		clip = player.hlinv.wepclips[weaponID][clipMode]
 	elseif useClip == false then
 		clip = player.hl1ammo[curModeStats.ammo]
 	else

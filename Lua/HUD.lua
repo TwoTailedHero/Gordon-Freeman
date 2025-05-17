@@ -30,7 +30,7 @@ local function drawCount(v, x, y, count, ammostats, flags, colormap)
 	K_DrawHL1Number(v, count, x, y, flags, colormap)
 	if ammostats and ammostats.icon then
 		v.drawScaled(
-			x, y - 12 * FRACUNIT,
+			x, y - 13 * FRACUNIT,
 			FRACUNIT / 2,
 			v.cachePatch(ammostats.icon),
 			flags,
@@ -51,9 +51,9 @@ local function shouldDraw(mode, player)
 	if not curStats then return false end
 
 	local clipSize	= curStats.clipsize or -1
-	local ammoType	= curStats.ammo
-	local reserveCnt  = (ammoType and player.hl1ammo[ammoType]) or 0
-	local clipCnt	 = (player.hl1clips[weapon] and player.hl1clips[weapon][clipMode]) or 0
+	local ammoType	= curStats.ammo or "none"
+	local reserveCnt  = player.hl1ammo[ammoType] or 0
+	local clipCnt	 = (player.hlinv.wepclips[weapon] and player.hlinv.wepclips[weapon][clipMode]) or 0
 	local neverDeny   = curStats.neverdenyuse
 
 	-- infinite ammo / no-clip weapons: clipsize < 0 AND no ammo type
@@ -102,7 +102,7 @@ local function printTable(data, prefix)
 				print("key " .. key .. " = a table:")
 				printTable(v, key .. ".")
 			else
-				print("key " .. key .. " = " .. v)
+				print("key " .. key .. " = " .. tostring(v))
 			end
 		end
 	else
@@ -285,12 +285,12 @@ hud.add(function(v, player)
 	if wpnStats.secondary and not wpnStats.secondary.altusesprimaryclip then
 		local secondary = shouldDraw("secondary", player)
 		if secondary.drawReserve then
-			drawCount(v, xPosition, 176 * FRACUNIT, secondary.reserveCnt, secondary.ammostats, drawFlags, colormap)
+			drawCount(v, xPosition, 180 * FRACUNIT, secondary.reserveCnt, secondary.ammostats, drawFlags, colormap)
 		end
 		if secondary.drawClip then
 			v.drawScaled(
 				xPosition - 32 * FRACUNIT,
-				164 * FRACUNIT,
+				168 * FRACUNIT,
 				FRACUNIT / 2,
 				v.cachePatch("HL1HUDDIVIDE"),
 				drawFlags,
@@ -300,7 +300,7 @@ hud.add(function(v, player)
 				v,
 				secondary.clipCnt,
 				xPosition - 35 * FRACUNIT,
-				176 * FRACUNIT,
+				180 * FRACUNIT,
 				drawFlags,
 				colormap
 			)

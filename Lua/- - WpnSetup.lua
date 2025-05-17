@@ -1114,6 +1114,11 @@ rawset(_G, "HL_WpnStats", {
 			firesounds = 2,
 			firedelay = 26,
 		},
+		secondary = {
+			firefunc = function()
+				return true
+			end
+		},
 		autoreload = true,
 		altfire = true,
 		secondary = {

@@ -128,7 +128,7 @@ HL_AddWeapon
 
 	Description:
 	This function adds a weapon to the player's inventory if it isn’t already present. When adding a new weapon, it plays a pickup sound (unless silent is true), records the event in the pickup history, and optionally switches the player's active weapon if autoswitch is enabled.
-	Additionally, it initializes the weapon's clip values (freeman.hl1clips) and handles any initial ammo or clip gifts specified by the weapon's stats. If the weapon is already owned, the function may simply add extra ammo based on the weapon's pick-up gift.
+	Additionally, it initializes the weapon's clip values (freeman.hlinv.wepclips) and handles any initial ammo or clip gifts specified by the weapon's stats. If the weapon is already owned, the function may simply add extra ammo based on the weapon's pick-up gift.
 
 
 HL_TakeWeapon
@@ -162,7 +162,7 @@ HL_TakeClip
 	None
 
 	Description:
-	This function deducts ammo from the clip(s) of a weapon in the player's clip inventory (player.hl1clips). When a specific weapon is provided, the function adjusts its primary or alternate clip depending on the alt parameter:
+	This function deducts ammo from the clip(s) of a weapon in the player's clip inventory (player.hlinv.wepclips). When a specific weapon is provided, the function adjusts its primary or alternate clip depending on the alt parameter:
 		If alt is nil, both primary and alternate clips are reduced.
 		If alt is true, only the alternate clip is reduced.
 		Otherwise, only the primary clip is reduced.
