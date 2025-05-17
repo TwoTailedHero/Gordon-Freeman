@@ -127,8 +127,10 @@ local function FireWeapon(player, mode)
 	local clip
 	if useClip then
 		clip = player.hl1clips[weaponID][clipMode]
-	else
+	elseif useClip == false then
 		clip = player.hl1ammo[curModeStats.ammo]
+	else
+		clip = INT32_MAX
 	end
 	if clip == nil then clip = 0 end
 
